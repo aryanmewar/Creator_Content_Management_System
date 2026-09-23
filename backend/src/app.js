@@ -13,6 +13,7 @@ import scheduleRoutes from './modules/schedules/schedule.routes.js';
 import publicationRoutes from './modules/publications/publication.routes.js';
 import dashboardRoutes from './modules/dashboard/dashboard.routes.js';
 import activityLogRoutes from './modules/activityLog/activityLog.routes.js';
+import savedLinkRoutes from './modules/savedLinks/savedLink.routes.js';
 
 // Error handling
 import errorHandler, { notFoundHandler } from './middleware/errorMiddleware.js';
@@ -65,6 +66,7 @@ app.use('/api/schedules', scheduleRoutes);
 app.use('/api/publications', publicationRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/activity', activityLogRoutes);
+app.use('/api/saved-links', savedLinkRoutes);
 
 // ─── Error Handlers ───────────────────────────────────────────────────────────
 app.use(notFoundHandler);

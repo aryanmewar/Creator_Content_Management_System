@@ -11,6 +11,7 @@ const pageTitles = {
   '/assign-content': 'Contributors Content',
   '/schedule': 'Schedule',
   '/reports': 'Reports & Analytics',
+  '/future-projects': 'Future Projects',
   '/settings': 'Settings',
 };
 
@@ -21,6 +22,7 @@ const pageSubtitles = {
   '/assign-content': 'Track and manage content assigned to additional contributors',
   '/schedule': 'Schedule content across platforms',
   '/reports': 'Content performance overview',
+  '/future-projects': 'Save links and ideas for your upcoming content',
   '/settings': 'Manage your account and preferences',
 };
 

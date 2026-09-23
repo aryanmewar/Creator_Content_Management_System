@@ -11,6 +11,7 @@ import AssignContent from '../pages/AssignContent.jsx';
 import Schedule from '../pages/Schedule.jsx';
 import Reports from '../pages/Reports.jsx';
 import Settings from '../pages/Settings.jsx';
+import FutureProjects from '../pages/FutureProjects.jsx';
 import NotFound from '../pages/NotFound.jsx';
 
 const AppRoutes = () => (
@@ -28,6 +29,7 @@ const AppRoutes = () => (
       <Route path="/assign-content" element={<AssignContent />} />
       <Route path="/schedule" element={<Schedule />} />
       <Route path="/reports" element={<Reports />} />
+      <Route path="/future-projects" element={<FutureProjects />} />
       <Route path="/settings" element={<Settings />} />
     </Route>
 

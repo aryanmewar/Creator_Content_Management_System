@@ -117,7 +117,12 @@ export const getOverdue = async () => {
  * Returns recently published content.
  */
 export const getRecent = async () => {
-  const publications = await Publication.find()
+  const twoDaysAgo = new Date();
+  twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+
+  const publications = await Publication.find({
+    publishedAt: { $gte: twoDaysAgo }
+  })
     .populate('contentId', 'title contentType')
     .populate('publishedBy', 'name email')
     .sort({ publishedAt: -1 })

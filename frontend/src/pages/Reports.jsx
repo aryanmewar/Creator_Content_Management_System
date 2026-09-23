@@ -83,11 +83,11 @@ const Reports = () => {
 
   const statusData = summary
     ? [
-      { name: 'Scheduled', value: summary.scheduled, color: '#38bdf8' },
-      { name: 'Published', value: summary.published, color: '#4ade80' },
-      { name: 'Pending Review', value: summary.pendingReview, color: '#a78bfa' },
-      { name: 'Overdue', value: summary.overdue, color: '#f87171' },
-      { name: 'Due Today', value: summary.dueToday, color: '#f59e0b' },
+      { name: 'Scheduled', value: summary.scheduled, color: '#0ea5e9' }, // sky-500
+      { name: 'Published', value: summary.published, color: '#10b981' }, // emerald-500
+      { name: 'Pending Review', value: summary.pendingReview, color: '#8b5cf6' }, // violet-500
+      { name: 'Overdue', value: summary.overdue, color: '#ef4444' }, // red-500
+      { name: 'Due Today', value: summary.dueToday, color: '#f59e0b' }, // amber-500
     ].filter((d) => d.value > 0)
     : [];
 
@@ -114,11 +114,11 @@ const Reports = () => {
           ) : (
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={contentByType} layout="vertical" margin={{ left: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                <XAxis type="number" tick={{ fontSize: 12 }} />
-                <YAxis type="category" dataKey="name" tick={{ fontSize: 12 }} width={100} />
-                <Tooltip />
-                <Bar dataKey="count" fill="#6366f1" radius={[0, 4, 4, 0]} />
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                <XAxis type="number" tick={{ fontSize: 12, fill: '#64748b' }} axisLine={{ stroke: '#e2e8f0' }} tickLine={false} />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 12, fill: '#475569', fontWeight: 500 }} width={100} axisLine={false} tickLine={false} />
+                <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Bar dataKey="count" fill="#3b82f6" radius={[0, 4, 4, 0]} barSize={32} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -132,13 +132,14 @@ const Reports = () => {
           ) : (
             <ResponsiveContainer width="100%" height={250}>
               <PieChart>
-                <Pie data={statusData} cx="50%" cy="50%" outerRadius={90} dataKey="value"
+                <Pie data={statusData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} dataKey="value"
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  labelLine={false}
+                  labelLine={{ stroke: '#cbd5e1', strokeWidth: 1 }}
+                  stroke="none"
                 >
                   {statusData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
                 </Pie>
-                <Tooltip />
+                <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
               </PieChart>
             </ResponsiveContainer>
           )}
@@ -151,15 +152,15 @@ const Reports = () => {
             <p className="text-sm text-slate-400 text-center py-8">No instructor data available</p>
           ) : (
             <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={instructorPerf}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="total" name="Total" fill="#6366f1" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="completed" name="Published" fill="#4ade80" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="overdue" name="Overdue" fill="#f87171" radius={[4, 4, 0, 0]} />
+              <BarChart data={instructorPerf} barSize={20}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#64748b' }} axisLine={{ stroke: '#e2e8f0' }} tickLine={false} />
+                <YAxis tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', color: '#475569' }} />
+                <Bar dataKey="total" name="Total" fill="#94a3b8" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="completed" name="Published" fill="#10b981" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="overdue" name="Overdue" fill="#ef4444" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}

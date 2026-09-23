@@ -12,7 +12,8 @@ import {
   Zap,
   ChevronLeft,
   ChevronRight,
-  X
+  X,
+  Bookmark
 } from 'lucide-react';
 import useAuth from '../../hooks/useAuth.js';
 import { getInitials } from '../../utils/formatUtils.js';
@@ -25,6 +26,7 @@ const navItems = [
   { to: '/assign-content', icon: UserPlus, label: 'Contributors Content' },
   { to: '/schedule', icon: Calendar, label: 'Schedule' },
   { to: '/reports', icon: BarChart3, label: 'Reports' },
+  { to: '/future-projects', icon: Bookmark, label: 'Future Projects' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 
