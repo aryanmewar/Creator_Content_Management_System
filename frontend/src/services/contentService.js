@@ -1,5 +1,5 @@
-import api from './api.js';
-import { buildQueryString } from '../utils/formatUtils.js';
+import api from "./api.js";
+import { buildQueryString } from "../utils/formatUtils.js";
 
 export const contentService = {
   getContent: async (params = {}) => {
@@ -13,7 +13,7 @@ export const contentService = {
   },
 
   createContent: async (payload) => {
-    const { data } = await api.post('/content', payload);
+    const { data } = await api.post("/content", payload);
     return data;
   },
 
@@ -28,7 +28,11 @@ export const contentService = {
   },
 
   updateContentStatus: async (id, status, feedback = null, extraData = {}) => {
-    const { data } = await api.patch(`/content/${id}/status`, { status, feedback, ...extraData });
+    const { data } = await api.patch(`/content/${id}/status`, {
+      status,
+      feedback,
+      ...extraData,
+    });
     return data;
   },
 };

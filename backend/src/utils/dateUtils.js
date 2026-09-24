@@ -9,10 +9,10 @@
  * @returns {'COMPLETED'|'OVERDUE'|'DUE_TODAY'|'UPCOMING'}
  */
 export const getDeadlineState = (deadline, contentStatus) => {
-  const completedStatuses = ['PUBLISHED', 'APPROVED', 'SCHEDULED'];
-  if (completedStatuses.includes(contentStatus)) return 'COMPLETED';
+  const completedStatuses = ["PUBLISHED", "APPROVED", "SCHEDULED"];
+  if (completedStatuses.includes(contentStatus)) return "COMPLETED";
 
-  if (!deadline) return 'UPCOMING';
+  if (!deadline) return "UPCOMING";
 
   const now = new Date();
   const deadlineDate = new Date(deadline);
@@ -22,12 +22,12 @@ export const getDeadlineState = (deadline, contentStatus) => {
   const deadlineDay = new Date(
     deadlineDate.getFullYear(),
     deadlineDate.getMonth(),
-    deadlineDate.getDate()
+    deadlineDate.getDate(),
   );
 
-  if (deadlineDay < today) return 'OVERDUE';
-  if (deadlineDay.getTime() === today.getTime()) return 'DUE_TODAY';
-  return 'UPCOMING';
+  if (deadlineDay < today) return "OVERDUE";
+  if (deadlineDay.getTime() === today.getTime()) return "DUE_TODAY";
+  return "UPCOMING";
 };
 
 /**

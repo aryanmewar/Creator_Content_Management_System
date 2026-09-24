@@ -1,13 +1,13 @@
-import mongoose from 'mongoose';
-import { CONTENT_STATUSES, CONTENT_TYPES } from '../../utils/statusUtils.js';
+import mongoose from "mongoose";
+import { CONTENT_STATUSES, CONTENT_TYPES } from "../../utils/statusUtils.js";
 
 const contentSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      required: [true, 'Content title is required'],
+      required: [true, "Content title is required"],
       trim: true,
-      maxlength: [200, 'Title cannot exceed 200 characters'],
+      maxlength: [200, "Title cannot exceed 200 characters"],
     },
     referenceLink: {
       type: String,
@@ -15,37 +15,39 @@ const contentSchema = new mongoose.Schema(
       default: null,
       validate: {
         validator: (v) => !v || /^https?:\/\/.+/.test(v),
-        message: 'Reference link must be a valid URL',
+        message: "Reference link must be a valid URL",
       },
     },
     contentType: {
       type: [String],
-      required: [true, 'Content type is required'],
+      required: [true, "Content type is required"],
       validate: {
         validator: (v) => Array.isArray(v) && v.length > 0,
-        message: 'At least one content type must be selected',
+        message: "At least one content type must be selected",
       },
     },
     isOwnerContent: {
       type: Boolean,
       default: true,
     },
-    contributors: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Instructor',
-    }],
+    contributors: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Instructor",
+      },
+    ],
     dueDate: {
       type: Date,
       default: null,
     },
     completionDate: {
       type: Date,
-      required: [true, 'Completion date is required'],
+      required: [true, "Completion date is required"],
     },
     notes: {
       type: String,
       trim: true,
-      maxlength: [2000, 'Notes cannot exceed 2000 characters'],
+      maxlength: [2000, "Notes cannot exceed 2000 characters"],
       default: null,
     },
     status: {
@@ -55,7 +57,7 @@ const contentSchema = new mongoose.Schema(
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
     thumbnail: {
@@ -81,14 +83,14 @@ const contentSchema = new mongoose.Schema(
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  }
+  },
 );
 
 // Text index for full-text search
-contentSchema.index({ title: 'text', notes: 'text' });
+contentSchema.index({ title: "text", notes: "text" });
 contentSchema.index({ status: 1, contentType: 1 });
 contentSchema.index({ contributors: 1 });
 contentSchema.index({ createdBy: 1 });
 
-const Content = mongoose.model('Content', contentSchema);
+const Content = mongoose.model("Content", contentSchema);
 export default Content;

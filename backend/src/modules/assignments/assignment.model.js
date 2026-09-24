@@ -1,36 +1,36 @@
-import mongoose from 'mongoose';
-import { PRIORITY_LEVELS, CONTENT_STATUSES } from '../../utils/statusUtils.js';
+import mongoose from "mongoose";
+import { PRIORITY_LEVELS, CONTENT_STATUSES } from "../../utils/statusUtils.js";
 
 const assignmentSchema = new mongoose.Schema(
   {
     contentId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Content',
-      required: [true, 'Content is required'],
+      ref: "Content",
+      required: [true, "Content is required"],
     },
     instructorId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Instructor',
-      required: [true, 'Instructor is required'],
+      ref: "Instructor",
+      required: [true, "Instructor is required"],
     },
     assignedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
     assignedAt: {
       type: Date,
-      required: [true, 'Assignment date is required'],
+      required: [true, "Assignment date is required"],
       default: Date.now,
     },
     deadline: {
       type: Date,
-      required: [true, 'Deadline is required'],
+      required: [true, "Deadline is required"],
     },
     priority: {
       type: String,
-      enum: { values: PRIORITY_LEVELS, message: 'Invalid priority level' },
-      default: 'MEDIUM',
+      enum: { values: PRIORITY_LEVELS, message: "Invalid priority level" },
+      default: "MEDIUM",
     },
     status: {
       type: String,
@@ -40,7 +40,7 @@ const assignmentSchema = new mongoose.Schema(
     instructions: {
       type: String,
       trim: true,
-      maxlength: [2000, 'Instructions cannot exceed 2000 characters'],
+      maxlength: [2000, "Instructions cannot exceed 2000 characters"],
       default: null,
     },
     submittedAt: {
@@ -58,12 +58,12 @@ const assignmentSchema = new mongoose.Schema(
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  }
+  },
 );
 
 assignmentSchema.index({ contentId: 1 });
 assignmentSchema.index({ instructorId: 1 });
 assignmentSchema.index({ deadline: 1, status: 1 });
 
-const Assignment = mongoose.model('Assignment', assignmentSchema);
+const Assignment = mongoose.model("Assignment", assignmentSchema);
 export default Assignment;

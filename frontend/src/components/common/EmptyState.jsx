@@ -1,9 +1,9 @@
-import React from 'react';
-import { InboxIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React from "react";
+import { InboxIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 const EmptyState = ({
-  title = 'No results found',
-  description = 'Try adjusting your search or filters.',
+  title = "No results found",
+  description = "Try adjusting your search or filters.",
   icon: Icon = InboxIcon,
   action,
   actionLabel,
@@ -17,9 +17,7 @@ const EmptyState = ({
       <p className="text-sm text-slate-500 max-w-sm">{description}</p>
       {action && actionLabel && (
         <div className="mt-5">
-          <Button onClick={action}>
-            {actionLabel}
-          </Button>
+          <Button onClick={action}>{actionLabel}</Button>
         </div>
       )}
     </div>

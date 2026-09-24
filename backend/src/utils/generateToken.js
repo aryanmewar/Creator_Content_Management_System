@@ -1,5 +1,5 @@
-import jwt from 'jsonwebtoken';
-import env from '../config/env.js';
+import jwt from "jsonwebtoken";
+import env from "../config/env.js";
 
 /**
  * Generate a signed JWT token for the given payload.

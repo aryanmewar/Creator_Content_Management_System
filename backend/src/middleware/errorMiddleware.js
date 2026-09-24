@@ -1,23 +1,26 @@
-import env from '../config/env.js';
+import env from "../config/env.js";
 
 /**
  * Centralized Express error handler.
  * Must be registered as the LAST middleware in app.js.
  */
-import fs from 'fs';
+import fs from "fs";
 const errorHandler = (err, req, res, next) => {
   console.error(`[ERROR] ${req.method} ${req.originalUrl}:`, err);
   try {
-    fs.appendFileSync('error_log.txt', `[${new Date().toISOString()}] ${req.method} ${req.originalUrl}\n${err.stack}\n\n`);
+    fs.appendFileSync(
+      "error_log.txt",
+      `[${new Date().toISOString()}] ${req.method} ${req.originalUrl}\n${err.stack}\n\n`,
+    );
   } catch (e) {}
 
   // Mongoose validation error
-  if (err.name === 'ValidationError') {
+  if (err.name === "ValidationError") {
     const messages = Object.values(err.errors).map((e) => e.message);
     return res.status(400).json({
       success: false,
-      message: messages.join(', '),
-      code: 'VALIDATION_ERROR',
+      message: messages.join(", "),
+      code: "VALIDATION_ERROR",
     });
   }
 
@@ -27,33 +30,33 @@ const errorHandler = (err, req, res, next) => {
     return res.status(409).json({
       success: false,
       message: `${field} already exists.`,
-      code: 'DUPLICATE_KEY',
+      code: "DUPLICATE_KEY",
     });
   }
 
   // Mongoose cast error (bad ObjectId)
-  if (err.name === 'CastError') {
+  if (err.name === "CastError") {
     return res.status(400).json({
       success: false,
       message: `Invalid ${err.path}: ${err.value}`,
-      code: 'INVALID_ID',
+      code: "INVALID_ID",
     });
   }
 
   // JWT errors
-  if (err.name === 'JsonWebTokenError') {
+  if (err.name === "JsonWebTokenError") {
     return res.status(401).json({
       success: false,
-      message: 'Invalid token.',
-      code: 'INVALID_TOKEN',
+      message: "Invalid token.",
+      code: "INVALID_TOKEN",
     });
   }
 
-  if (err.name === 'TokenExpiredError') {
+  if (err.name === "TokenExpiredError") {
     return res.status(401).json({
       success: false,
-      message: 'Token expired.',
-      code: 'TOKEN_EXPIRED',
+      message: "Token expired.",
+      code: "TOKEN_EXPIRED",
     });
   }
 
@@ -61,9 +64,9 @@ const errorHandler = (err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   return res.status(statusCode).json({
     success: false,
-    message: err.message || 'Internal server error',
-    code: err.code || 'INTERNAL_ERROR',
-    ...(env.NODE_ENV === 'development' && { stack: err.stack }),
+    message: err.message || "Internal server error",
+    code: err.code || "INTERNAL_ERROR",
+    ...(env.NODE_ENV === "development" && { stack: err.stack }),
   });
 };
 
@@ -73,7 +76,7 @@ const errorHandler = (err, req, res, next) => {
 export const notFoundHandler = (req, res, next) => {
   const err = new Error(`Route not found: ${req.originalUrl}`);
   err.statusCode = 404;
-  err.code = 'NOT_FOUND';
+  err.code = "NOT_FOUND";
   next(err);
 };
 

@@ -4,27 +4,27 @@
  */
 
 export const CONTENT_STATUSES = {
-  DRAFT: 'DRAFT',
-  ASSIGNED: 'ASSIGNED',
-  IN_PROGRESS: 'IN_PROGRESS',
-  COMPLETED: 'COMPLETED',
-  SUBMITTED: 'SUBMITTED',
-  APPROVED: 'APPROVED',
-  SCHEDULED: 'SCHEDULED',
-  PUBLISHED: 'PUBLISHED',
-  REJECTED: 'REJECTED',
+  DRAFT: "DRAFT",
+  ASSIGNED: "ASSIGNED",
+  IN_PROGRESS: "IN_PROGRESS",
+  COMPLETED: "COMPLETED",
+  SUBMITTED: "SUBMITTED",
+  APPROVED: "APPROVED",
+  SCHEDULED: "SCHEDULED",
+  PUBLISHED: "PUBLISHED",
+  REJECTED: "REJECTED",
 };
 
 // Valid transitions: key → array of allowed next statuses
 const TRANSITION_MAP = {
-  DRAFT: ['ASSIGNED'],
-  ASSIGNED: ['IN_PROGRESS'],
-  IN_PROGRESS: ['COMPLETED', 'SUBMITTED'],
-  COMPLETED: ['APPROVED', 'REJECTED'],
-  SUBMITTED: ['APPROVED', 'REJECTED'],
-  REJECTED: ['IN_PROGRESS'],
-  APPROVED: ['SCHEDULED'],
-  SCHEDULED: ['PUBLISHED'],
+  DRAFT: ["ASSIGNED"],
+  ASSIGNED: ["IN_PROGRESS"],
+  IN_PROGRESS: ["COMPLETED", "SUBMITTED"],
+  COMPLETED: ["APPROVED", "REJECTED"],
+  SUBMITTED: ["APPROVED", "REJECTED"],
+  REJECTED: ["IN_PROGRESS"],
+  APPROVED: ["SCHEDULED"],
+  SCHEDULED: ["PUBLISHED"],
   PUBLISHED: [], // terminal state
 };
 
@@ -61,22 +61,20 @@ export const validateTransition = (fromStatus, toStatus) => {
     return `Invalid target status: ${toStatus}`;
   }
   if (!isValidTransition(fromStatus, toStatus)) {
-    return `Cannot transition from ${fromStatus} to ${toStatus}. Allowed: ${getAllowedTransitions(fromStatus).join(', ') || 'none'}`;
+    return `Cannot transition from ${fromStatus} to ${toStatus}. Allowed: ${getAllowedTransitions(fromStatus).join(", ") || "none"}`;
   }
   return null;
 };
 
-export const PRIORITY_LEVELS = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
+export const PRIORITY_LEVELS = ["LOW", "MEDIUM", "HIGH", "URGENT"];
 
-export const CONTENT_TYPES = [
-  'Reel',
-  'Post',
-  'Lecture video'
-];
+export const CONTENT_TYPES = ["Reel", "Post", "Lecture video"];
 
-export const PLATFORMS = ['Instagram', 'YouTube', 'LinkedIn', 'Facebook'];
+export const PLATFORMS = ["Instagram", "YouTube", "LinkedIn", "Facebook"];
 
 export const USER_ROLES = {
-  ADMIN: 'ADMIN',
-  CONTENT_MANAGER: 'CONTENT_MANAGER',
+  SUPER_ADMIN: "SUPER_ADMIN",
+  ADMIN: "ADMIN",
+  CONTENT_MANAGER: "CONTENT_MANAGER",
+  CONTRIBUTOR: "CONTRIBUTOR",
 };

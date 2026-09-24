@@ -1,21 +1,25 @@
-import React from 'react';
-import { AlertTriangle } from 'lucide-react';
-import Button from './Button.jsx';
-import Modal from './Modal.jsx';
+import React from "react";
+import { AlertTriangle } from "lucide-react";
+import Button from "./Button.jsx";
+import Modal from "./Modal.jsx";
 
 const ConfirmDialog = ({
   isOpen,
   onClose,
   onConfirm,
-  title = 'Confirm Action',
-  message = 'Are you sure you want to proceed?',
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
-  variant = 'danger',
+  title = "Confirm Action",
+  message = "Are you sure you want to proceed?",
+  confirmLabel = "Confirm",
+  cancelLabel = "Cancel",
+  variant = "danger",
   loading = false,
 }) => {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={title} size="sm"
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={title}
+      size="sm"
       footer={
         <>
           <Button variant="secondary" onClick={onClose} disabled={loading}>

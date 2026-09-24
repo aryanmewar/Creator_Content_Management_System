@@ -1,20 +1,34 @@
-import React, { useEffect, useState } from 'react';
-import { Plus, ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
-import toast from 'react-hot-toast';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, isToday } from 'date-fns';
-import DashboardLayout from '../components/layout/DashboardLayout.jsx';
-import Loader from '../components/common/Loader.jsx';
-import { scheduleService } from '../services/scheduleService.js';
-import { contentService } from '../services/contentService.js';
-import { getPlatformColor } from '../utils/statusUtils.js';
-import { PLATFORMS } from '../utils/constants.js';
+import React, { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import toast from "react-hot-toast";
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  isSameMonth,
+  isSameDay,
+  isToday,
+} from "date-fns";
+import DashboardLayout from "../components/layout/DashboardLayout.jsx";
+import Loader from "../components/common/Loader.jsx";
+import { scheduleService } from "../services/scheduleService.js";
+import { contentService } from "../services/contentService.js";
+import { getPlatformColor } from "../utils/statusUtils.js";
+import { PLATFORMS } from "../utils/constants.js";
 
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import Select from '../components/common/Select.jsx';
-import { Badge } from '@/components/ui/badge';
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import Select from "../components/common/Select.jsx";
+import { Badge } from "@/components/ui/badge";
 
 const Schedule = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -22,7 +36,12 @@ const Schedule = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [approvedContent, setApprovedContent] = useState([]);
-  const [form, setForm] = useState({ contentId: '', platform: '', scheduledDate: '', scheduledTime: '09:00' });
+  const [form, setForm] = useState({
+    contentId: "",
+    platform: "",
+    scheduledDate: "",
+    scheduledTime: "09:00",
+  });
   const [formLoading, setFormLoading] = useState(false);
 
   const loadSchedules = async (date) => {
@@ -34,25 +53,31 @@ const Schedule = () => {
           year: date.getFullYear(),
           limit: 200,
         }),
-        contentService.getContent({ status: 'SCHEDULED', limit: 200 })
+        contentService.getContent({ status: "SCHEDULED", limit: 200 }),
       ]);
-      
+
       const realSchedules = res.data || [];
       const scheduledContentList = contentRes.data || [];
-      
-      const mappedContents = scheduledContentList.filter(c => c.scheduledDate).map(c => ({
-        _id: `content-${c._id}`,
-        contentId: c,
-        platform: 'General',
-        scheduledDate: c.scheduledDate,
-        scheduledTime: '12:00',
-        status: 'SCHEDULED',
-      }));
+
+      const mappedContents = scheduledContentList
+        .filter((c) => c.scheduledDate)
+        .map((c) => ({
+          _id: `content-${c._id}`,
+          contentId: c,
+          platform: "General",
+          scheduledDate: c.scheduledDate,
+          scheduledTime: "12:00",
+          status: "SCHEDULED",
+        }));
 
       setSchedules([...realSchedules, ...mappedContents]);
     } catch (err) {
-      console.error('Failed to load schedules:', err);
-      toast.error(err.response?.data?.message || err.message || 'Failed to load schedules.');
+      console.error("Failed to load schedules:", err);
+      toast.error(
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to load schedules.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -60,7 +85,7 @@ const Schedule = () => {
 
   useEffect(() => {
     loadSchedules(currentDate);
-    contentService.getContent({ status: 'APPROVED', limit: 100 }).then((r) => {
+    contentService.getContent({ status: "APPROVED", limit: 100 }).then((r) => {
       setApprovedContent(r.data || []);
     });
   }, [currentDate]);
@@ -69,19 +94,26 @@ const Schedule = () => {
     setFormLoading(true);
     try {
       await scheduleService.createSchedule(form);
-      toast.success('Content scheduled!');
+      toast.success("Content scheduled!");
       setIsModalOpen(false);
-      setForm({ contentId: '', platform: '', scheduledDate: '', scheduledTime: '09:00' });
+      setForm({
+        contentId: "",
+        platform: "",
+        scheduledDate: "",
+        scheduledTime: "09:00",
+      });
       await loadSchedules(currentDate);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to schedule content.');
+      toast.error(err.response?.data?.message || "Failed to schedule content.");
     } finally {
       setFormLoading(false);
     }
   };
 
-  const prevMonth = () => setCurrentDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
-  const nextMonth = () => setCurrentDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
+  const prevMonth = () =>
+    setCurrentDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
+  const nextMonth = () =>
+    setCurrentDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -89,19 +121,18 @@ const Schedule = () => {
   const firstDayOfWeek = monthStart.getDay();
   const paddedDays = Array(firstDayOfWeek).fill(null).concat(days);
 
-  const getSchedulesForDay = (day) => schedules.filter((s) => isSameDay(new Date(s.scheduledDate), day));
+  const getSchedulesForDay = (day) =>
+    schedules.filter((s) => isSameDay(new Date(s.scheduledDate), day));
 
   return (
     <DashboardLayout>
-
-
       <Card className="p-6 mb-6 border-slate-200 shadow-sm">
         <div className="flex items-center justify-between mb-6">
           <Button variant="ghost" size="icon" onClick={prevMonth}>
             <ChevronLeft className="w-5 h-5" />
           </Button>
           <h3 className="text-lg font-semibold text-slate-900">
-            {format(currentDate, 'MMMM yyyy')}
+            {format(currentDate, "MMMM yyyy")}
           </h3>
           <Button variant="ghost" size="icon" onClick={nextMonth}>
             <ChevronRight className="w-5 h-5" />
@@ -111,8 +142,11 @@ const Schedule = () => {
         <div className="w-full">
           <div className="w-full">
             <div className="grid grid-cols-7 mb-2">
-              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-                <div key={day} className="text-center text-xs font-semibold text-slate-500 py-2">
+              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                <div
+                  key={day}
+                  className="text-center text-xs font-semibold text-slate-500 py-2"
+                >
                   {day}
                 </div>
               ))}
@@ -123,7 +157,8 @@ const Schedule = () => {
             ) : (
               <div className="grid grid-cols-7 gap-1">
                 {paddedDays.map((day, idx) => {
-                  if (!day) return <div key={`empty-${idx}`} className="h-24" />;
+                  if (!day)
+                    return <div key={`empty-${idx}`} className="h-24" />;
 
                   const daySchedules = getSchedulesForDay(day);
                   const inMonth = isSameMonth(day, currentDate);
@@ -133,13 +168,17 @@ const Schedule = () => {
                     <div
                       key={day.toISOString()}
                       className={`h-24 p-1.5 rounded-xl border transition-colors ${
-                        !inMonth ? 'opacity-40' : ''
-                      } ${todayFlag ? 'border-primary bg-primary/5' : 'border-slate-100 hover:border-slate-200 hover:bg-slate-50'}`}
+                        !inMonth ? "opacity-40" : ""
+                      } ${todayFlag ? "border-primary bg-primary/5" : "border-slate-100 hover:border-slate-200 hover:bg-slate-50"}`}
                     >
-                      <div className={`text-xs font-semibold mb-1 w-6 h-6 flex items-center justify-center rounded-full ${
-                        todayFlag ? 'bg-primary text-primary-foreground' : 'text-slate-700'
-                      }`}>
-                        {format(day, 'd')}
+                      <div
+                        className={`text-xs font-semibold mb-1 w-6 h-6 flex items-center justify-center rounded-full ${
+                          todayFlag
+                            ? "bg-primary text-primary-foreground"
+                            : "text-slate-700"
+                        }`}
+                      >
+                        {format(day, "d")}
                       </div>
                       <div className="space-y-1 overflow-hidden">
                         {daySchedules.slice(0, 3).map((s) => (
@@ -152,7 +191,9 @@ const Schedule = () => {
                           </div>
                         ))}
                         {daySchedules.length > 3 && (
-                          <div className="text-[10px] text-muted-foreground pl-1 font-medium">+{daySchedules.length - 3} more</div>
+                          <div className="text-[10px] text-muted-foreground pl-1 font-medium">
+                            +{daySchedules.length - 3} more
+                          </div>
                         )}
                       </div>
                     </div>
@@ -165,19 +206,39 @@ const Schedule = () => {
       </Card>
 
       <Card className="p-6 border-slate-200 shadow-sm">
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">This Month's Schedule</h3>
+        <h3 className="text-lg font-semibold text-slate-900 mb-4">
+          This Month's Schedule
+        </h3>
         {schedules.length === 0 ? (
-          <p className="text-sm text-slate-400 text-center py-6">No schedules this month.</p>
+          <p className="text-sm text-slate-400 text-center py-6">
+            No schedules this month.
+          </p>
         ) : (
           <div className="space-y-2">
             {schedules.map((s) => (
-              <div key={s._id} className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 border border-transparent transition-colors">
-                <Badge variant="outline" className={`font-bold uppercase tracking-wider text-[10px] ${getPlatformColor(s.platform)}`}>{s.platform}</Badge>
+              <div
+                key={s._id}
+                className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 border border-transparent transition-colors"
+              >
+                <Badge
+                  variant="outline"
+                  className={`font-bold uppercase tracking-wider text-[10px] ${getPlatformColor(s.platform)}`}
+                >
+                  {s.platform}
+                </Badge>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-slate-800 truncate">{s.contentId?.title}</p>
-                  <p className="text-xs text-muted-foreground">{format(new Date(s.scheduledDate), 'MMM d, yyyy')} at {s.scheduledTime}</p>
+                  <p className="text-sm font-semibold text-slate-800 truncate">
+                    {s.contentId?.title}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {format(new Date(s.scheduledDate), "MMM d, yyyy")} at{" "}
+                    {s.scheduledTime}
+                  </p>
                 </div>
-                <Badge variant="secondary" className={`${s.status === 'PUBLISHED' ? 'bg-emerald-100 text-emerald-700' : 'bg-sky-100 text-sky-700'}`}>
+                <Badge
+                  variant="secondary"
+                  className={`${s.status === "PUBLISHED" ? "bg-emerald-100 text-emerald-700" : "bg-sky-100 text-sky-700"}`}
+                >
                   {s.status}
                 </Badge>
               </div>
@@ -186,7 +247,10 @@ const Schedule = () => {
         )}
       </Card>
 
-      <Dialog open={isModalOpen} onOpenChange={(open) => !open && setIsModalOpen(false)}>
+      <Dialog
+        open={isModalOpen}
+        onOpenChange={(open) => !open && setIsModalOpen(false)}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Schedule Content</DialogTitle>
@@ -194,15 +258,23 @@ const Schedule = () => {
           <div className="space-y-4 py-4">
             {approvedContent.length === 0 ? (
               <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-700 font-medium">
-                No approved content available. Content must be in APPROVED status before scheduling.
+                No approved content available. Content must be in APPROVED
+                status before scheduling.
               </div>
             ) : (
               <div className="space-y-1.5">
-                <label className="text-sm font-semibold">Content <span className="text-destructive">*</span></label>
+                <label className="text-sm font-semibold">
+                  Content <span className="text-destructive">*</span>
+                </label>
                 <Select
                   value={form.contentId}
-                  onChange={(e) => setForm(f => ({ ...f, contentId: e.target.value }))}
-                  options={approvedContent.map(c => ({ label: c.title, value: c._id }))}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, contentId: e.target.value }))
+                  }
+                  options={approvedContent.map((c) => ({
+                    label: c.title,
+                    value: c._id,
+                  }))}
                   placeholder="Select content..."
                   className="w-full"
                 />
@@ -210,11 +282,15 @@ const Schedule = () => {
             )}
 
             <div className="space-y-1.5">
-              <label className="text-sm font-semibold">Platform <span className="text-destructive">*</span></label>
+              <label className="text-sm font-semibold">
+                Platform <span className="text-destructive">*</span>
+              </label>
               <Select
                 value={form.platform}
-                onChange={(e) => setForm(f => ({ ...f, platform: e.target.value }))}
-                options={PLATFORMS.map(p => ({ label: p, value: p }))}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, platform: e.target.value }))
+                }
+                options={PLATFORMS.map((p) => ({ label: p, value: p }))}
                 placeholder="Select platform..."
                 className="w-full"
               />
@@ -222,19 +298,45 @@ const Schedule = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-sm font-semibold">Date <span className="text-destructive">*</span></label>
-                <Input type="date" value={form.scheduledDate} onChange={(e) => setForm(f => ({ ...f, scheduledDate: e.target.value }))} />
+                <label className="text-sm font-semibold">
+                  Date <span className="text-destructive">*</span>
+                </label>
+                <Input
+                  type="date"
+                  value={form.scheduledDate}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, scheduledDate: e.target.value }))
+                  }
+                />
               </div>
               <div className="space-y-1.5">
-                <label className="text-sm font-semibold">Time <span className="text-destructive">*</span></label>
-                <Input type="time" value={form.scheduledTime} onChange={(e) => setForm(f => ({ ...f, scheduledTime: e.target.value }))} />
+                <label className="text-sm font-semibold">
+                  Time <span className="text-destructive">*</span>
+                </label>
+                <Input
+                  type="time"
+                  value={form.scheduledTime}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, scheduledTime: e.target.value }))
+                  }
+                />
               </div>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="secondary" onClick={() => setIsModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleSchedule} disabled={!form.contentId || !form.platform || !form.scheduledDate || formLoading}>
-              {formLoading ? 'Scheduling...' : 'Schedule'}
+            <Button variant="secondary" onClick={() => setIsModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSchedule}
+              disabled={
+                !form.contentId ||
+                !form.platform ||
+                !form.scheduledDate ||
+                formLoading
+              }
+            >
+              {formLoading ? "Scheduling..." : "Schedule"}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,11 +1,11 @@
-import Content from '../content/content.model.js';
-import Assignment from '../assignments/assignment.model.js';
-import Instructor from '../instructors/instructor.model.js';
-import Publication from '../publications/publication.model.js';
-import Schedule from '../schedules/schedule.model.js';
-import { getStartOfToday, getTodayRange } from '../../utils/dateUtils.js';
-import { CONTENT_STATUSES } from '../../utils/statusUtils.js';
-import { getDeadlineState } from '../../utils/dateUtils.js';
+import Content from "../content/content.model.js";
+import Assignment from "../assignments/assignment.model.js";
+import Instructor from "../instructors/instructor.model.js";
+import Publication from "../publications/publication.model.js";
+import Schedule from "../schedules/schedule.model.js";
+import { getStartOfToday, getTodayRange } from "../../utils/dateUtils.js";
+import { CONTENT_STATUSES } from "../../utils/statusUtils.js";
+import { getDeadlineState } from "../../utils/dateUtils.js";
 
 /**
  * GET /api/dashboard/summary
@@ -30,12 +30,12 @@ export const getSummary = async () => {
     // Due today: deadline is today AND content not complete
     Assignment.countDocuments({
       deadline: { $gte: todayStart, $lte: todayEnd },
-      status: { $nin: ['PUBLISHED', 'APPROVED', 'SCHEDULED'] },
+      status: { $nin: ["PUBLISHED", "APPROVED", "SCHEDULED"] },
     }),
     // Overdue: deadline < today AND content not complete
     Assignment.countDocuments({
       deadline: { $lt: today },
-      status: { $nin: ['PUBLISHED', 'APPROVED', 'SCHEDULED'] },
+      status: { $nin: ["PUBLISHED", "APPROVED", "SCHEDULED"] },
     }),
   ]);
 
@@ -57,16 +57,16 @@ export const getDeadlines = async () => {
   const { start, end } = getTodayRange();
   const assignments = await Assignment.find({
     deadline: { $gte: start, $lte: end },
-    status: { $nin: ['PUBLISHED', 'APPROVED', 'SCHEDULED'] },
+    status: { $nin: ["PUBLISHED", "APPROVED", "SCHEDULED"] },
   })
-    .populate('contentId', 'title contentType status')
-    .populate('instructorId', 'name email profileImage')
+    .populate("contentId", "title contentType status")
+    .populate("instructorId", "name email profileImage")
     .sort({ deadline: 1 })
     .limit(20);
 
   return assignments.map((a) => ({
     ...a.toObject(),
-    deadlineState: 'DUE_TODAY',
+    deadlineState: "DUE_TODAY",
   }));
 };
 
@@ -78,16 +78,16 @@ export const getUpcoming = async () => {
   const today = getStartOfToday();
   const assignments = await Assignment.find({
     deadline: { $gt: today },
-    status: { $nin: ['PUBLISHED', 'APPROVED', 'SCHEDULED'] },
+    status: { $nin: ["PUBLISHED", "APPROVED", "SCHEDULED"] },
   })
-    .populate('contentId', 'title contentType status')
-    .populate('instructorId', 'name email profileImage')
+    .populate("contentId", "title contentType status")
+    .populate("instructorId", "name email profileImage")
     .sort({ deadline: 1 })
     .limit(20);
 
   return assignments.map((a) => ({
     ...a.toObject(),
-    deadlineState: 'UPCOMING',
+    deadlineState: "UPCOMING",
   }));
 };
 
@@ -99,16 +99,16 @@ export const getOverdue = async () => {
   const today = getStartOfToday();
   const assignments = await Assignment.find({
     deadline: { $lt: today },
-    status: { $nin: ['PUBLISHED', 'APPROVED', 'SCHEDULED'] },
+    status: { $nin: ["PUBLISHED", "APPROVED", "SCHEDULED"] },
   })
-    .populate('contentId', 'title contentType status')
-    .populate('instructorId', 'name email profileImage')
+    .populate("contentId", "title contentType status")
+    .populate("instructorId", "name email profileImage")
     .sort({ deadline: 1 })
     .limit(20);
 
   return assignments.map((a) => ({
     ...a.toObject(),
-    deadlineState: 'OVERDUE',
+    deadlineState: "OVERDUE",
   }));
 };
 
@@ -121,10 +121,10 @@ export const getRecent = async () => {
   twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
 
   const publications = await Publication.find({
-    publishedAt: { $gte: twoDaysAgo }
+    publishedAt: { $gte: twoDaysAgo },
   })
-    .populate('contentId', 'title contentType')
-    .populate('publishedBy', 'name email')
+    .populate("contentId", "title contentType")
+    .populate("publishedBy", "name email")
     .sort({ publishedAt: -1 })
     .limit(10);
 
@@ -136,7 +136,8 @@ export const getRecent = async () => {
  * Returns recent activity log entries.
  */
 export const getActivity = async () => {
-  const { getActivityLog } = await import('../activityLog/activityLog.service.js');
+  const { getActivityLog } =
+    await import("../activityLog/activityLog.service.js");
   const result = await getActivityLog({ page: 1, limit: 15 });
   return result.data;
 };

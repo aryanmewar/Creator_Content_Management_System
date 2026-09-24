@@ -1,25 +1,25 @@
-import React, { useEffect } from 'react';
-import { createPortal } from 'react-dom';
-import { X } from 'lucide-react';
+import React, { useEffect } from "react";
+import { createPortal } from "react-dom";
+import { X } from "lucide-react";
 
-const Modal = ({ isOpen, onClose, title, children, size = 'md', footer }) => {
+const Modal = ({ isOpen, onClose, title, children, size = "md", footer }) => {
   // Lock body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     }
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     };
   }, [isOpen]);
 
   if (!isOpen) return null;
 
   const sizes = {
-    sm: 'max-w-md',
-    md: 'max-w-lg',
-    lg: 'max-w-2xl',
-    xl: 'max-w-4xl',
+    sm: "max-w-md",
+    md: "max-w-lg",
+    lg: "max-w-2xl",
+    xl: "max-w-4xl",
   };
 
   return createPortal(
@@ -36,7 +36,9 @@ const Modal = ({ isOpen, onClose, title, children, size = 'md', footer }) => {
       />
 
       {/* Modal content */}
-      <div className={`relative bg-white rounded-2xl shadow-modal w-full ${sizes[size]} max-h-[90vh] flex flex-col`}>
+      <div
+        className={`relative bg-white rounded-2xl shadow-modal w-full ${sizes[size]} max-h-[90vh] flex flex-col`}
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
           <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
@@ -60,7 +62,7 @@ const Modal = ({ isOpen, onClose, title, children, size = 'md', footer }) => {
         )}
       </div>
     </div>,
-    document.body
+    document.body,
   );
 };
 

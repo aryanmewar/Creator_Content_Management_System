@@ -1,6 +1,6 @@
-import express from 'express';
-import * as savedLinkController from './savedLink.controller.js';
-import protect from '../../middleware/authMiddleware.js';
+import express from "express";
+import * as savedLinkController from "./savedLink.controller.js";
+import protect from "../../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -8,12 +8,12 @@ const router = express.Router();
 router.use(protect);
 
 router
-  .route('/')
+  .route("/")
   .get(savedLinkController.getSavedLinks)
   .post(savedLinkController.createSavedLink);
 
 router
-  .route('/:id')
+  .route("/:id")
   .put(savedLinkController.updateSavedLink)
   .delete(savedLinkController.deleteSavedLink);
 

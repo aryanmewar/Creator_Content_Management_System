@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -50,12 +50,14 @@
     --ring: 212.7 26.8% 83.9%;
   }
 
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     box-sizing: border-box;
   }
 
   html {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: "Inter", system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
@@ -63,7 +65,14 @@
 
   body {
     @apply bg-slate-50 text-slate-900;
-    font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family:
+      "Outfit",
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      sans-serif;
   }
 
   ::-webkit-scrollbar {
@@ -186,7 +195,6 @@
   .section-title {
     @apply text-lg font-semibold text-slate-800;
   }
-
 }
 
 @layer utilities {
@@ -204,16 +212,24 @@
   }
 
   .font-logo {
-    font-family: 'Righteous', display;
+    font-family: "Righteous", display;
     letter-spacing: 0.05em;
   }
 
   /* Blob Animation */
   @keyframes blob {
-    0% { transform: translate(0px, 0px) scale(1); }
-    33% { transform: translate(30px, -50px) scale(1.1); }
-    66% { transform: translate(-20px, 20px) scale(0.9); }
-    100% { transform: translate(0px, 0px) scale(1); }
+    0% {
+      transform: translate(0px, 0px) scale(1);
+    }
+    33% {
+      transform: translate(30px, -50px) scale(1.1);
+    }
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
+    }
+    100% {
+      transform: translate(0px, 0px) scale(1);
+    }
   }
 
   .animate-blob {
@@ -230,25 +246,36 @@
 
   /* High-Tech Grid Animation */
   .bg-grid-pattern {
-    background-image: 
+    background-image:
       linear-gradient(to right, rgba(99, 102, 241, 0.1) 1px, transparent 1px),
       linear-gradient(to bottom, rgba(99, 102, 241, 0.1) 1px, transparent 1px);
     background-size: 40px 40px;
   }
 
   .bg-dot-pattern {
-    background-image: radial-gradient(rgba(99, 102, 241, 0.3) 2px, transparent 2px);
+    background-image: radial-gradient(
+      rgba(99, 102, 241, 0.3) 2px,
+      transparent 2px
+    );
     background-size: 32px 32px;
   }
 
   .mask-radial {
-    -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%);
+    -webkit-mask-image: radial-gradient(
+      ellipse at center,
+      black 20%,
+      transparent 70%
+    );
     mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%);
   }
 
   @keyframes pan {
-    0% { background-position: 0% 0%; }
-    100% { background-position: -40px -40px; }
+    0% {
+      background-position: 0% 0%;
+    }
+    100% {
+      background-position: -40px -40px;
+    }
   }
 
   .animate-pan {
@@ -257,9 +284,15 @@
 
   /* Gradient Animation */
   @keyframes gradient {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
   }
 
   .animate-gradient {
@@ -269,18 +302,18 @@
 
   /* Floating Shapes Animation */
   @keyframes float-up {
-    0% { 
-      transform: translateY(110vh) rotate(0deg); 
+    0% {
+      transform: translateY(110vh) rotate(0deg);
       opacity: 0;
     }
-    10% { 
+    10% {
       opacity: 0.6;
     }
-    90% { 
+    90% {
       opacity: 0.6;
     }
-    100% { 
-      transform: translateY(-20vh) rotate(360deg); 
+    100% {
+      transform: translateY(-20vh) rotate(360deg);
       opacity: 0;
     }
   }

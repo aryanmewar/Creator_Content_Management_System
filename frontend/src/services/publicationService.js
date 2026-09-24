@@ -1,5 +1,5 @@
-import api from './api.js';
-import { buildQueryString } from '../utils/formatUtils.js';
+import api from "./api.js";
+import { buildQueryString } from "../utils/formatUtils.js";
 
 export const publicationService = {
   getPublications: async (params = {}) => {
@@ -8,7 +8,7 @@ export const publicationService = {
   },
 
   createPublication: async (payload) => {
-    const { data } = await api.post('/publications', payload);
+    const { data } = await api.post("/publications", payload);
     return data;
   },
 

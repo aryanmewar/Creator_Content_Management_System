@@ -1,5 +1,5 @@
-import api from './api.js';
-import { buildQueryString } from '../utils/formatUtils.js';
+import api from "./api.js";
+import { buildQueryString } from "../utils/formatUtils.js";
 
 export const assignmentService = {
   getAssignments: async (params = {}) => {
@@ -13,7 +13,7 @@ export const assignmentService = {
   },
 
   createAssignment: async (payload) => {
-    const { data } = await api.post('/assignments', payload);
+    const { data } = await api.post("/assignments", payload);
     return data;
   },
 

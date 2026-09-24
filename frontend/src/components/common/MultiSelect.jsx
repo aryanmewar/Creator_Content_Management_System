@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { X, ChevronDown } from 'lucide-react';
+import React, { useState, useRef, useEffect } from "react";
+import { X, ChevronDown } from "lucide-react";
 
 const MultiSelect = ({
   label,
@@ -7,8 +7,8 @@ const MultiSelect = ({
   options = [],
   value = [],
   onChange,
-  placeholder = 'Select options...',
-  className = '',
+  placeholder = "Select options...",
+  className = "",
   required = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,8 +20,8 @@ const MultiSelect = ({
         setIsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleSelect = (val) => {
@@ -42,7 +42,7 @@ const MultiSelect = ({
   };
 
   const availableOptions = options.filter(
-    (opt) => !value.includes(opt.value ?? opt)
+    (opt) => !value.includes(opt.value ?? opt),
   );
 
   return (
@@ -55,10 +55,10 @@ const MultiSelect = ({
       )}
 
       <div
-        className={`form-input relative min-h-[42px] flex flex-wrap gap-1.5 items-center cursor-pointer pb-1 pt-1 px-3 pr-9 ${error ? 'border-red-400 focus:ring-red-400' : ''}`}
+        className={`form-input relative min-h-[42px] flex flex-wrap gap-1.5 items-center cursor-pointer pb-1 pt-1 px-3 pr-9 ${error ? "border-red-400 focus:ring-red-400" : ""}`}
         onClick={() => setIsOpen(!isOpen)}
       >
-        {(!value || value.length === 0) ? (
+        {!value || value.length === 0 ? (
           <span className="text-slate-400 text-sm">{placeholder}</span>
         ) : (
           value.map((val) => (

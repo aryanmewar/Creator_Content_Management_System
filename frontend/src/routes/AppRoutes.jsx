@@ -1,26 +1,31 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import ProtectedRoute from './ProtectedRoute.jsx';
-import Login from '../pages/Login.jsx';
-import Home from '../pages/Home.jsx';
-import Instructors from '../pages/Instructors.jsx';
-import InstructorDetails from '../pages/InstructorDetails.jsx';
-import Content from '../pages/Content.jsx';
-import ContentDetails from '../pages/ContentDetails.jsx';
-import AssignContent from '../pages/AssignContent.jsx';
-import Schedule from '../pages/Schedule.jsx';
-import Reports from '../pages/Reports.jsx';
-import Settings from '../pages/Settings.jsx';
-import FutureProjects from '../pages/FutureProjects.jsx';
-import NotFound from '../pages/NotFound.jsx';
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import ProtectedRoute from "./ProtectedRoute.jsx";
+import Login from "../pages/Login.jsx";
+import Home from "../pages/Home.jsx";
+import Instructors from "../pages/Instructors.jsx";
+import InstructorDetails from "../pages/InstructorDetails.jsx";
+import Content from "../pages/Content.jsx";
+import ContentDetails from "../pages/ContentDetails.jsx";
+import AssignContent from "../pages/AssignContent.jsx";
+import Schedule from "../pages/Schedule.jsx";
+import Reports from "../pages/Reports.jsx";
+import Settings from "../pages/Settings.jsx";
+import FutureProjects from "../pages/FutureProjects.jsx";
+import ContributorDashboard from "../pages/ContributorDashboard.jsx";
+import ContributorReport from "../pages/ContributorReport.jsx";
+import Notifications from "../pages/Notifications.jsx";
+import NotFound from "../pages/NotFound.jsx";
 
 const AppRoutes = () => (
   <Routes>
     {/* Public routes */}
     <Route path="/login" element={<Login />} />
 
-    {/* Protected routes */}
-    <Route element={<ProtectedRoute />}>
+    {/* Admin & Content Manager Protected Routes */}
+    <Route
+      element={<ProtectedRoute allowedRoles={["ADMIN", "CONTENT_MANAGER"]} />}
+    >
       <Route path="/" element={<Home />} />
       <Route path="/instructors" element={<Instructors />} />
       <Route path="/instructors/:id" element={<InstructorDetails />} />
@@ -31,6 +36,17 @@ const AppRoutes = () => (
       <Route path="/reports" element={<Reports />} />
       <Route path="/future-projects" element={<FutureProjects />} />
       <Route path="/settings" element={<Settings />} />
+    </Route>
+
+    {/* Contributor Protected Routes */}
+    <Route element={<ProtectedRoute allowedRoles={["CONTRIBUTOR"]} />}>
+      <Route path="/my-dashboard" element={<ContributorDashboard />} />
+      <Route path="/my-report" element={<ContributorReport />} />
+    </Route>
+
+    {/* Routes accessible to all authenticated users */}
+    <Route element={<ProtectedRoute allowedRoles={["ADMIN", "CONTENT_MANAGER", "CONTRIBUTOR"]} />}>
+      <Route path="/notifications" element={<Notifications />} />
     </Route>
 
     {/* 404 */}

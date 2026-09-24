@@ -1,23 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Link as LinkIcon, Copy, Trash2, Edit, ExternalLink, CalendarDays } from 'lucide-react';
-import toast from 'react-hot-toast';
-import DashboardLayout from '../components/layout/DashboardLayout';
-import savedLinkService from '../services/savedLinkService';
-import Loader from '../components/common/Loader';
-import EmptyState from '../components/common/EmptyState';
-import Button from '../components/common/Button';
+import React, { useState, useEffect } from "react";
+import {
+  Plus,
+  Copy,
+  Trash2,
+  Edit,
+  ExternalLink,
+  CalendarDays,
+} from "lucide-react";
+import toast from "react-hot-toast";
+import DashboardLayout from "../components/layout/DashboardLayout";
+import savedLinkService from "../services/savedLinkService";
+import Loader from "../components/common/Loader";
+import EmptyState from "../components/common/EmptyState";
+import Button from "../components/common/Button";
 
 const FutureProjects = () => {
   const [links, setLinks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({ title: '', link: '', assignee: '' });
+  const [formData, setFormData] = useState({
+    title: "",
+    link: "",
+    assignee: "",
+  });
   const [editId, setEditId] = useState(null);
-
-  useEffect(() => {
-    fetchLinks();
-  }, []);
 
   const fetchLinks = async () => {
     try {
@@ -25,64 +32,79 @@ const FutureProjects = () => {
       const data = await savedLinkService.getSavedLinks();
       setLinks(data);
     } catch (error) {
-      toast.error('Failed to load future projects');
+      console.error(error);
+      toast.error("Failed to load future projects");
     } finally {
       setIsLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchLinks();
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.title || !formData.link) {
-      return toast.error('Please fill in title and link');
+      return toast.error("Please fill in title and link");
     }
 
     try {
       setIsSubmitting(true);
       if (editId) {
-        const updated = await savedLinkService.updateSavedLink(editId, formData);
-        setLinks(links.map(l => l._id === editId ? updated : l));
-        toast.success('Project updated successfully');
+        const updated = await savedLinkService.updateSavedLink(
+          editId,
+          formData,
+        );
+        setLinks(links.map((l) => (l._id === editId ? updated : l)));
+        toast.success("Project updated successfully");
       } else {
         const created = await savedLinkService.createSavedLink(formData);
         setLinks([created, ...links]);
-        toast.success('Project saved successfully');
+        toast.success("Project saved successfully");
       }
       closeForm();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to save project');
+      toast.error(error.response?.data?.message || "Failed to save project");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this project?')) return;
+    if (!window.confirm("Are you sure you want to delete this project?"))
+      return;
     try {
       await savedLinkService.deleteSavedLink(id);
-      setLinks(links.filter(l => l._id !== id));
-      toast.success('Project deleted');
+      setLinks(links.filter((l) => l._id !== id));
+      toast.success("Project deleted");
     } catch (error) {
-      toast.error('Failed to delete project');
+      console.error(error);
+      toast.error("Failed to delete project");
     }
   };
 
   const openEdit = (linkObj) => {
-    setFormData({ title: linkObj.title, link: linkObj.link, assignee: linkObj.assignee || '' });
+    setFormData({
+      title: linkObj.title,
+      link: linkObj.link,
+      assignee: linkObj.assignee || "",
+    });
     setEditId(linkObj._id);
     setIsFormOpen(true);
   };
 
   const closeForm = () => {
-    setFormData({ title: '', link: '', assignee: '' });
+    setFormData({ title: "", link: "", assignee: "" });
     setEditId(null);
     setIsFormOpen(false);
   };
 
   const handleCopy = (link) => {
     if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(link)
-        .then(() => toast.success('Link copied to clipboard!'))
+      navigator.clipboard
+        .writeText(link)
+        .then(() => toast.success("Link copied to clipboard!"))
         .catch(() => fallbackCopyTextToClipboard(link));
     } else {
       fallbackCopyTextToClipboard(link);
@@ -100,14 +122,15 @@ const FutureProjects = () => {
     textArea.select();
 
     try {
-      const successful = document.execCommand('copy');
+      const successful = document.execCommand("copy");
       if (successful) {
-        toast.success('Link copied to clipboard!');
+        toast.success("Link copied to clipboard!");
       } else {
-        toast.error('Browser blocked copying. Please copy manually.');
+        toast.error("Browser blocked copying. Please copy manually.");
       }
     } catch (err) {
-      toast.error('Failed to copy link');
+      console.error(err);
+      toast.error("Failed to copy link");
     }
     document.body.removeChild(textArea);
   };
@@ -122,39 +145,63 @@ const FutureProjects = () => {
 
       {isFormOpen && (
         <div className="bg-white p-5 rounded-2xl shadow-card border border-slate-200 mb-6 animate-in slide-in-from-top-4 duration-300">
-          <h2 className="text-lg font-semibold text-slate-800 mb-4">{editId ? 'Edit Project' : 'Add New Future Project'}</h2>
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-4">
+          <h2 className="text-lg font-semibold text-slate-800 mb-4">
+            {editId ? "Edit Project" : "Add New Future Project"}
+          </h2>
+          <form
+            onSubmit={handleSubmit}
+            className="grid grid-cols-1 md:grid-cols-12 gap-4"
+          >
             <div className="md:col-span-4">
-              <label className="form-label block mb-1">Project Title <span className="text-red-500">*</span></label>
-              <input 
-                className="form-input" 
+              <label className="form-label block mb-1">
+                Project Title <span className="text-red-500">*</span>
+              </label>
+              <input
+                className="form-input"
                 placeholder="e.g. Next Big Video Idea"
                 value={formData.title}
-                onChange={e => setFormData({...formData, title: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
                 autoFocus
               />
             </div>
             <div className="md:col-span-5">
-              <label className="form-label block mb-1">Resource Link <span className="text-red-500">*</span></label>
-              <input 
-                className="form-input" 
+              <label className="form-label block mb-1">
+                Resource Link <span className="text-red-500">*</span>
+              </label>
+              <input
+                className="form-input"
                 placeholder="https://..."
                 value={formData.link}
-                onChange={e => setFormData({...formData, link: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, link: e.target.value })
+                }
               />
             </div>
             <div className="md:col-span-3">
               <label className="form-label block mb-1">Future Assignee</label>
-              <input 
-                className="form-input" 
+              <input
+                className="form-input"
                 placeholder="e.g. John Doe"
                 value={formData.assignee}
-                onChange={e => setFormData({...formData, assignee: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, assignee: e.target.value })
+                }
               />
             </div>
             <div className="md:col-span-12 flex justify-end gap-3 mt-2">
-              <Button type="button" variant="outline" onClick={closeForm} disabled={isSubmitting}>Cancel</Button>
-              <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : 'Save Project'}</Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={closeForm}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Saving..." : "Save Project"}
+              </Button>
             </div>
           </form>
         </div>
@@ -178,25 +225,29 @@ const FutureProjects = () => {
               <div key={linkObj._id} className="card p-5 space-y-4">
                 <div className="flex justify-between items-start gap-4">
                   <div>
-                    <h3 className="font-bold text-slate-800 text-base">{linkObj.title}</h3>
+                    <h3 className="font-bold text-slate-800 text-base">
+                      {linkObj.title}
+                    </h3>
                     <div className="mt-2">
                       {linkObj.assignee ? (
                         <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
                           {linkObj.assignee}
                         </span>
                       ) : (
-                        <span className="text-sm text-slate-400 italic">Unassigned</span>
+                        <span className="text-sm text-slate-400 italic">
+                          Unassigned
+                        </span>
                       )}
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
-                    <button 
+                    <button
                       onClick={() => openEdit(linkObj)}
                       className="p-2 text-slate-400 hover:text-primary bg-slate-50 rounded-lg transition-colors"
                     >
                       <Edit className="w-4 h-4" />
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleDelete(linkObj._id)}
                       className="p-2 text-slate-400 hover:text-red-600 bg-slate-50 rounded-lg transition-colors"
                     >
@@ -206,22 +257,24 @@ const FutureProjects = () => {
                 </div>
 
                 <div className="pt-3 border-t border-slate-100">
-                  <p className="text-xs text-slate-500 font-medium mb-2">LINK</p>
+                  <p className="text-xs text-slate-500 font-medium mb-2">
+                    LINK
+                  </p>
                   <div className="flex items-center justify-between gap-2 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
                     <div className="truncate text-sm text-slate-600 font-medium max-w-[200px]">
                       {linkObj.link}
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
-                      <button 
+                      <button
                         onClick={() => handleCopy(linkObj.link)}
                         className="p-1.5 text-slate-500 hover:text-primary hover:bg-white rounded-md transition-colors shadow-sm bg-white"
                         title="Copy Link"
                       >
                         <Copy className="w-3.5 h-3.5" />
                       </button>
-                      <a 
-                        href={linkObj.link} 
-                        target="_blank" 
+                      <a
+                        href={linkObj.link}
+                        target="_blank"
                         rel="noreferrer"
                         className="p-1.5 text-slate-500 hover:text-blue-500 hover:bg-white rounded-md transition-colors shadow-sm bg-white"
                         title="Open Link"
@@ -242,16 +295,25 @@ const FutureProjects = () => {
                 <thead>
                   <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider">
                     <th className="px-6 py-4 font-semibold w-1/3">Title</th>
-                    <th className="px-6 py-4 font-semibold w-1/4">Future Assignee</th>
+                    <th className="px-6 py-4 font-semibold w-1/4">
+                      Future Assignee
+                    </th>
                     <th className="px-6 py-4 font-semibold flex-1">Link</th>
-                    <th className="px-6 py-4 font-semibold text-right w-24">Actions</th>
+                    <th className="px-6 py-4 font-semibold text-right w-24">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {links.map((linkObj) => (
-                    <tr key={linkObj._id} className="hover:bg-slate-50/50 transition-colors group">
+                    <tr
+                      key={linkObj._id}
+                      className="hover:bg-slate-50/50 transition-colors group"
+                    >
                       <td className="px-6 py-4">
-                        <p className="text-sm font-semibold text-slate-800">{linkObj.title}</p>
+                        <p className="text-sm font-semibold text-slate-800">
+                          {linkObj.title}
+                        </p>
                       </td>
                       <td className="px-6 py-4">
                         {linkObj.assignee ? (
@@ -259,7 +321,9 @@ const FutureProjects = () => {
                             {linkObj.assignee}
                           </span>
                         ) : (
-                          <span className="text-sm text-slate-400 italic">Unassigned</span>
+                          <span className="text-sm text-slate-400 italic">
+                            Unassigned
+                          </span>
                         )}
                       </td>
                       <td className="px-6 py-4">
@@ -267,16 +331,16 @@ const FutureProjects = () => {
                           <div className="max-w-[200px] sm:max-w-[300px] truncate text-sm text-slate-600">
                             {linkObj.link}
                           </div>
-                          <button 
+                          <button
                             onClick={() => handleCopy(linkObj.link)}
                             className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-md transition-colors"
                             title="Copy Link"
                           >
                             <Copy className="w-4 h-4" />
                           </button>
-                          <a 
-                            href={linkObj.link} 
-                            target="_blank" 
+                          <a
+                            href={linkObj.link}
+                            target="_blank"
                             rel="noreferrer"
                             className="p-1.5 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-md transition-colors"
                             title="Open Link"
@@ -287,13 +351,13 @@ const FutureProjects = () => {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button 
+                          <button
                             onClick={() => openEdit(linkObj)}
                             className="p-1.5 text-slate-400 hover:text-primary bg-white hover:bg-slate-50 border border-transparent hover:border-slate-200 rounded-lg shadow-sm"
                           >
                             <Edit className="w-4 h-4" />
                           </button>
-                          <button 
+                          <button
                             onClick={() => handleDelete(linkObj._id)}
                             className="p-1.5 text-slate-400 hover:text-red-600 bg-white hover:bg-slate-50 border border-transparent hover:border-slate-200 rounded-lg shadow-sm"
                           >

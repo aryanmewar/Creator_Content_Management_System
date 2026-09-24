@@ -1,7 +1,7 @@
-import multer from 'multer';
-import { v2 as cloudinary } from 'cloudinary';
-import env from '../config/env.js';
-import { sendError } from '../utils/response.js';
+import multer from "multer";
+import { v2 as cloudinary } from "cloudinary";
+import env from "../config/env.js";
+import { sendError } from "../utils/response.js";
 
 // Configure Cloudinary
 cloudinary.config({
@@ -15,13 +15,13 @@ const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
   const allowedMimeTypes = [
-    'image/jpeg',
-    'image/png',
-    'image/webp',
-    'image/gif',
-    'video/mp4',
-    'video/quicktime',
-    'application/pdf',
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+    "video/mp4",
+    "video/quicktime",
+    "application/pdf",
   ];
 
   if (allowedMimeTypes.includes(file.mimetype)) {
@@ -46,11 +46,11 @@ export const upload = multer({
 export const uploadToCloudinary = (buffer, options = {}) => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { folder: 'content-manager', ...options },
+      { folder: "content-manager", ...options },
       (error, result) => {
         if (error) reject(error);
         else resolve(result);
-      }
+      },
     );
     stream.end(buffer);
   });
@@ -59,14 +59,16 @@ export const uploadToCloudinary = (buffer, options = {}) => {
 /**
  * Middleware: upload single file to Cloudinary, attach result to req.uploadedFile
  */
-export const uploadSingle = (fieldName = 'file') => [
+export const uploadSingle = (fieldName = "file") => [
   upload.single(fieldName),
   async (req, res, next) => {
     if (!req.file) return next();
 
     try {
       const result = await uploadToCloudinary(req.file.buffer, {
-        resource_type: req.file.mimetype.startsWith('video') ? 'video' : 'image',
+        resource_type: req.file.mimetype.startsWith("video")
+          ? "video"
+          : "image",
       });
       req.uploadedFile = {
         url: result.secure_url,
@@ -78,8 +80,8 @@ export const uploadSingle = (fieldName = 'file') => [
       next();
     } catch (error) {
       return sendError(res, {
-        message: 'File upload failed. Please try again.',
-        code: 'UPLOAD_FAILED',
+        message: "File upload failed. Please try again.",
+        code: "UPLOAD_FAILED",
         statusCode: 500,
       });
     }

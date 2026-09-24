@@ -1,10 +1,10 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const activityLogSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
     action: {
@@ -28,12 +28,12 @@ const activityLogSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 activityLogSchema.index({ userId: 1 });
 activityLogSchema.index({ entityType: 1, entityId: 1 });
 activityLogSchema.index({ createdAt: -1 });
 
-const ActivityLog = mongoose.model('ActivityLog', activityLogSchema);
+const ActivityLog = mongoose.model("ActivityLog", activityLogSchema);
 export default ActivityLog;

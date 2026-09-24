@@ -1,8 +1,8 @@
-import React from 'react';
-import { Loader2 } from 'lucide-react';
+import React from "react";
+import { Loader2 } from "lucide-react";
 
-const Loader = ({ size = 'md', text = 'Loading...', fullScreen = false }) => {
-  const sizes = { sm: 'w-4 h-4', md: 'w-8 h-8', lg: 'w-12 h-12' };
+const Loader = ({ size = "md", text = "Loading...", fullScreen = false }) => {
+  const sizes = { sm: "w-4 h-4", md: "w-8 h-8", lg: "w-12 h-12" };
 
   if (fullScreen) {
     return (

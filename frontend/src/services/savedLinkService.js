@@ -1,13 +1,13 @@
-import api from './api.js';
+import api from "./api.js";
 
 const savedLinkService = {
   getSavedLinks: async () => {
-    const response = await api.get('/saved-links');
+    const response = await api.get("/saved-links");
     return response.data.data;
   },
 
   createSavedLink: async (data) => {
-    const response = await api.post('/saved-links', data);
+    const response = await api.post("/saved-links", data);
     return response.data.data;
   },
 
@@ -18,7 +18,7 @@ const savedLinkService = {
 
   deleteSavedLink: async (id) => {
     await api.delete(`/saved-links/${id}`);
-  }
+  },
 };
 
 export default savedLinkService;

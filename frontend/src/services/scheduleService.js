@@ -1,5 +1,5 @@
-import api from './api.js';
-import { buildQueryString } from '../utils/formatUtils.js';
+import api from "./api.js";
+import { buildQueryString } from "../utils/formatUtils.js";
 
 export const scheduleService = {
   getSchedules: async (params = {}) => {
@@ -13,7 +13,7 @@ export const scheduleService = {
   },
 
   createSchedule: async (payload) => {
-    const { data } = await api.post('/schedules', payload);
+    const { data } = await api.post("/schedules", payload);
     return data;
   },
 
