@@ -25,7 +25,7 @@ const assignmentSchema = new mongoose.Schema(
     },
     deadline: {
       type: Date,
-      required: [true, "Deadline is required"],
+      default: null,
     },
     priority: {
       type: String,

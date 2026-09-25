@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import {
   getStatusColor,
   getStatusLabel,
-  getPriorityColor,
 } from "../../utils/statusUtils.js";
 import { getInitials, truncate } from "../../utils/formatUtils.js";
 
@@ -15,6 +14,7 @@ const TodayDeadlines = ({ deadlines = [] }) => {
         <h3 className="section-title mb-4 flex items-center gap-2">
           <Clock className="w-5 h-5 text-amber-500" />
           Today's Deadlines
+          <span className="badge bg-amber-100 text-amber-700 ml-1">0</span>
         </h3>
         <p className="text-sm text-slate-400 text-center py-8 flex items-center justify-center gap-1.5">
           No deadlines today <PartyPopper className="w-4 h-4 text-amber-500" />
@@ -39,8 +39,9 @@ const TodayDeadlines = ({ deadlines = [] }) => {
         {deadlines.map((assignment) => (
           <div
             key={assignment._id}
-            className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors"
+            className="group flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-2xl bg-gradient-to-r from-slate-50/80 to-white hover:from-amber-50/50 hover:to-white border border-slate-100 hover:border-amber-100/50 transition-all duration-300 shadow-sm hover:shadow-md relative overflow-hidden"
           >
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-400 opacity-0 group-hover:opacity-100 transition-opacity" />
             {/* Instructor avatar */}
             <div className="w-9 h-9 rounded-full bg-primary-100 flex items-center justify-center shrink-0">
               {assignment.instructorId?.profileImage?.url ? (

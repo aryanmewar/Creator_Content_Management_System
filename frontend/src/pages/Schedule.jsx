@@ -15,6 +15,7 @@ import Loader from "../components/common/Loader.jsx";
 import { scheduleService } from "../services/scheduleService.js";
 import { contentService } from "../services/contentService.js";
 import { getPlatformColor } from "../utils/statusUtils.js";
+import { formatTime12Hour } from "../utils/dateUtils.js";
 import { PLATFORMS } from "../utils/constants.js";
 
 import { Card } from "@/components/ui/card";
@@ -60,15 +61,24 @@ const Schedule = () => {
       const scheduledContentList = contentRes.data || [];
 
       const mappedContents = scheduledContentList
-        .filter((c) => c.scheduledDate)
-        .map((c) => ({
-          _id: `content-${c._id}`,
-          contentId: c,
-          platform: "General",
-          scheduledDate: c.scheduledDate,
-          scheduledTime: "12:00",
-          status: "SCHEDULED",
-        }));
+        .filter((c) => {
+          if (!c.scheduledDate) return false;
+          const d = new Date(c.scheduledDate);
+          return d.getMonth() === date.getMonth() && d.getFullYear() === date.getFullYear();
+        })
+        .map((c) => {
+          let cType = Array.isArray(c.contentType) ? c.contentType[0] : c.contentType;
+          if (cType === "Others" && c.otherContentType) cType = c.otherContentType;
+
+          return {
+            _id: `content-${c._id}`,
+            contentId: c,
+            platform: cType || "General",
+            scheduledDate: c.scheduledDate,
+            scheduledTime: c.scheduledTime || "",
+            status: "SCHEDULED",
+          };
+        });
 
       setSchedules([...realSchedules, ...mappedContents]);
     } catch (err) {
@@ -185,9 +195,9 @@ const Schedule = () => {
                           <div
                             key={s._id}
                             className={`text-[10px] px-1.5 py-0.5 rounded font-medium truncate ${getPlatformColor(s.platform)}`}
-                            title={`${s.contentId?.title} on ${s.platform} at ${s.scheduledTime}`}
+                            title={`${s.contentId?.title} on ${s.platform} at ${s.scheduledTime ? formatTime12Hour(s.scheduledTime) : ""}`}
                           >
-                            {s.scheduledTime} {s.contentId?.title}
+                            {s.scheduledTime ? formatTime12Hour(s.scheduledTime) : ""} {s.contentId?.title}
                           </div>
                         ))}
                         {daySchedules.length > 3 && (
@@ -209,42 +219,49 @@ const Schedule = () => {
         <h3 className="text-lg font-semibold text-slate-900 mb-4">
           This Month's Schedule
         </h3>
-        {schedules.length === 0 ? (
-          <p className="text-sm text-slate-400 text-center py-6">
-            No schedules this month.
-          </p>
-        ) : (
-          <div className="space-y-2">
-            {schedules.map((s) => (
-              <div
-                key={s._id}
-                className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 border border-transparent transition-colors"
-              >
-                <Badge
-                  variant="outline"
-                  className={`font-bold uppercase tracking-wider text-[10px] ${getPlatformColor(s.platform)}`}
+        {(() => {
+          const currentMonthSchedules = schedules.filter((s) => {
+            const d = new Date(s.scheduledDate);
+            return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
+          });
+          
+          return currentMonthSchedules.length === 0 ? (
+            <p className="text-sm text-slate-400 text-center py-6">
+              No schedules this month.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {currentMonthSchedules.map((s) => (
+                <div
+                  key={s._id}
+                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 border border-transparent transition-colors"
                 >
-                  {s.platform}
-                </Badge>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-slate-800 truncate">
-                    {s.contentId?.title}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {format(new Date(s.scheduledDate), "MMM d, yyyy")} at{" "}
-                    {s.scheduledTime}
-                  </p>
+                  <Badge
+                    variant="outline"
+                    className={`font-bold uppercase tracking-wider text-[10px] ${getPlatformColor(s.platform)}`}
+                  >
+                    {s.platform}
+                  </Badge>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-slate-800 truncate">
+                      {s.contentId?.title}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {format(new Date(s.scheduledDate), "MMM d, yyyy")}
+                      {s.scheduledTime ? ` at ${formatTime12Hour(s.scheduledTime)}` : ""}
+                    </p>
+                  </div>
+                  <Badge
+                    variant="secondary"
+                    className={`${s.status === "PUBLISHED" ? "bg-emerald-100 text-emerald-700" : "bg-sky-100 text-sky-700"}`}
+                  >
+                    {s.status}
+                  </Badge>
                 </div>
-                <Badge
-                  variant="secondary"
-                  className={`${s.status === "PUBLISHED" ? "bg-emerald-100 text-emerald-700" : "bg-sky-100 text-sky-700"}`}
-                >
-                  {s.status}
-                </Badge>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          );
+        })()}
       </Card>
 
       <Dialog

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Calendar, Users, Save, Edit2, Trash2 } from "lucide-react";
+import { Calendar, Users, Save, Edit2, Trash2, ExternalLink } from "lucide-react";
 import {
   FaYoutube,
   FaInstagram,
@@ -8,7 +8,7 @@ import {
   FaPen,
 } from "react-icons/fa";
 import { getStatusColor, getStatusLabel } from "@/utils/statusUtils.js";
-import { formatDate } from "@/utils/dateUtils.js";
+import { formatDate, formatTime12Hour } from "@/utils/dateUtils.js";
 
 import {
   Card,
@@ -20,6 +20,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Select from "@/components/common/Select.jsx";
+import TimePicker from "@/components/common/TimePicker.jsx";
 import { Input } from "@/components/ui/input";
 
 const ALLOWED_DROPDOWN_STATUSES = [
@@ -38,7 +39,7 @@ const ContentCard = ({
   onStatusChange,
   onViewDetails,
 }) => {
-  const { title, contentType, status, contributors, completionDate } = content;
+  const { title, contentType, status, contributors, completionDate, dueDate, notes } = content;
 
   const hasLinks = !!(
     content.publishedLinks?.youtube ||
@@ -52,6 +53,9 @@ const ContentCard = ({
     content.scheduledDate
       ? new Date(content.scheduledDate).toISOString().split("T")[0]
       : "",
+  );
+  const [scheduledTime, setScheduledTime] = useState(
+    content.scheduledTime || "",
   );
   const [publishedLinks, setPublishedLinks] = useState(
     content.publishedLinks || {
@@ -90,6 +94,7 @@ const ContentCard = ({
       });
       await onStatusChange(content._id, status, {
         scheduledDate: scheduledDate === "" ? null : scheduledDate,
+        scheduledTime: scheduledTime === "" ? null : scheduledTime,
         publishedLinks: cleanLinks,
         publishedDate: publishedDate === "" ? null : publishedDate,
       });
@@ -187,7 +192,7 @@ const ContentCard = ({
                   variant="outline"
                   className="text-[10px] font-bold uppercase tracking-wider bg-slate-50 text-slate-600"
                 >
-                  {type}
+                  {type === "Others" && content.otherContentType ? `Others (${content.otherContentType})` : type}
                 </Badge>
               ))}
             </div>
@@ -198,11 +203,38 @@ const ContentCard = ({
             <span className="font-medium">{displayText}</span>
           </div>
 
+          {content.referenceLink && (
+            <div className="flex items-center gap-1.5">
+              <ExternalLink className="w-4 h-4 opacity-70 text-blue-500" />
+              <a 
+                href={content.referenceLink} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="font-medium text-blue-600 hover:text-blue-800 hover:underline"
+                onClick={(e) => e.stopPropagation()}
+              >
+                Reference Link
+              </a>
+            </div>
+          )}
+
+          {dueDate && (
+            <div className="flex items-center gap-1.5">
+              <Calendar className="w-4 h-4 opacity-70 text-indigo-500" />
+              <span>
+                Shoot Date:{" "}
+                <span className="font-medium text-foreground">
+                  {formatDate(dueDate)}
+                </span>
+              </span>
+            </div>
+          )}
+
           {completionDate && (
             <div className="flex items-center gap-1.5">
-              <Calendar className="w-4 h-4 opacity-70" />
+              <Calendar className="w-4 h-4 opacity-70 text-emerald-500" />
               <span>
-                Completion:{" "}
+                Shoot Completion:{" "}
                 <span className="font-medium text-foreground">
                   {formatDate(completionDate)}
                 </span>
@@ -210,6 +242,13 @@ const ContentCard = ({
             </div>
           )}
         </div>
+
+        {notes && (
+          <div className="mb-4 text-sm bg-amber-50/50 p-3 rounded-lg border border-amber-100/50 text-slate-600">
+            <span className="font-semibold text-slate-700 block mb-1">Notes:</span>
+            {notes}
+          </div>
+        )}
 
         {/* State-Specific Read-Only Views */}
         <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-border">
@@ -219,7 +258,7 @@ const ContentCard = ({
               <div className="flex items-center gap-2 bg-blue-50/50 px-3 py-1.5 rounded-md border border-blue-100">
                 <Calendar className="w-4 h-4 text-blue-500" />
                 <span className="text-sm font-medium text-blue-700">
-                  Scheduled for {formatDate(content.scheduledDate)}
+                  Scheduled for {formatDate(content.scheduledDate)}{content.scheduledTime && ` at ${formatTime12Hour(content.scheduledTime)}`}
                 </span>
                 <Button
                   variant="ghost"
@@ -336,16 +375,28 @@ const ContentCard = ({
 
       {showDateForm && (
         <CardFooter className="bg-slate-50/80 border-t border-border pt-4 rounded-b-xl flex flex-col sm:flex-row gap-4 sm:items-end animate-in slide-in-from-top-4 duration-500 fade-in">
-          <div className="w-full sm:max-w-[200px]">
+          <div className="w-full sm:max-w-[200px] flex flex-col justify-end">
             <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
               Set Scheduled Date
             </label>
             <Input
               type="date"
-              className="h-9 bg-white"
+              className="h-9 py-1 px-3 text-sm bg-white"
+              style={{ minHeight: "36px", height: "36px" }}
               value={scheduledDate}
               onChange={(e) => setScheduledDate(e.target.value)}
             />
+          </div>
+          <div className="w-full sm:w-auto shrink-0 flex flex-col justify-end">
+            <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
+              Time (Optional)
+            </label>
+            <div className="h-9 flex items-center">
+              <TimePicker
+                value={scheduledTime}
+                onChange={setScheduledTime}
+              />
+            </div>
           </div>
           <Button
             onClick={handleSaveExpanded}

@@ -9,7 +9,7 @@
  * @returns {'COMPLETED'|'OVERDUE'|'DUE_TODAY'|'UPCOMING'}
  */
 export const getDeadlineState = (deadline, contentStatus) => {
-  const completedStatuses = ["PUBLISHED", "APPROVED", "SCHEDULED"];
+  const completedStatuses = ["IN_PROGRESS", "SUBMITTED", "PUBLISHED", "APPROVED", "SCHEDULED"];
   if (completedStatuses.includes(contentStatus)) return "COMPLETED";
 
   if (!deadline) return "UPCOMING";

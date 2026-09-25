@@ -168,16 +168,16 @@ const Instructors = () => {
         </div>
 
         {/* Actions and Search */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-8">
           <AnimatedSearch
             placeholder="Search by name, email, or designation..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full max-w-md focus-within:max-w-2xl"
+            className="flex-1 w-full sm:max-w-md focus-within:sm:max-w-[500px] h-11"
           />
           <Button
             onClick={() => setIsFormOpen(true)}
-            className="w-full sm:w-auto shrink-0"
+            className="w-full sm:w-auto shrink-0 h-11 rounded-full px-6 shadow-sm hover:shadow hover:-translate-y-0.5 transition-all"
           >
             <Plus className="mr-2 h-4 w-4" /> Add Contributor
           </Button>

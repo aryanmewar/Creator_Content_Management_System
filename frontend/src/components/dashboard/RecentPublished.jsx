@@ -29,8 +29,9 @@ const RecentPublished = ({ publications = [] }) => {
         {publications.map((pub) => (
           <div
             key={pub._id}
-            className="flex items-center gap-3 p-3 rounded-xl bg-slate-50"
+            className="group flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-r from-emerald-50/50 to-white hover:from-emerald-50/80 hover:to-white border border-slate-100 hover:border-emerald-200 transition-all duration-300 shadow-sm hover:shadow-md relative overflow-hidden"
           >
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-slate-800 truncate">
                 {pub.contentId?.title || "Untitled"}
@@ -44,14 +45,6 @@ const RecentPublished = ({ publications = [] }) => {
                 </span>
               </div>
             </div>
-            <a
-              href={pub.postUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-primary-600 hover:bg-primary-50 transition-colors"
-            >
-              <ExternalLink className="w-4 h-4" />
-            </a>
           </div>
         ))}
       </div>

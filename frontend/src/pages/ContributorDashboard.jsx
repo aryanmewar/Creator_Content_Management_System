@@ -3,6 +3,8 @@ import DashboardLayout from "../components/layout/DashboardLayout.jsx";
 import StatsCard from "../components/dashboard/StatsCard.jsx";
 import Loader from "../components/common/Loader.jsx";
 import { Target, Clock, CheckCircle, AlertCircle } from "lucide-react";
+import TodayDeadlines from "../components/dashboard/TodayDeadlines.jsx";
+import TodaySchedule from "../components/dashboard/TodaySchedule.jsx";
 import { contributorService } from "../services/contributorService.js";
 
 const ContributorDashboard = () => {
@@ -50,31 +52,39 @@ const ContributorDashboard = () => {
       )}
 
       {stats && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <StatsCard
-            title="Total Assigned"
-            value={stats.totalAssigned}
-            icon={Target}
-            color="primary"
-          />
-          <StatsCard
-            title="In Progress"
-            value={stats.inProgress}
-            icon={Clock}
-            color="purple"
-          />
-          <StatsCard
-            title="Completed"
-            value={stats.published}
-            icon={CheckCircle}
-            color="success"
-          />
-          <StatsCard
-            title="Overdue"
-            value={stats.overdue}
-            icon={AlertCircle}
-            color="danger"
-          />
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
+          <div className="xl:col-span-2 space-y-6">
+            {/* Show schedule and deadlines for contributor */}
+            <TodaySchedule schedules={stats.todaySchedules || []} />
+            <TodayDeadlines deadlines={stats.todayDeadlines || []} />
+          </div>
+          
+          <div className="space-y-6">
+            <StatsCard
+              title="Total Assigned"
+              value={stats.totalAssigned}
+              icon={Target}
+              color="primary"
+            />
+            <StatsCard
+              title="In Progress"
+              value={stats.inProgress}
+              icon={Clock}
+              color="purple"
+            />
+            <StatsCard
+              title="Completed"
+              value={stats.published}
+              icon={CheckCircle}
+              color="success"
+            />
+            <StatsCard
+              title="Overdue"
+              value={stats.overdue}
+              icon={AlertCircle}
+              color="danger"
+            />
+          </div>
         </div>
       )}
 
@@ -91,8 +101,8 @@ const ContributorDashboard = () => {
                 <tr className="border-b border-slate-200 text-slate-500">
                   <th className="py-3 px-4 font-semibold">Title</th>
                   <th className="py-3 px-4 font-semibold">Type</th>
-                  <th className="py-3 px-4 font-semibold">Due Date</th>
-                  <th className="py-3 px-4 font-semibold">Completion Date</th>
+                  <th className="py-3 px-4 font-semibold">Target Shoot Date</th>
+                  <th className="py-3 px-4 font-semibold">Shoot Completion</th>
                   <th className="py-3 px-4 font-semibold">Status</th>
                 </tr>
               </thead>

@@ -96,11 +96,11 @@
 @layer components {
   /* ── Card System ─────────────────────────────────────── */
   .card {
-    @apply bg-white rounded-xl border border-slate-200 shadow-card;
+    @apply bg-white/90 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-200/50 rounded-2xl relative;
   }
 
   .card-hover {
-    @apply card transition-all duration-200 hover:shadow-card-hover hover:-translate-y-0.5;
+    @apply card transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-1;
   }
 
   /* ── Form Elements ───────────────────────────────────── */

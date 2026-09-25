@@ -73,7 +73,11 @@ const enrichInstructorStats = async (instructor) => {
       completed++;
       continue;
     }
-    if (c.completionDate && new Date(c.completionDate) < today) {
+    if (
+      c.completionDate && 
+      new Date(c.completionDate) < today &&
+      ["ASSIGNED", "DRAFT"].includes(c.status)
+    ) {
       overdue++;
       continue;
     }

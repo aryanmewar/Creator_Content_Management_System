@@ -7,6 +7,7 @@ export const getContent = async (req, res, next) => {
     return sendPaginated(res, {
       data: result.data,
       pagination: result.pagination,
+      statusCounts: result.statusCounts,
     });
   } catch (error) {
     next(error);
@@ -84,7 +85,7 @@ export const deleteContent = async (req, res, next) => {
 
 export const updateContentStatus = async (req, res, next) => {
   try {
-    const { status, feedback, scheduledDate, publishedLinks, publishedDate } =
+    const { status, feedback, scheduledDate, scheduledTime, publishedLinks, publishedDate } =
       req.body;
     const content = await contentService.updateContentStatus(
       req.params.id,
@@ -92,6 +93,7 @@ export const updateContentStatus = async (req, res, next) => {
       req.user._id,
       feedback,
       scheduledDate,
+      scheduledTime,
       publishedLinks,
       publishedDate,
     );

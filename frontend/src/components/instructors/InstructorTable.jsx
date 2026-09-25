@@ -54,7 +54,8 @@ const InstructorTable = ({ instructors, onEdit, onToggleStatus, onDelete }) => {
             return (
               <tr
                 key={_id}
-                className="hover:bg-slate-50/50 transition-colors group"
+                onClick={() => navigate(`/instructors/${_id}`)}
+                className="hover:bg-slate-50/50 transition-colors group cursor-pointer"
               >
                 <td className="px-4 py-4 text-center font-medium text-slate-500">
                   {index + 1}
@@ -115,18 +116,15 @@ const InstructorTable = ({ instructors, onEdit, onToggleStatus, onDelete }) => {
                   </span>
                 </td>
                 <td className="px-4 py-4 text-right relative">
-                  <div className="relative group/menu inline-block">
+                  <div 
+                    className="relative group/menu inline-block"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <button className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
                       <MoreHorizontal className="w-4 h-4" />
                     </button>
                     <div className="absolute right-0 top-full mt-1 w-36 z-50 opacity-0 invisible group-hover/menu:opacity-100 group-hover/menu:visible transition-all duration-200 transform origin-top-right translate-y-1 group-hover/menu:translate-y-0">
                       <div className="bg-white border border-slate-200 rounded-xl shadow-lg p-1 overflow-hidden">
-                        <button
-                          onClick={() => navigate(`/instructors/${_id}`)}
-                          className="w-full text-left px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-primary-600 rounded-lg flex items-center transition-colors"
-                        >
-                          <Eye className="w-3.5 h-3.5 mr-2" /> View Profile
-                        </button>
                         <button
                           onClick={() => onEdit(instructor)}
                           className="w-full text-left px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-primary-600 rounded-lg flex items-center transition-colors"

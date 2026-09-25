@@ -101,14 +101,14 @@ const InstructorForm = ({
   };
 
   const inputClasses =
-    "w-full min-h-[44px] px-4 py-2 outline-none text-slate-800 font-normal bg-slate-50 border border-slate-200 shadow-sm rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/50 transition-colors placeholder:text-slate-400";
+    "w-full h-10 px-4 py-2 outline-none text-slate-800 font-normal bg-slate-50 border border-slate-200 shadow-sm rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500/50 transition-colors placeholder:text-slate-400";
   const labelClasses =
     "text-sm font-semibold text-slate-700 px-1 mb-1 inline-block";
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-lg p-8 bg-white shadow-2xl rounded-[32px] border border-slate-100">
-        <DialogHeader className="mb-6">
+      <DialogContent className="sm:max-w-lg w-[95vw] sm:w-full max-h-[95vh] overflow-y-auto no-scrollbar p-5 sm:p-6 bg-white shadow-2xl rounded-2xl sm:rounded-[32px] border border-slate-100">
+        <DialogHeader className="mb-4">
           <DialogTitle className="text-2xl font-bold text-slate-800 tracking-tight">
             {instructor ? "Edit Contributor" : "Add New Contributor"}
           </DialogTitle>
@@ -122,7 +122,7 @@ const InstructorForm = ({
         <form
           id="glass-instructor-form"
           onSubmit={handleSubmit(handleFormSubmit)}
-          className="space-y-5"
+          className="space-y-4"
         >
           <div className="space-y-1.5">
             <label className={labelClasses}>
@@ -189,7 +189,7 @@ const InstructorForm = ({
                     { label: "Other", value: "Other" },
                   ]}
                   placeholder="Select designation..."
-                  className="w-full h-[44px]"
+                  className="w-full h-10"
                 />
               )}
             />
@@ -213,7 +213,7 @@ const InstructorForm = ({
                     { label: "Super Admin (Full Access)", value: "SUPER_ADMIN" },
                   ]}
                   placeholder="Select role..."
-                  className="w-full h-[44px]"
+                  className="w-full h-10"
                 />
               )}
             />
@@ -244,12 +244,12 @@ const InstructorForm = ({
           )}
         </form>
 
-        <div className="mt-8 pt-4 flex sm:justify-end gap-3 items-center border-t border-slate-100">
+        <div className="mt-6 pt-4 flex flex-col sm:flex-row sm:justify-end gap-3 items-center border-t border-slate-100">
           <Button
             variant="ghost"
             onClick={onClose}
             disabled={isLoading}
-            className="text-slate-600 font-medium hover:text-slate-800 hover:bg-slate-100/50 rounded-full h-11 px-6"
+            className="w-full sm:w-auto text-slate-600 font-medium hover:text-slate-800 hover:bg-slate-100/50 rounded-full h-11 px-6"
           >
             Cancel
           </Button>
@@ -257,7 +257,7 @@ const InstructorForm = ({
             type="submit"
             form="glass-instructor-form"
             disabled={isLoading}
-            className="bg-slate-900 hover:bg-slate-800 text-white rounded-full h-11 px-8 font-medium shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
+            className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white rounded-full h-11 px-8 font-medium shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
           >
             {isLoading
               ? "Processing..."

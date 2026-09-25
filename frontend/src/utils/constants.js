@@ -10,7 +10,7 @@ export const CONTENT_STATUSES = {
   REJECTED: "REJECTED",
 };
 
-export const CONTENT_TYPES = ["Reel", "Post", "Lecture video"];
+export const CONTENT_TYPES = ["Reel", "Post", "Lecture video", "Others"];
 
 export const PLATFORMS = ["Instagram", "YouTube", "LinkedIn", "Facebook"];
 

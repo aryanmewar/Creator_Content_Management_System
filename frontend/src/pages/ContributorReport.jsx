@@ -3,6 +3,7 @@ import DashboardLayout from "../components/layout/DashboardLayout.jsx";
 import StatsCard from "../components/dashboard/StatsCard.jsx";
 import Loader from "../components/common/Loader.jsx";
 import { Award, AlertTriangle, Activity, TrendingUp } from "lucide-react";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 import { contributorService } from "../services/contributorService.js";
 
 const ContributorReport = () => {
@@ -30,6 +31,48 @@ const ContributorReport = () => {
         <Loader />
       </DashboardLayout>
     );
+
+  const STATUS_COLORS = {
+    ASSIGNED: "#3b82f6",
+    IN_PROGRESS: "#eab308",
+    SUBMITTED: "#a855f7",
+    APPROVED: "#22c55e",
+    SCHEDULED: "#0ea5e9",
+    PUBLISHED: "#10b981",
+  };
+
+  let pieData = [];
+  let barData = [];
+
+  if (report && report.history) {
+    const statusCounts = report.history.reduce((acc, item) => {
+      const s = item.status;
+      acc[s] = (acc[s] || 0) + 1;
+      return acc;
+    }, {});
+
+    pieData = Object.keys(statusCounts).map((status) => ({
+      name: status.replace("_", " "),
+      status,
+      value: statusCounts[status],
+    }));
+
+    // Group by month for completion (using submittedAt or deadline as a fallback for grouping if they exist)
+    const monthCounts = report.history.reduce((acc, item) => {
+      const dateString = item.submittedAt || item.deadline || item.dueDate;
+      if (dateString) {
+        const d = new Date(dateString);
+        const month = d.toLocaleString('default', { month: 'short' });
+        acc[month] = (acc[month] || 0) + 1;
+      }
+      return acc;
+    }, {});
+
+    barData = Object.keys(monthCounts).map((month) => ({
+      name: month,
+      Assignments: monthCounts[month],
+    }));
+  }
 
   return (
     <DashboardLayout>
@@ -77,6 +120,54 @@ const ContributorReport = () => {
             />
           </div>
 
+          {pieData.length > 0 && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+              <div className="card p-6">
+                <h3 className="section-title mb-6">Status Distribution</h3>
+                <div className="h-[300px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                      <Pie
+                        data={pieData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={50}
+                        outerRadius={70}
+                        paddingAngle={5}
+                        dataKey="value"
+                      >
+                        {pieData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={STATUS_COLORS[entry.status] || "#94a3b8"} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                      <Legend wrapperStyle={{ fontSize: "12px", paddingTop: "10px" }} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              <div className="card p-6">
+                <h3 className="section-title mb-6">Assignments by Month</h3>
+                <div className="h-[300px] w-full">
+                  <div className="w-full overflow-x-auto no-scrollbar h-full">
+                    <div className="min-w-[400px] h-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={barData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                          <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b'}} />
+                          <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{fill: '#64748b'}} />
+                          <Tooltip cursor={{fill: '#f1f5f9'}} />
+                          <Bar dataKey="Assignments" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="card p-6">
             <h3 className="section-title mb-4">Historical Assignments</h3>
             {report.history.length === 0 ? (
@@ -89,8 +180,8 @@ const ContributorReport = () => {
                   <thead>
                     <tr className="border-b border-slate-200 text-slate-500">
                       <th className="py-3 px-4 font-semibold">Title</th>
-                      <th className="py-3 px-4 font-semibold">Due Date</th>
-                      <th className="py-3 px-4 font-semibold">Completion Date</th>
+                      <th className="py-3 px-4 font-semibold">Target Shoot Date</th>
+                      <th className="py-3 px-4 font-semibold">Shoot Completion</th>
                       <th className="py-3 px-4 font-semibold">Submitted At</th>
                       <th className="py-3 px-4 font-semibold">Status</th>
                     </tr>

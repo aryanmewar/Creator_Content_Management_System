@@ -14,7 +14,7 @@ const DashboardLayout = ({ children }) => {
   }, [isCollapsed]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 relative">
+    <div className="flex h-screen overflow-hidden bg-slate-50/50 bg-grid-pattern relative">
       {/* Sidebar */}
       <Sidebar
         isCollapsed={isCollapsed}

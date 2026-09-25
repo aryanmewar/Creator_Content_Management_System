@@ -112,9 +112,11 @@ const ContentDetails = () => {
                   {content.title}
                 </h2>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="badge bg-slate-100 text-slate-600">
-                    {content.contentType}
-                  </span>
+                  {(Array.isArray(content.contentType) ? content.contentType : [content.contentType]).map((type, idx) => (
+                    <span key={idx} className="badge bg-slate-100 text-slate-600">
+                      {type === "Others" && content.otherContentType ? `Others (${content.otherContentType})` : type}
+                    </span>
+                  ))}
                   <span className={`badge ${getStatusColor(content.status)}`}>
                     {getStatusLabel(content.status)}
                   </span>

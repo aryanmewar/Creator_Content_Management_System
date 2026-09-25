@@ -9,7 +9,10 @@ const InstructorCard = ({ instructor, onEdit, onToggleStatus, onDelete }) => {
     instructor;
 
   return (
-    <div className="card p-5 hover:shadow-card-hover transition-all duration-200 group">
+    <div 
+      onClick={() => navigate(`/instructors/${_id}`)}
+      className="card p-5 hover:shadow-card-hover transition-all duration-200 group cursor-pointer"
+    >
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
@@ -57,14 +60,10 @@ const InstructorCard = ({ instructor, onEdit, onToggleStatus, onDelete }) => {
 
 
       {/* Actions */}
-      <div className="flex gap-2 pt-3 border-t border-slate-100">
-        <button
-          onClick={() => navigate(`/instructors/${_id}`)}
-          className="btn btn-ghost btn-sm flex-1"
-        >
-          <Eye className="w-3.5 h-3.5" />
-          View
-        </button>
+      <div 
+        className="flex gap-2 pt-3 border-t border-slate-100"
+        onClick={(e) => e.stopPropagation()}
+      >
         <button
           onClick={() => onEdit(instructor)}
           className="btn btn-secondary btn-sm flex-1"

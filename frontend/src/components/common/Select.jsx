@@ -1,4 +1,4 @@
-import React, { forwardRef, useState } from "react";
+import React, { forwardRef, useState, useEffect, useRef } from "react";
 import { ChevronDown, Check, X } from "lucide-react";
 
 const Select = forwardRef(
@@ -17,10 +17,26 @@ const Select = forwardRef(
     ref,
   ) => {
     const [isOpen, setIsOpen] = useState(false);
+    const wrapperRef = useRef(null);
     const selectedOption = options.find((opt) => (opt.value ?? opt) === value);
     const displayValue = selectedOption
       ? (selectedOption.label ?? selectedOption)
       : placeholder;
+
+    useEffect(() => {
+      const handleClickOutside = (event) => {
+        if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+          setIsOpen(false);
+        }
+      };
+      document.addEventListener("mousedown", handleClickOutside);
+      // touchstart for mobile
+      document.addEventListener("touchstart", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+        document.removeEventListener("touchstart", handleClickOutside);
+      };
+    }, []);
 
     const handleSelect = (val) => {
       if (onChange) onChange({ target: { value: val } });
@@ -29,9 +45,8 @@ const Select = forwardRef(
 
     return (
       <div
+        ref={wrapperRef}
         className={`relative inline-block ${className}`}
-        onMouseEnter={() => setIsOpen(true)}
-        onMouseLeave={() => setIsOpen(false)}
       >
         {label && (
           <label className="form-label block mb-1">
@@ -73,7 +88,7 @@ const Select = forwardRef(
           className={`absolute top-full left-0 mt-2 min-w-[220px] w-full z-50 transition-all duration-300 transform origin-top ${isOpen ? "opacity-100 visible translate-y-0" : "opacity-0 invisible translate-y-2"}`}
         >
           <div className="bg-white/80 backdrop-blur-md rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-white p-2 overflow-hidden ring-1 ring-slate-900/5">
-            <div className="max-h-[280px] overflow-y-auto no-scrollbar flex flex-col gap-1">
+            <div className="max-h-[280px] overflow-y-auto flex flex-col gap-1">
               {placeholder && (
                 <button
                   type="button"

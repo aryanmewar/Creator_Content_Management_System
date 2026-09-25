@@ -129,3 +129,360 @@ Error: Invalid email or password.
     at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
     at async login (file:///C:/Content%20App/backend/src/modules/auth/auth.controller.js:26:29)
 
+[2026-09-24T19:02:42.796Z] GET /api/content?page=1&limit=20&sortBy=publishedDate&sortOrder=desc
+ReferenceError: skip is not defined
+    at Module.getContent (file:///C:/Content%20App/backend/src/modules/content/content.service.js:68:16)
+    at getContent (file:///C:/Content%20App/backend/src/modules/content/content.controller.js:6:41)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Content App\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Content App\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Content App\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Content App\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Content App\backend\node_modules\express\lib\router\index.js:280:10)
+    at protect (file:///C:/Content%20App/backend/src/middleware/authMiddleware.js:41:5)
+
+[2026-09-24T19:02:42.844Z] GET /api/content?page=1&limit=20&sortBy=publishedDate&sortOrder=desc
+ReferenceError: skip is not defined
+    at Module.getContent (file:///C:/Content%20App/backend/src/modules/content/content.service.js:68:16)
+    at getContent (file:///C:/Content%20App/backend/src/modules/content/content.controller.js:6:41)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Content App\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Content App\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Content App\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Content App\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Content App\backend\node_modules\express\lib\router\index.js:280:10)
+    at protect (file:///C:/Content%20App/backend/src/middleware/authMiddleware.js:41:5)
+
+[2026-09-24T19:02:51.335Z] GET /api/content?status=PUBLISHED&page=1&limit=20&sortBy=publishedDate&sortOrder=desc
+ReferenceError: skip is not defined
+    at Module.getContent (file:///C:/Content%20App/backend/src/modules/content/content.service.js:68:16)
+    at getContent (file:///C:/Content%20App/backend/src/modules/content/content.controller.js:6:41)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Content App\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Content App\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Content App\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Content App\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Content App\backend\node_modules\express\lib\router\index.js:280:10)
+    at protect (file:///C:/Content%20App/backend/src/middleware/authMiddleware.js:41:5)
+
+[2026-09-24T19:04:21.149Z] GET /api/content?page=1&limit=20&sortBy=publishedDate&sortOrder=desc
+ReferenceError: skip is not defined
+    at Module.getContent (file:///C:/Content%20App/backend/src/modules/content/content.service.js:68:16)
+    at getContent (file:///C:/Content%20App/backend/src/modules/content/content.controller.js:6:41)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Content App\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Content App\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Content App\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Content App\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Content App\backend\node_modules\express\lib\router\index.js:280:10)
+    at protect (file:///C:/Content%20App/backend/src/middleware/authMiddleware.js:41:5)
+
+[2026-09-24T19:04:21.196Z] GET /api/content?page=1&limit=20&sortBy=publishedDate&sortOrder=desc
+ReferenceError: skip is not defined
+    at Module.getContent (file:///C:/Content%20App/backend/src/modules/content/content.service.js:68:16)
+    at getContent (file:///C:/Content%20App/backend/src/modules/content/content.controller.js:6:41)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Content App\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Content App\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Content App\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Content App\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Content App\backend\node_modules\express\lib\router\index.js:280:10)
+    at protect (file:///C:/Content%20App/backend/src/middleware/authMiddleware.js:41:5)
+
+[2026-09-24T19:04:29.311Z] GET /api/content?limit=1000
+ReferenceError: skip is not defined
+    at Module.getContent (file:///C:/Content%20App/backend/src/modules/content/content.service.js:83:13)
+    at getContent (file:///C:/Content%20App/backend/src/modules/content/content.controller.js:6:41)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Content App\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Content App\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Content App\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Content App\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Content App\backend\node_modules\express\lib\router\index.js:280:10)
+    at protect (file:///C:/Content%20App/backend/src/middleware/authMiddleware.js:41:5)
+
+[2026-09-24T19:04:29.608Z] GET /api/content?limit=1000
+ReferenceError: skip is not defined
+    at Module.getContent (file:///C:/Content%20App/backend/src/modules/content/content.service.js:83:13)
+    at getContent (file:///C:/Content%20App/backend/src/modules/content/content.controller.js:6:41)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Content App\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Content App\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Content App\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Content App\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Content App\backend\node_modules\express\lib\router\index.js:280:10)
+    at protect (file:///C:/Content%20App/backend/src/middleware/authMiddleware.js:41:5)
+
+[2026-09-24T19:04:34.535Z] GET /api/content?limit=1000
+ReferenceError: skip is not defined
+    at Module.getContent (file:///C:/Content%20App/backend/src/modules/content/content.service.js:83:13)
+    at getContent (file:///C:/Content%20App/backend/src/modules/content/content.controller.js:6:41)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Content App\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Content App\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Content App\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Content App\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Content App\backend\node_modules\express\lib\router\index.js:280:10)
+    at protect (file:///C:/Content%20App/backend/src/middleware/authMiddleware.js:41:5)
+
+[2026-09-24T19:04:34.580Z] GET /api/content?limit=1000
+ReferenceError: skip is not defined
+    at Module.getContent (file:///C:/Content%20App/backend/src/modules/content/content.service.js:83:13)
+    at getContent (file:///C:/Content%20App/backend/src/modules/content/content.controller.js:6:41)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Content App\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Content App\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Content App\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Content App\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Content App\backend\node_modules\express\lib\router\index.js:280:10)
+    at protect (file:///C:/Content%20App/backend/src/middleware/authMiddleware.js:41:5)
+
+[2026-09-24T19:04:35.630Z] GET /api/content?status=APPROVED&limit=100
+ReferenceError: skip is not defined
+    at Module.getContent (file:///C:/Content%20App/backend/src/modules/content/content.service.js:83:13)
+    at getContent (file:///C:/Content%20App/backend/src/modules/content/content.controller.js:6:41)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Content App\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Content App\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Content App\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Content App\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Content App\backend\node_modules\express\lib\router\index.js:280:10)
+    at protect (file:///C:/Content%20App/backend/src/middleware/authMiddleware.js:41:5)
+
+[2026-09-24T19:04:35.633Z] GET /api/content?status=SCHEDULED&limit=200
+ReferenceError: skip is not defined
+    at Module.getContent (file:///C:/Content%20App/backend/src/modules/content/content.service.js:83:13)
+    at getContent (file:///C:/Content%20App/backend/src/modules/content/content.controller.js:6:41)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Content App\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Content App\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Content App\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Content App\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Content App\backend\node_modules\express\lib\router\index.js:280:10)
+    at protect (file:///C:/Content%20App/backend/src/middleware/authMiddleware.js:41:5)
+
+[2026-09-24T19:04:35.677Z] GET /api/content?status=APPROVED&limit=100
+ReferenceError: skip is not defined
+    at Module.getContent (file:///C:/Content%20App/backend/src/modules/content/content.service.js:83:13)
+    at getContent (file:///C:/Content%20App/backend/src/modules/content/content.controller.js:6:41)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Content App\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Content App\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Content App\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Content App\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Content App\backend\node_modules\express\lib\router\index.js:280:10)
+    at protect (file:///C:/Content%20App/backend/src/middleware/authMiddleware.js:41:5)
+
+[2026-09-24T19:04:35.678Z] GET /api/content?status=SCHEDULED&limit=200
+ReferenceError: skip is not defined
+    at Module.getContent (file:///C:/Content%20App/backend/src/modules/content/content.service.js:83:13)
+    at getContent (file:///C:/Content%20App/backend/src/modules/content/content.controller.js:6:41)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Content App\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Content App\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Content App\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Content App\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Content App\backend\node_modules\express\lib\router\index.js:280:10)
+    at protect (file:///C:/Content%20App/backend/src/middleware/authMiddleware.js:41:5)
+
+[2026-09-24T19:04:37.904Z] GET /api/content?limit=1000
+ReferenceError: skip is not defined
+    at Module.getContent (file:///C:/Content%20App/backend/src/modules/content/content.service.js:83:13)
+    at getContent (file:///C:/Content%20App/backend/src/modules/content/content.controller.js:6:41)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Content App\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Content App\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Content App\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Content App\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Content App\backend\node_modules\express\lib\router\index.js:280:10)
+    at protect (file:///C:/Content%20App/backend/src/middleware/authMiddleware.js:41:5)
+
+[2026-09-24T19:04:37.949Z] GET /api/content?limit=1000
+ReferenceError: skip is not defined
+    at Module.getContent (file:///C:/Content%20App/backend/src/modules/content/content.service.js:83:13)
+    at getContent (file:///C:/Content%20App/backend/src/modules/content/content.controller.js:6:41)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Content App\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Content App\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Content App\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Content App\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Content App\backend\node_modules\express\lib\router\index.js:280:10)
+    at protect (file:///C:/Content%20App/backend/src/middleware/authMiddleware.js:41:5)
+
+[2026-09-24T19:04:39.730Z] GET /api/content?limit=1000
+ReferenceError: skip is not defined
+    at Module.getContent (file:///C:/Content%20App/backend/src/modules/content/content.service.js:83:13)
+    at getContent (file:///C:/Content%20App/backend/src/modules/content/content.controller.js:6:41)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Content App\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Content App\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Content App\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Content App\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Content App\backend\node_modules\express\lib\router\index.js:280:10)
+    at protect (file:///C:/Content%20App/backend/src/middleware/authMiddleware.js:41:5)
+
+[2026-09-24T19:04:39.775Z] GET /api/content?limit=1000
+ReferenceError: skip is not defined
+    at Module.getContent (file:///C:/Content%20App/backend/src/modules/content/content.service.js:83:13)
+    at getContent (file:///C:/Content%20App/backend/src/modules/content/content.controller.js:6:41)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Content App\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Content App\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Content App\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Content App\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Content App\backend\node_modules\express\lib\router\index.js:280:10)
+    at protect (file:///C:/Content%20App/backend/src/middleware/authMiddleware.js:41:5)
+
+[2026-09-24T19:04:42.496Z] GET /api/content?status=SCHEDULED&limit=200
+ReferenceError: skip is not defined
+    at Module.getContent (file:///C:/Content%20App/backend/src/modules/content/content.service.js:83:13)
+    at getContent (file:///C:/Content%20App/backend/src/modules/content/content.controller.js:6:41)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Content App\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Content App\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Content App\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Content App\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Content App\backend\node_modules\express\lib\router\index.js:280:10)
+    at protect (file:///C:/Content%20App/backend/src/middleware/authMiddleware.js:41:5)
+
+[2026-09-24T19:04:42.498Z] GET /api/content?status=APPROVED&limit=100
+ReferenceError: skip is not defined
+    at Module.getContent (file:///C:/Content%20App/backend/src/modules/content/content.service.js:83:13)
+    at getContent (file:///C:/Content%20App/backend/src/modules/content/content.controller.js:6:41)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Content App\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Content App\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Content App\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Content App\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Content App\backend\node_modules\express\lib\router\index.js:280:10)
+    at protect (file:///C:/Content%20App/backend/src/middleware/authMiddleware.js:41:5)
+
+[2026-09-24T19:04:42.540Z] GET /api/content?status=SCHEDULED&limit=200
+ReferenceError: skip is not defined
+    at Module.getContent (file:///C:/Content%20App/backend/src/modules/content/content.service.js:83:13)
+    at getContent (file:///C:/Content%20App/backend/src/modules/content/content.controller.js:6:41)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Content App\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Content App\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Content App\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Content App\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Content App\backend\node_modules\express\lib\router\index.js:280:10)
+    at protect (file:///C:/Content%20App/backend/src/middleware/authMiddleware.js:41:5)
+
+[2026-09-24T19:04:42.542Z] GET /api/content?status=APPROVED&limit=100
+ReferenceError: skip is not defined
+    at Module.getContent (file:///C:/Content%20App/backend/src/modules/content/content.service.js:83:13)
+    at getContent (file:///C:/Content%20App/backend/src/modules/content/content.controller.js:6:41)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Content App\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Content App\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Content App\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Content App\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Content App\backend\node_modules\express\lib\router\index.js:280:10)
+    at protect (file:///C:/Content%20App/backend/src/middleware/authMiddleware.js:41:5)
+
+[2026-09-24T19:05:00.741Z] GET /api/content?page=1&limit=20&sortBy=publishedDate&sortOrder=desc
+ReferenceError: skip is not defined
+    at Module.getContent (file:///C:/Content%20App/backend/src/modules/content/content.service.js:68:16)
+    at getContent (file:///C:/Content%20App/backend/src/modules/content/content.controller.js:6:41)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Content App\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Content App\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Content App\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Content App\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Content App\backend\node_modules\express\lib\router\index.js:280:10)
+    at protect (file:///C:/Content%20App/backend/src/middleware/authMiddleware.js:41:5)
+
+[2026-09-24T19:05:00.786Z] GET /api/content?page=1&limit=20&sortBy=publishedDate&sortOrder=desc
+ReferenceError: skip is not defined
+    at Module.getContent (file:///C:/Content%20App/backend/src/modules/content/content.service.js:68:16)
+    at getContent (file:///C:/Content%20App/backend/src/modules/content/content.controller.js:6:41)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Content App\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Content App\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Content App\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Content App\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Content App\backend\node_modules\express\lib\router\index.js:280:10)
+    at protect (file:///C:/Content%20App/backend/src/middleware/authMiddleware.js:41:5)
+
+[2026-09-24T19:05:04.999Z] GET /api/content?page=1&limit=20&sortBy=publishedDate&sortOrder=desc
+ReferenceError: skip is not defined
+    at Module.getContent (file:///C:/Content%20App/backend/src/modules/content/content.service.js:68:16)
+    at getContent (file:///C:/Content%20App/backend/src/modules/content/content.controller.js:6:41)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Content App\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Content App\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Content App\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Content App\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Content App\backend\node_modules\express\lib\router\index.js:280:10)
+    at protect (file:///C:/Content%20App/backend/src/middleware/authMiddleware.js:41:5)
+
+[2026-09-24T19:05:05.051Z] GET /api/content?page=1&limit=20&sortBy=publishedDate&sortOrder=desc
+ReferenceError: skip is not defined
+    at Module.getContent (file:///C:/Content%20App/backend/src/modules/content/content.service.js:68:16)
+    at getContent (file:///C:/Content%20App/backend/src/modules/content/content.controller.js:6:41)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Content App\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Content App\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Content App\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Content App\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Content App\backend\node_modules\express\lib\router\index.js:280:10)
+    at protect (file:///C:/Content%20App/backend/src/middleware/authMiddleware.js:41:5)
+
+[2026-09-24T19:05:08.748Z] GET /api/content?page=1&limit=20&sortBy=publishedDate&sortOrder=desc
+ReferenceError: skip is not defined
+    at Module.getContent (file:///C:/Content%20App/backend/src/modules/content/content.service.js:68:16)
+    at getContent (file:///C:/Content%20App/backend/src/modules/content/content.controller.js:6:41)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Content App\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Content App\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Content App\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Content App\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Content App\backend\node_modules\express\lib\router\index.js:280:10)
+    at protect (file:///C:/Content%20App/backend/src/middleware/authMiddleware.js:41:5)
+
+[2026-09-24T19:05:08.793Z] GET /api/content?page=1&limit=20&sortBy=publishedDate&sortOrder=desc
+ReferenceError: skip is not defined
+    at Module.getContent (file:///C:/Content%20App/backend/src/modules/content/content.service.js:68:16)
+    at getContent (file:///C:/Content%20App/backend/src/modules/content/content.controller.js:6:41)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Content App\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Content App\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Content App\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Content App\backend\node_modules\express\lib\router\index.js:284:15
+    at router.process_params (C:\Content App\backend\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Content App\backend\node_modules\express\lib\router\index.js:280:10)
+    at protect (file:///C:/Content%20App/backend/src/middleware/authMiddleware.js:41:5)
+
+[2026-09-25T10:09:35.898Z] POST /api/auth/login
+Error: Invalid email or password.
+    at Module.loginUser (file:///C:/Content%20App/backend/src/modules/auth/auth.service.js:38:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async login (file:///C:/Content%20App/backend/src/modules/auth/auth.controller.js:26:29)
+

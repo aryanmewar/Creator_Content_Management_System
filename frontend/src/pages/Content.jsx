@@ -26,7 +26,7 @@ const STATUS_TABS = [
 
 const Content = () => {
   const navigate = useNavigate();
-  const { contents, isLoading, pagination, filters, dispatch, fetchContent } =
+  const { contents, isLoading, pagination, statusCounts, filters, dispatch, fetchContent } =
     useContentContext();
   const [activeTab, setActiveTab] = useState("All");
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -37,10 +37,19 @@ const Content = () => {
   const [instructors, setInstructors] = useState([]);
 
   useEffect(() => {
+    let dateFrom = "";
+    let dateTo = "";
+    
+    if (filters.month) {
+      const [year, month] = filters.month.split('-');
+      dateFrom = new Date(year, parseInt(month) - 1, 1).toISOString();
+      dateTo = new Date(year, parseInt(month), 0, 23, 59, 59, 999).toISOString();
+    }
+
     const params =
       activeTab === "All"
-        ? { ...filters, status: "" }
-        : { ...filters, status: activeTab };
+        ? { ...filters, status: "", isOwnerContent: true, dateFrom, dateTo }
+        : { ...filters, status: activeTab, isOwnerContent: true, dateFrom, dateTo };
     fetchContent(params);
   }, [activeTab, filters, fetchContent]);
 
@@ -90,9 +99,6 @@ const Content = () => {
         extraData,
       );
       dispatch({ type: "UPDATE_CONTENT", payload: response.data });
-      if (activeTab !== "All") {
-        setActiveTab(newStatus);
-      }
       toast.success("Status updated!");
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to update status.");
@@ -118,40 +124,53 @@ const Content = () => {
     dispatch({ type: "SET_FILTERS", payload: newFilters });
   };
 
-  // Show all contents in Owners Content page
-  const ownersContents = contents;
+  // Show only contents created via Owners Content page
+  const ownersContents = contents.filter(c => c.isOwnerContent === true);
 
   return (
     <DashboardLayout>
+      <div className="sm:pb-0">
       {/* Tabs, Filters, and Actions */}
-      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-5">
-        <div className="flex gap-1 bg-slate-100 rounded-lg p-1 overflow-x-auto no-scrollbar w-full xl:w-auto">
-          {STATUS_TABS.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-all ${
-                activeTab === tab
-                  ? "bg-white text-primary shadow-sm"
-                  : "text-slate-500 hover:text-slate-700"
-              }`}
-            >
-              {tab === "All" ? "All Content" : tab.replace("_", " ")}
-            </button>
-          ))}
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-5 w-full">
+        {/* Tab Bar */}
+        <div className="w-full xl:w-auto bg-white border border-slate-200 p-1.5 rounded-2xl shadow-sm overflow-x-auto no-scrollbar">
+          <div className="flex gap-1 bg-slate-50 rounded-xl p-1 shrink-0 w-max">
+            {STATUS_TABS.map((tab) => {
+              const count = tab === "All" ? statusCounts?.All || 0 : statusCounts?.[tab] || 0;
+              return (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-2 ${
+                    activeTab === tab
+                      ? "bg-white text-primary shadow-sm"
+                      : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  {tab === "All" ? "All Content" : tab.replace("_", " ")}
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${activeTab === tab ? "bg-primary/10 text-primary" : "bg-slate-200/50 text-slate-500"}`}>
+                    {count}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full xl:w-auto">
-          <ContentFilters
-            filters={filters}
-            onChange={handleFilterChange}
-            instructors={instructors}
-            hideStatusFilter={true}
-            hideContributorFilter={true}
-          />
+        {/* Filters & Actions */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full xl:w-auto pb-2 xl:pb-0">
+          <div className="w-full sm:w-auto">
+            <ContentFilters
+              filters={filters}
+              onChange={handleFilterChange}
+              instructors={instructors}
+              hideStatusFilter={true}
+              hideContributorFilter={true}
+            />
+          </div>
           <Button
             onClick={() => setIsFormOpen(true)}
-            className="w-full sm:w-auto shrink-0 h-[46px] rounded-xl"
+            className="w-full sm:w-auto shrink-0 h-[46px] xl:h-10 rounded-xl px-4 whitespace-nowrap"
           >
             <Plus className="mr-2 h-4 w-4" /> Add New Content
           </Button>
@@ -186,34 +205,7 @@ const Content = () => {
             ))}
           </div>
 
-          {/* Pagination */}
-          {pagination && pagination.totalPages > 1 && (
-            <div className="flex items-center justify-center gap-3 mt-6">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={pagination.page <= 1}
-                onClick={() =>
-                  dispatch({ type: "SET_PAGE", payload: pagination.page - 1 })
-                }
-              >
-                Previous
-              </Button>
-              <span className="text-sm text-slate-600">
-                Page {pagination.page} of {pagination.totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={pagination.page >= pagination.totalPages}
-                onClick={() =>
-                  dispatch({ type: "SET_PAGE", payload: pagination.page + 1 })
-                }
-              >
-                Next
-              </Button>
-            </div>
-          )}
+
         </>
       )}
 
@@ -224,7 +216,6 @@ const Content = () => {
         onSubmit={handleCreate}
         isLoading={formLoading}
         instructors={instructors}
-        hideDueDate={true}
         isOwnerView={true}
       />
       <ContentForm
@@ -234,7 +225,6 @@ const Content = () => {
         content={editingContent}
         isLoading={formLoading}
         instructors={instructors}
-        hideDueDate={true}
         isOwnerView={true}
       />
 
@@ -248,6 +238,7 @@ const Content = () => {
         confirmLabel="Delete"
         variant="danger"
       />
+      </div>
     </DashboardLayout>
   );
 };

@@ -24,6 +24,7 @@ import {
   PieChart,
   Pie,
   Cell,
+  Legend,
 } from "recharts";
 
 const STATUS_COLORS = {
@@ -69,14 +70,19 @@ const Home = () => {
         const scheduledContentList = contentRes.data || [];
         const mappedContents = scheduledContentList
           .filter((c) => c.scheduledDate)
-          .map((c) => ({
-            _id: `content-${c._id}`,
-            contentId: c,
-            platform: "General",
-            scheduledDate: c.scheduledDate,
-            scheduledTime: "12:00",
-            status: "SCHEDULED",
-          }));
+          .map((c) => {
+            let cType = Array.isArray(c.contentType) ? c.contentType[0] : c.contentType;
+            if (cType === "Others" && c.otherContentType) cType = c.otherContentType;
+            
+            return {
+              _id: `content-${c._id}`,
+              contentId: c,
+              platform: cType || "General",
+              scheduledDate: c.scheduledDate,
+              scheduledTime: c.scheduledTime || "",
+              status: "SCHEDULED",
+            };
+          });
 
         setSummary(s.data);
         setDeadlines(d.data || []);
@@ -133,7 +139,7 @@ const Home = () => {
   return (
     <DashboardLayout>
       {/* Stats Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
         <StatsCard
           title="Total Content"
           value={summary?.totalContent}
@@ -164,12 +170,6 @@ const Home = () => {
           icon={AlertCircle}
           color="danger"
         />
-        <StatsCard
-          title="Pending Review"
-          value={summary?.pendingReview}
-          icon={BarChart3}
-          color="purple"
-        />
       </div>
 
       {/* Main content grid */}
@@ -187,23 +187,35 @@ const Home = () => {
                 <BarChart3 className="w-5 h-5 text-primary-500" />
                 Content Status Overview
               </h3>
-              <ResponsiveContainer width="100%" height={220}>
-                <PieChart>
+              <ResponsiveContainer width="100%" height={260}>
+                <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                   <Pie
                     data={pieData}
                     cx="50%"
                     cy="50%"
-                    outerRadius={80}
+                    innerRadius={50}
+                    outerRadius={70}
                     dataKey="value"
                     label={({ name, percent }) =>
                       `${name} ${(percent * 100).toFixed(0)}%`
                     }
+                    labelLine={{ stroke: "#cbd5e1", strokeWidth: 1 }}
+                    stroke="none"
                   >
                     {pieData.map((entry, i) => (
                       <Cell key={i} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: "8px",
+                      border: "none",
+                      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                    }}
+                  />
+                  <Legend
+                    wrapperStyle={{ fontSize: "12px", paddingTop: "10px" }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </div>

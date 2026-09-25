@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-const CONTENT_TYPES_OPTIONS = ["Reel", "Post", "Lecture video"].map((t) => ({
+const CONTENT_TYPES_OPTIONS = ["Reel", "Post", "Lecture video", "Others"].map((t) => ({
   label: t,
   value: t,
 }));
@@ -20,37 +20,30 @@ const CONTENT_TYPES_OPTIONS = ["Reel", "Post", "Lecture video"].map((t) => ({
 const getSchema = (isOwnerView) =>
   z.object({
     title: z.string().min(2, "Title must be at least 2 characters").max(200),
-    referenceLink: isOwnerView
-      ? z.string().url("Must be a valid URL").optional().or(z.literal(""))
-      : z
-          .string()
-          .url("Must be a valid URL")
-          .min(1, "Reference link is required"),
+    referenceLink: z.string().url("Must be a valid URL").optional().or(z.literal("")),
     contentType: z
       .array(z.string())
       .min(1, "Please select at least one content type"),
     contributors: isOwnerView
       ? z.array(z.string()).optional()
       : z.array(z.string()).min(1, "Please select at least one contributor"),
-    dueDate: isOwnerView
-      ? z
-          .string()
-          .optional()
-          .refine((val) => !val || !isNaN(new Date(val).getTime()), {
-            message: "Invalid due date",
-          })
-      : z
-          .string()
-          .min(1, "Due date is required")
-          .refine((val) => !isNaN(new Date(val).getTime()), {
-            message: "Invalid due date",
-          }),
+    dueDate: z
+      .string()
+      .optional()
+      .refine((val) => !val || !isNaN(new Date(val).getTime()), {
+        message: "Invalid due date",
+      }),
     completionDate: z
       .string()
-      .refine((val) => !isNaN(new Date(val).getTime()), {
+      .optional()
+      .refine((val) => !val || !isNaN(new Date(val).getTime()), {
         message: "Invalid date",
       }),
     notes: z.string().max(2000).optional(),
+    otherContentType: z.string().optional(),
+  }).refine(data => !data.contentType.includes("Others") || (data.contentType.includes("Others") && data.otherContentType && data.otherContentType.trim().length > 0), {
+    message: "Please specify the other content type",
+    path: ["otherContentType"]
   });
 
 const ContentForm = ({
@@ -67,11 +60,15 @@ const ContentForm = ({
     register,
     handleSubmit,
     control,
+    watch,
     formState: { errors },
     reset,
   } = useForm({
     resolver: zodResolver(getSchema(isOwnerView)),
   });
+
+  const watchContentType = watch("contentType") || [];
+  const showOtherInput = watchContentType.includes("Others");
 
   useEffect(() => {
     if (content) {
@@ -97,6 +94,7 @@ const ContentForm = ({
           : content.contentType
             ? [content.contentType]
             : [],
+        otherContentType: content.otherContentType || "",
         contributors: initialContributors,
         dueDate: dueStr,
         completionDate: dateStr,
@@ -107,6 +105,7 @@ const ContentForm = ({
         title: "",
         referenceLink: "",
         contentType: [],
+        otherContentType: "",
         contributors: [],
         dueDate: "",
         completionDate: "",
@@ -120,9 +119,10 @@ const ContentForm = ({
       title: data.title,
       referenceLink: data.referenceLink === "" ? null : data.referenceLink,
       contentType: data.contentType,
+      otherContentType: data.contentType.includes("Others") ? data.otherContentType : null,
       contributors: data.contributors,
       dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : null,
-      completionDate: new Date(data.completionDate).toISOString(),
+      completionDate: data.completionDate ? new Date(data.completionDate).toISOString() : null,
       notes: data.notes === "" ? null : data.notes,
       isOwnerContent: isOwnerView,
     };
@@ -141,7 +141,7 @@ const ContentForm = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-3xl p-8 bg-white shadow-2xl rounded-[32px] border border-slate-100">
+      <DialogContent className="sm:max-w-3xl w-[95vw] sm:w-full max-h-[90vh] overflow-y-auto p-5 sm:p-8 bg-white shadow-2xl rounded-2xl sm:rounded-[32px] border border-slate-100">
         <DialogHeader className="mb-6">
           <DialogTitle className="text-2xl font-bold text-slate-800 tracking-tight">
             {content ? "Edit Content" : "Add New Content"}
@@ -180,8 +180,7 @@ const ContentForm = ({
 
               <div className="space-y-1.5">
                 <label className={labelClasses}>
-                  Reference Link{" "}
-                  {!isOwnerView && <span className="text-rose-500">*</span>}
+                  Reference Link
                 </label>
                 <input
                   type="url"
@@ -214,6 +213,25 @@ const ContentForm = ({
                     />
                   )}
                 />
+                
+                {showOtherInput && (
+                  <div className="space-y-1.5 mt-3 animate-in fade-in slide-in-from-top-1">
+                    <label className={labelClasses}>
+                      Please Specify <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Podcast, Interview"
+                      {...register("otherContentType")}
+                      className={`${inputClasses} ${errors.otherContentType ? "border-rose-400 ring-2 ring-rose-200" : ""}`}
+                    />
+                    {errors.otherContentType && (
+                      <p className="text-xs font-medium text-rose-500 px-1">
+                        {errors.otherContentType.message}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -244,8 +262,7 @@ const ContentForm = ({
                 {!hideDueDate && (
                   <div className="space-y-1.5">
                     <label className={labelClasses}>
-                      Due Date{" "}
-                      {!isOwnerView && <span className="text-rose-500">*</span>}
+                      Target Shoot Date
                     </label>
                     <input
                       type="date"
@@ -264,7 +281,7 @@ const ContentForm = ({
                   className={`space-y-1.5 ${hideDueDate ? "col-span-2" : ""}`}
                 >
                   <label className={labelClasses}>
-                    Completion Date <span className="text-rose-500">*</span>
+                    Shoot Completion
                   </label>
                   <input
                     type="date"
@@ -296,12 +313,12 @@ const ContentForm = ({
           </div>
         </form>
 
-        <div className="mt-8 pt-4 flex sm:justify-end gap-3 items-center border-t border-slate-100">
+        <div className="mt-8 pt-4 flex flex-col sm:flex-row sm:justify-end gap-3 items-center border-t border-slate-100">
           <Button
             variant="ghost"
             onClick={onClose}
             disabled={isLoading}
-            className="text-slate-600 font-medium hover:text-slate-800 hover:bg-slate-100/50 rounded-full h-11 px-6"
+            className="w-full sm:w-auto text-slate-600 font-medium hover:text-slate-800 hover:bg-slate-100/50 rounded-full h-11 px-6"
           >
             Cancel
           </Button>
@@ -309,7 +326,7 @@ const ContentForm = ({
             type="submit"
             form="glass-content-form"
             disabled={isLoading}
-            className="bg-slate-900 hover:bg-slate-800 text-white rounded-full h-11 px-8 font-medium shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
+            className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white rounded-full h-11 px-8 font-medium shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
           >
             {isLoading
               ? "Processing..."

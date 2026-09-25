@@ -26,6 +26,11 @@ const contentSchema = new mongoose.Schema(
         message: "At least one content type must be selected",
       },
     },
+    otherContentType: {
+      type: String,
+      trim: true,
+      default: null,
+    },
     isOwnerContent: {
       type: Boolean,
       default: true,
@@ -42,7 +47,7 @@ const contentSchema = new mongoose.Schema(
     },
     completionDate: {
       type: Date,
-      required: [true, "Completion date is required"],
+      default: null,
     },
     notes: {
       type: String,
@@ -68,6 +73,11 @@ const contentSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    scheduledTime: {
+      type: String,
+      default: null,
+      match: [/^([0-1]\d|2[0-3]):([0-5]\d)$/, "Time must be in HH:MM format"],
+    },
     publishedLinks: {
       youtube: { type: String, default: null, trim: true },
       instagram: { type: String, default: null, trim: true },
@@ -77,6 +87,10 @@ const contentSchema = new mongoose.Schema(
     publishedDate: {
       type: Date,
       default: null,
+    },
+    scheduleNotificationSent: {
+      type: Boolean,
+      default: false,
     },
   },
   {

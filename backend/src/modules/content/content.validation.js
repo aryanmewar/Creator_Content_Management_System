@@ -5,6 +5,7 @@ export const createContentSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters").max(200),
   referenceLink: z.string().url("Must be a valid URL").optional().nullable(),
   contentType: z.array(z.string()).min(1, "Select at least one content type"),
+  otherContentType: z.string().max(100).optional().nullable(),
   contributors: z.array(z.string()).optional(),
   dueDate: z
     .string()
@@ -17,9 +18,11 @@ export const createContentSchema = z.object({
   completionDate: z
     .string()
     .or(z.date())
-    .refine((val) => !isNaN(new Date(val).getTime()), {
+    .refine((val) => !val || !isNaN(new Date(val).getTime()), {
       message: "Invalid completion date",
-    }),
+    })
+    .optional()
+    .nullable(),
   notes: z.string().max(2000).optional().nullable(),
   isOwnerContent: z.boolean().optional(),
 });
@@ -28,6 +31,7 @@ export const updateContentSchema = z.object({
   title: z.string().min(2).max(200).optional(),
   referenceLink: z.string().url("Must be a valid URL").optional().nullable(),
   contentType: z.array(z.string()).min(1).optional(),
+  otherContentType: z.string().max(100).optional().nullable(),
   contributors: z.array(z.string()).optional(),
   dueDate: z
     .string()
@@ -38,13 +42,19 @@ export const updateContentSchema = z.object({
   completionDate: z
     .string()
     .or(z.date())
-    .refine((val) => !isNaN(new Date(val).getTime()))
-    .optional(),
+    .refine((val) => !val || !isNaN(new Date(val).getTime()))
+    .optional()
+    .nullable(),
   notes: z.string().max(2000).optional().nullable(),
   scheduledDate: z
     .string()
     .or(z.date())
     .refine((val) => !val || !isNaN(new Date(val).getTime()))
+    .optional()
+    .nullable(),
+  scheduledTime: z
+    .string()
+    .regex(/^([0-1]\d|2[0-3]):([0-5]\d)$/, "Time must be in HH:MM format")
     .optional()
     .nullable(),
   publishedLinks: z
@@ -94,6 +104,11 @@ export const updateStatusSchema = z.object({
     .string()
     .or(z.date())
     .refine((val) => !val || !isNaN(new Date(val).getTime()))
+    .optional()
+    .nullable(),
+  scheduledTime: z
+    .string()
+    .regex(/^([0-1]\d|2[0-3]):([0-5]\d)$/, "Time must be in HH:MM format")
     .optional()
     .nullable(),
   publishedLinks: z

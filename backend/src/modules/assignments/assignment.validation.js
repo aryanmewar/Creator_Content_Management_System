@@ -9,11 +9,11 @@ export const createAssignmentSchema = z
       .date()
       .optional()
       .default(() => new Date()),
-    deadline: z.coerce.date({ required_error: "Deadline is required" }),
+    deadline: z.coerce.date().optional().nullable(),
     priority: z.enum(PRIORITY_LEVELS).optional().default("MEDIUM"),
     instructions: z.string().max(2000).optional().nullable(),
   })
-  .refine((data) => new Date(data.deadline) >= new Date(data.assignedAt), {
+  .refine((data) => !data.deadline || new Date(data.deadline) >= new Date(data.assignedAt), {
     message: "Deadline cannot be before the assignment date.",
     path: ["deadline"],
   });

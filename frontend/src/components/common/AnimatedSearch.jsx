@@ -9,13 +9,13 @@ const AnimatedSearch = ({
 }) => {
   return (
     <div
-      className={`relative group transition-all duration-300 ease-in-out ${className}`}
+      className={`relative group transition-all duration-300 ease-in-out min-w-0 ${className}`}
     >
       {/* Animated Theme Border */}
       <div className="absolute -inset-0.5 bg-primary/40 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-500 group-focus-within:opacity-70 group-focus-within:duration-200"></div>
 
-      <div className="relative flex items-center bg-white rounded-2xl overflow-hidden shadow-sm">
-        <div className="pl-4 pr-2 py-3 flex items-center justify-center">
+      <div className="relative flex items-center bg-white rounded-2xl overflow-hidden shadow-sm h-full w-full">
+        <div className="pl-3 pr-2 h-full flex items-center justify-center">
           <Search className="h-4 w-4 text-slate-400 group-focus-within:text-primary transition-colors duration-300" />
         </div>
         <input
@@ -23,7 +23,7 @@ const AnimatedSearch = ({
           placeholder={placeholder}
           value={value}
           onChange={onChange}
-          className="w-full py-3 pr-5 pl-2 bg-transparent border-none focus:outline-none text-slate-800 text-sm placeholder:text-slate-400"
+          className="w-full h-full pr-4 bg-transparent border-none focus:outline-none text-slate-800 text-sm placeholder:text-slate-400 min-w-0"
         />
         {/* Animated typing indicator */}
         <div

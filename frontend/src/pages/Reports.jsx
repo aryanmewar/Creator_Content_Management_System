@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { BarChart3, TrendingUp, Award, Target } from "lucide-react";
+import { BarChart3, TrendingUp, Award, Target, Download } from "lucide-react";
+import * as XLSX from "xlsx";
 import {
   BarChart,
   Bar,
@@ -19,6 +20,16 @@ import Loader from "../components/common/Loader.jsx";
 import { dashboardService } from "../services/dashboardService.js";
 import { contentService } from "../services/contentService.js";
 import { instructorService } from "../services/instructorService.js";
+
+const formatToDDMMYYYY = (dateString) => {
+  if (!dateString) return "N/A";
+  const d = new Date(dateString);
+  if (isNaN(d.getTime())) return "N/A";
+  const day = d.getDate().toString().padStart(2, "0");
+  const month = (d.getMonth() + 1).toString().padStart(2, "0");
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+};
 
 const Reports = () => {
   const [summary, setSummary] = useState(null);
@@ -95,17 +106,55 @@ const Reports = () => {
 
   const statusData = summary
     ? [
-        { name: "Scheduled", value: summary.scheduled, color: "#0ea5e9" }, // sky-500
-        { name: "Published", value: summary.published, color: "#10b981" }, // emerald-500
         {
-          name: "Pending Review",
+          name: "Draft",
+          value: Math.max(0, summary.totalContent - summary.scheduled - summary.published - summary.pendingReview),
+          color: "#94a3b8",
+        },
+        {
+          name: "In Progress",
           value: summary.pendingReview,
-          color: "#8b5cf6",
-        }, // violet-500
-        { name: "Overdue", value: summary.overdue, color: "#ef4444" }, // red-500
-        { name: "Due Today", value: summary.dueToday, color: "#f59e0b" }, // amber-500
+          color: "#f59e0b",
+        },
+        {
+          name: "Scheduled",
+          value: summary.scheduled,
+          color: "#38bdf8",
+        },
+        {
+          name: "Published",
+          value: summary.published,
+          color: "#4ade80",
+        },
       ].filter((d) => d.value > 0)
     : [];
+
+  const downloadExcel = () => {
+    if (deliveredContent.length === 0) return;
+    
+    const wsData = [
+      ["Content Title", "By Whom", "Published Date", "Platform"],
+      ...deliveredContent.map((item) => [
+        item.title,
+        item.byWhom,
+        formatToDDMMYYYY(item.publishedDate),
+        item.platforms
+      ])
+    ];
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+    ws['!cols'] = [
+      { wch: 45 },
+      { wch: 25 },
+      { wch: 15 },
+      { wch: 35 },
+    ];
+
+    XLSX.utils.book_append_sheet(wb, ws, "Delivered Content");
+    XLSX.writeFile(wb, "Delivered_Content_Report.xlsx");
+  };
 
   if (isLoading)
     return (
@@ -117,7 +166,7 @@ const Reports = () => {
   return (
     <DashboardLayout>
       {/* Summary Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <StatsCard
           title="Total Content"
           value={summary?.totalContent}
@@ -136,12 +185,6 @@ const Reports = () => {
           icon={TrendingUp}
           color="danger"
         />
-        <StatsCard
-          title="Pending Review"
-          value={summary?.pendingReview}
-          icon={BarChart3}
-          color="purple"
-        />
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -157,7 +200,7 @@ const Reports = () => {
               <BarChart
                 data={contentByType}
                 layout="vertical"
-                margin={{ left: 20 }}
+                margin={{ top: 10, right: 30, bottom: 10, left: 10 }}
               >
                 <CartesianGrid
                   strokeDasharray="3 3"
@@ -206,20 +249,20 @@ const Reports = () => {
             </p>
           ) : (
             <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie
-                  data={statusData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={90}
-                  dataKey="value"
-                  label={({ name, percent }) =>
-                    `${name} ${(percent * 100).toFixed(0)}%`
-                  }
-                  labelLine={{ stroke: "#cbd5e1", strokeWidth: 1 }}
-                  stroke="none"
-                >
+                <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                  <Pie
+                    data={statusData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={70}
+                    dataKey="value"
+                    label={({ name, percent }) =>
+                      `${name} ${(percent * 100).toFixed(0)}%`
+                    }
+                    labelLine={{ stroke: "#cbd5e1", strokeWidth: 1 }}
+                    stroke="none"
+                  >
                   {statusData.map((entry, i) => (
                     <Cell key={i} fill={entry.color} />
                   ))}
@@ -230,6 +273,9 @@ const Reports = () => {
                     border: "none",
                     boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                   }}
+                />
+                <Legend
+                  wrapperStyle={{ fontSize: "12px", paddingTop: "10px" }}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -244,8 +290,10 @@ const Reports = () => {
               No instructor data available
             </p>
           ) : (
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={instructorPerf} barSize={20}>
+            <div className="w-full overflow-x-auto no-scrollbar">
+              <div className="min-w-[600px] h-[280px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={instructorPerf} barSize={20} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
                 <CartesianGrid
                   strokeDasharray="3 3"
                   vertical={false}
@@ -294,12 +342,25 @@ const Reports = () => {
                 />
               </BarChart>
             </ResponsiveContainer>
+              </div>
+            </div>
           )}
         </div>
 
         {/* Delivered Content Table */}
         <div className="card p-6 xl:col-span-2">
-          <h3 className="section-title mb-4">Delivered Content</h3>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <h3 className="section-title">Delivered Content</h3>
+            {deliveredContent.length > 0 && (
+              <button
+                onClick={downloadExcel}
+                className="flex items-center justify-center gap-2 text-sm font-medium text-slate-700 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 px-3 py-1.5 rounded-lg shadow-sm transition-all hover:shadow hover:-translate-y-0.5"
+              >
+                <Download className="w-4 h-4" />
+                Export to Excel
+              </button>
+            )}
+          </div>
           {deliveredContent.length === 0 ? (
             <p className="text-sm text-slate-400 text-center py-8">
               No delivered content available
@@ -308,9 +369,10 @@ const Reports = () => {
             <>
               {/* Desktop Table */}
               <div className="hidden lg:block overflow-x-auto">
-                <table className="w-full text-left text-sm border-collapse">
-                  <thead>
-                    <tr className="border-b border-slate-200 text-slate-500">
+                <div className="max-h-[500px] overflow-y-auto pr-1">
+                  <table className="w-full text-left text-sm border-collapse">
+                    <thead className="sticky top-0 bg-white z-10">
+                      <tr className="border-b border-slate-200 text-slate-500">
                       <th className="py-3 px-4 font-semibold">Content Title</th>
                       <th className="py-3 px-4 font-semibold">By Whom</th>
                       <th className="py-3 px-4 font-semibold">
@@ -332,9 +394,7 @@ const Reports = () => {
                           {item.byWhom}
                         </td>
                         <td className="py-3 px-4 text-slate-600">
-                          {item.publishedDate
-                            ? new Date(item.publishedDate).toLocaleDateString()
-                            : "N/A"}
+                          {formatToDDMMYYYY(item.publishedDate)}
                         </td>
                         <td className="py-3 px-4 text-slate-600">
                           {item.platforms}
@@ -342,11 +402,12 @@ const Reports = () => {
                       </tr>
                     ))}
                   </tbody>
-                </table>
+                  </table>
+                </div>
               </div>
 
               {/* Mobile Card List */}
-              <div className="lg:hidden flex flex-col gap-3">
+              <div className="lg:hidden flex flex-col gap-3 max-h-[500px] overflow-y-auto pr-1">
                 {deliveredContent.map((item, i) => (
                   <div
                     key={i}
@@ -361,15 +422,20 @@ const Reports = () => {
                         {item.byWhom}
                       </span>
                     </p>
-                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-200">
-                      <p className="text-xs text-slate-500">
-                        {item.publishedDate
-                          ? new Date(item.publishedDate).toLocaleDateString()
-                          : "N/A"}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-3 pt-3 border-t border-slate-200 gap-2">
+                      <p className="text-xs text-slate-500 shrink-0">
+                        {formatToDDMMYYYY(item.publishedDate)}
                       </p>
-                      <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-200 text-slate-600 px-2 py-0.5 rounded-md">
-                        {item.platforms}
-                      </span>
+                      <div className="flex flex-wrap gap-1 justify-end">
+                        {item.platforms.split(", ").map((plat, idx) => (
+                          <span
+                            key={idx}
+                            className="text-[10px] font-bold uppercase tracking-wider bg-slate-200 text-slate-700 px-2 py-0.5 rounded-md whitespace-nowrap"
+                          >
+                            {plat}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 ))}

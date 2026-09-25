@@ -31,12 +31,15 @@ export const sendError = (
 
 export const sendPaginated = (
   res,
-  { message = "Success", data = [], pagination = {}, statusCode = 200 } = {},
+  { message = "Success", data = [], pagination = {}, statusCounts, statusCode = 200 } = {},
 ) => {
-  return res.status(statusCode).json({
+  const payload = {
     success: true,
     message,
     data,
     pagination,
-  });
+  };
+  if (statusCounts) payload.statusCounts = statusCounts;
+  
+  return res.status(statusCode).json(payload);
 };

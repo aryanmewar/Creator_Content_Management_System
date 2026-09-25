@@ -68,7 +68,7 @@ export const validateTransition = (fromStatus, toStatus) => {
 
 export const PRIORITY_LEVELS = ["LOW", "MEDIUM", "HIGH", "URGENT"];
 
-export const CONTENT_TYPES = ["Reel", "Post", "Lecture video"];
+export const CONTENT_TYPES = ["Reel", "Post", "Lecture video", "Others"];
 
 export const PLATFORMS = ["Instagram", "YouTube", "LinkedIn", "Facebook"];
 

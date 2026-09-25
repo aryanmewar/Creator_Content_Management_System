@@ -11,6 +11,7 @@ const ContentContext = createContext(null);
 const initialState = {
   contents: [],
   pagination: null,
+  statusCounts: {},
   selectedContent: null,
   isLoading: false,
   error: null,
@@ -20,7 +21,9 @@ const initialState = {
     contentType: "",
     instructor: "",
     page: 1,
-    limit: 20,
+    limit: 1000,
+    sortBy: "publishedDate",
+    sortOrder: "desc",
   },
 };
 
@@ -35,23 +38,72 @@ const contentReducer = (state, action) => {
         ...state,
         contents: action.payload.data,
         pagination: action.payload.pagination,
+        statusCounts: action.payload.statusCounts || {},
         isLoading: false,
       };
     case "SET_SELECTED":
       return { ...state, selectedContent: action.payload, isLoading: false };
-    case "ADD_CONTENT":
-      return { ...state, contents: [action.payload, ...state.contents] };
-    case "UPDATE_CONTENT":
+    case "ADD_CONTENT": {
+      const newContents = [action.payload, ...state.contents];
+      if (state.filters.sortBy === "publishedDate" && state.filters.sortOrder === "desc") {
+        newContents.sort((a, b) => {
+          const priorityA = a.status === "DRAFT" ? 0 : 1;
+          const priorityB = b.status === "DRAFT" ? 0 : 1;
+          
+          if (priorityA !== priorityB) return priorityA - priorityB;
+          
+          // Same priority group
+          const dateA = ["PUBLISHED", "SCHEDULED"].includes(a.status) 
+             ? (a.publishedDate || a.scheduledDate || a.updatedAt) 
+             : (a.status === "DRAFT" ? (a.updatedAt || a.createdAt) : (a.completionDate || a.updatedAt || a.createdAt));
+             
+          const dateB = ["PUBLISHED", "SCHEDULED"].includes(b.status) 
+             ? (b.publishedDate || b.scheduledDate || b.updatedAt) 
+             : (b.status === "DRAFT" ? (b.updatedAt || b.createdAt) : (b.completionDate || b.updatedAt || b.createdAt));
+          
+          const timeA = dateA ? new Date(dateA).getTime() : 0;
+          const timeB = dateB ? new Date(dateB).getTime() : 0;
+          return timeB - timeA;
+        });
+      }
+      return { ...state, contents: newContents };
+    }
+    case "UPDATE_CONTENT": {
+      const updatedContents = state.contents.map((c) =>
+        c._id === action.payload._id ? action.payload : c,
+      );
+
+      if (state.filters.sortBy === "publishedDate" && state.filters.sortOrder === "desc") {
+        updatedContents.sort((a, b) => {
+          const priorityA = a.status === "DRAFT" ? 0 : 1;
+          const priorityB = b.status === "DRAFT" ? 0 : 1;
+          
+          if (priorityA !== priorityB) return priorityA - priorityB;
+          
+          // Same priority group
+          const dateA = ["PUBLISHED", "SCHEDULED"].includes(a.status) 
+             ? (a.publishedDate || a.scheduledDate || a.updatedAt) 
+             : (a.status === "DRAFT" ? (a.updatedAt || a.createdAt) : (a.completionDate || a.updatedAt || a.createdAt));
+             
+          const dateB = ["PUBLISHED", "SCHEDULED"].includes(b.status) 
+             ? (b.publishedDate || b.scheduledDate || b.updatedAt) 
+             : (b.status === "DRAFT" ? (b.updatedAt || b.createdAt) : (b.completionDate || b.updatedAt || b.createdAt));
+          
+          const timeA = dateA ? new Date(dateA).getTime() : 0;
+          const timeB = dateB ? new Date(dateB).getTime() : 0;
+          return timeB - timeA;
+        });
+      }
+
       return {
         ...state,
-        contents: state.contents.map((c) =>
-          c._id === action.payload._id ? action.payload : c,
-        ),
+        contents: updatedContents,
         selectedContent:
           state.selectedContent?._id === action.payload._id
             ? action.payload
             : state.selectedContent,
       };
+    }
     case "REMOVE_CONTENT":
       return {
         ...state,

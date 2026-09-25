@@ -35,7 +35,14 @@ export const getSchedules = async ({
 
   const total = await Schedule.countDocuments(query);
   const schedules = await Schedule.find(query)
-    .populate("contentId", "title contentType status")
+    .populate({
+      path: "contentId",
+      select: "title contentType status createdBy contributors",
+      populate: [
+        { path: "createdBy", select: "name email" },
+        { path: "contributors", select: "name email profileImage" }
+      ]
+    })
     .populate("createdBy", "name email")
     .sort({ scheduledDate: 1, scheduledTime: 1 })
     .skip((page - 1) * limit)

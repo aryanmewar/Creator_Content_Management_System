@@ -24,6 +24,8 @@ export const getContent = async ({
   sortOrder = "desc",
   dateFrom,
   dateTo,
+  isOwnerContent,
+  hasContributors,
 }) => {
   const query = {};
 
@@ -35,26 +37,90 @@ export const getContent = async ({
   }
   if (status) query.status = status;
   if (contentType) query.contentType = contentType;
-  if (instructor) query.contributors = instructor;
+  if (isOwnerContent === "true" || isOwnerContent === true) {
+    query.isOwnerContent = true;
+  }
+  if (hasContributors === "true" || hasContributors === true) {
+    query["contributors.0"] = { $exists: true };
+  }
+  if (instructor) {
+    // Content is a Mongoose model, so we can access mongoose through it
+    const mongoose = Content.base; 
+    query.contributors = new mongoose.Types.ObjectId(instructor);
+  }
   if (dateFrom || dateTo) {
     query.createdAt = {};
     if (dateFrom) query.createdAt.$gte = new Date(dateFrom);
     if (dateTo) query.createdAt.$lte = new Date(dateTo);
   }
 
-  const sort = { [sortBy]: sortOrder === "asc" ? 1 : -1 };
   const skip = (page - 1) * limit;
   const total = await Content.countDocuments(query);
 
-  const content = await Content.find(query)
-    .populate("contributors", "name email designation profileImage")
-    .populate("createdBy", "name email")
-    .sort(sort)
-    .skip(skip)
-    .limit(parseInt(limit));
+  let content;
+  if (sortBy === "publishedDate") {
+    const pipeline = [
+      { $match: query },
+      {
+        $addFields: {
+          sortPriority: {
+            $cond: {
+              if: { $eq: ["$status", "DRAFT"] },
+              then: 0,
+              else: 1,
+            },
+          },
+          sortDate: {
+            $cond: {
+              if: { $in: ["$status", ["PUBLISHED", "SCHEDULED"]] },
+              then: { $ifNull: ["$publishedDate", { $ifNull: ["$scheduledDate", "$updatedAt"] }] },
+              else: {
+                $cond: {
+                  if: { $eq: ["$status", "DRAFT"] },
+                  then: { $ifNull: ["$updatedAt", "$createdAt"] },
+                  else: { $ifNull: ["$completionDate", { $ifNull: ["$updatedAt", "$createdAt"] }] },
+                },
+              },
+            },
+          },
+        },
+      },
+      { $sort: { sortPriority: 1, sortDate: sortOrder === "asc" ? 1 : -1 } },
+      { $skip: skip },
+      { $limit: parseInt(limit) },
+    ];
+    const contentDocs = await Content.aggregate(pipeline);
+    const contentModels = contentDocs.map((doc) => Content.hydrate(doc));
+    content = await Content.populate(contentModels, [
+      { path: "contributors", select: "name email designation profileImage" },
+      { path: "createdBy", select: "name email" },
+    ]);
+  } else {
+    const sort = { [sortBy]: sortOrder === "asc" ? 1 : -1, createdAt: -1 };
+    content = await Content.find(query)
+      .populate("contributors", "name email designation profileImage")
+      .populate("createdBy", "name email")
+      .sort(sort)
+      .skip(skip)
+      .limit(parseInt(limit));
+  }
 
   // Attach assignment deadline info
   const enriched = await Promise.all(content.map(enrichContentWithDeadline));
+
+  // Get status counts for the current query (ignoring status filter)
+  const countQuery = { ...query };
+  delete countQuery.status;
+  const statusCountsAggr = await Content.aggregate([
+    { $match: countQuery },
+    { $group: { _id: "$status", count: { $sum: 1 } } }
+  ]);
+  
+  const totalCount = await Content.countDocuments(countQuery);
+  const statusCounts = { All: totalCount };
+  statusCountsAggr.forEach(({ _id, count }) => {
+    if (_id) statusCounts[_id] = count;
+  });
 
   return {
     data: enriched,
@@ -64,6 +130,7 @@ export const getContent = async ({
       total,
       totalPages: Math.ceil(total / limit),
     },
+    statusCounts,
   };
 };
 
@@ -211,6 +278,7 @@ export const updateContentStatus = async (
   userId,
   feedback = null,
   scheduledDate = undefined,
+  scheduledTime = undefined,
   publishedLinks = undefined,
   publishedDate = undefined,
 ) => {
@@ -226,6 +294,9 @@ export const updateContentStatus = async (
 
   if (scheduledDate !== undefined) {
     content.scheduledDate = scheduledDate;
+  }
+  if (scheduledTime !== undefined) {
+    content.scheduledTime = scheduledTime;
   }
   if (publishedLinks !== undefined) {
     content.publishedLinks = publishedLinks;

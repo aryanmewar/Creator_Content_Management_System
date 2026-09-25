@@ -1,6 +1,6 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Bell, Menu } from "lucide-react";
+import { Bell, Menu, Calendar } from "lucide-react";
 import { useNotification } from "../../context/NotificationContext.jsx";
 import { Button } from "@/components/ui/button";
 
@@ -56,31 +56,32 @@ const Navbar = ({ onMenuClick }) => {
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-9 w-9 text-slate-500 relative"
-          onClick={() => navigate("/notifications")}
-        >
-          <Bell className="w-4 h-4" />
-          {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 min-w-[16px] h-4 rounded-full flex items-center justify-center border-2 border-white">
-              {unreadCount > 99 ? '99+' : unreadCount}
-            </span>
-          )}
-        </Button>
-
-        {/* Date */}
-        <div className="hidden md:block text-right">
-          <p className="text-xs text-slate-500">
+      <div className="flex items-center gap-3 sm:gap-4">
+        {/* Date Pill */}
+        <div className="hidden md:flex items-center gap-2 bg-slate-50/80 hover:bg-slate-100 px-3.5 py-1.5 rounded-full border border-slate-200 text-slate-600 transition-all">
+          <Calendar className="w-4 h-4 text-slate-400" />
+          <p className="text-xs font-medium tracking-wide">
             {now.toLocaleDateString("en-US", {
-              weekday: "long",
+              weekday: "short",
               month: "long",
               day: "numeric",
             })}
           </p>
         </div>
+
+        <Button
+          variant="outline"
+          size="icon"
+          className="h-10 w-10 rounded-full text-slate-500 relative bg-white hover:bg-slate-50 transition-transform hover:scale-105 hover:text-slate-700 shadow-sm"
+          onClick={() => navigate("/notifications")}
+        >
+          <Bell className="w-5 h-5" />
+          {unreadCount > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold px-1.5 min-w-[20px] h-[20px] rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
+        </Button>
       </div>
     </header>
   );
