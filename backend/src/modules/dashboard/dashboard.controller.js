@@ -54,3 +54,12 @@ export const getActivity = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getOverdueHistory = async (req, res, next) => {
+  try {
+    const data = await dashboardService.getOverdueHistory(req.query);
+    return sendSuccess(res, { data });
+  } catch (error) {
+    next(error);
+  }
+};

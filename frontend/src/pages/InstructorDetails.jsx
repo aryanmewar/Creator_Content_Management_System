@@ -80,6 +80,7 @@ const InstructorDetails = () => {
           <div className="flex flex-col items-center text-center mb-6">
             {profileImage?.url ? (
               <img
+                loading="lazy"
                 src={profileImage.url}
                 alt={name}
                 className="w-20 h-20 rounded-full object-cover ring-4 ring-primary-100 mb-3"

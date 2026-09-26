@@ -28,7 +28,9 @@ const DashboardLayout = ({ children }) => {
         className={`flex flex-col flex-1 transition-all duration-500 ease-out overflow-hidden ${isCollapsed ? "md:ml-16" : "md:ml-64"}`}
       >
         <Navbar onMenuClick={() => setIsMobileMenuOpen(true)} />
-        <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6">
+          {children}
+        </main>
       </div>
     </div>
   );

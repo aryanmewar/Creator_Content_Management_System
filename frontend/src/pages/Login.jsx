@@ -157,6 +157,7 @@ const Login = () => {
           <div className="relative w-40 h-40 sm:w-48 sm:h-48 md:w-64 md:h-64 mb-6 md:mb-10">
             {slides.map((slide, index) => (
               <img
+                loading="lazy"
                 key={index}
                 src={slide.image}
                 alt={slide.title}

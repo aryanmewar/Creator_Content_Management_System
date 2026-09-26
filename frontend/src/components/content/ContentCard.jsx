@@ -6,7 +6,10 @@ import {
   Edit2,
   Trash2,
   ExternalLink,
+  Mail,
 } from "lucide-react";
+import toast from "react-hot-toast";
+import emailjs from "@emailjs/browser";
 import {
   FaYoutube,
   FaInstagram,
@@ -14,7 +17,11 @@ import {
   FaFacebook,
   FaPen,
 } from "react-icons/fa";
-import { getStatusColor, getStatusLabel, getAllowedTransitions } from "@/utils/statusUtils.js";
+import {
+  getStatusColor,
+  getStatusLabel,
+  getAllowedTransitions,
+} from "@/utils/statusUtils.js";
 import { formatDate, formatTime12Hour } from "@/utils/dateUtils.js";
 
 import {
@@ -45,6 +52,7 @@ const ContentCard = ({
   onDelete,
   onStatusChange,
   onViewDetails,
+  showEmailOption = false,
 }) => {
   const {
     title,
@@ -86,6 +94,7 @@ const ContentCard = ({
       : "",
   );
   const [isSaving, setIsSaving] = useState(false);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
 
   const [forceUnlockStatus, setForceUnlockStatus] = useState(false);
   const [forceEditLinks, setForceEditLinks] = useState(false);
@@ -118,6 +127,47 @@ const ContentCard = ({
     setForceEditLinks(false);
     setForceEditDate(false);
     setForceUnlockStatus(false);
+  };
+
+  const handleSendEmailNotification = async (e) => {
+    e.stopPropagation();
+    if (!hasContributors) {
+      toast.error("No assignee found to send email to.");
+      return;
+    }
+
+    setIsSendingEmail(true);
+    try {
+      // Loop through all contributors and send emails
+      for (const contributor of contributors) {
+        if (!contributor.email) continue;
+
+        const templateParams = {
+          to_name: contributor.name,
+          to_email: contributor.email,
+          content_title: title,
+          due_date: dueDate ? formatDate(dueDate) : "Not set",
+          notes: notes || "No specific notes",
+          reference_link: content.referenceLink || "No reference link provided",
+          website_link: `${window.location.origin}/content/${content._id}`,
+        };
+
+        console.log("Sending EmailJS with params:", templateParams);
+
+        await emailjs.send(
+          import.meta.env.VITE_EMAILJS_SERVICE_ID,
+          import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+          templateParams,
+          import.meta.env.VITE_EMAILJS_PUBLIC_KEY,
+        );
+      }
+      toast.success("Email notification sent successfully!");
+    } catch (error) {
+      console.error("EmailJS Error:", error);
+      toast.error("Failed to send email notification. Check .env config.");
+    } finally {
+      setIsSendingEmail(false);
+    }
   };
 
   const contentTypes = Array.isArray(contentType)
@@ -389,18 +439,34 @@ const ContentCard = ({
                 Edit Status
               </Button>
             ) : (
-              <Select
-                value={status}
-                onChange={(e) =>
-                  onStatusChange && onStatusChange(content._id, e.target.value)
-                }
-                options={ALLOWED_DROPDOWN_STATUSES.map((s) => ({
-                  label: getStatusLabel(s),
-                  value: s,
-                }))}
-                placeholder="Status"
-                className="w-[160px]"
-              />
+              <div className="flex items-center gap-2">
+                {status === "ASSIGNED" && showEmailOption && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleSendEmailNotification}
+                    disabled={isSendingEmail}
+                    className="text-xs h-9 text-emerald-600 border-emerald-200 hover:bg-emerald-50 whitespace-nowrap"
+                    title="Send Email to Assignee(s)"
+                  >
+                    <Mail className="w-3.5 h-3.5 mr-1.5" />
+                    {isSendingEmail ? "Sending..." : "Notify via Email"}
+                  </Button>
+                )}
+                <Select
+                  value={status}
+                  onChange={(e) =>
+                    onStatusChange &&
+                    onStatusChange(content._id, e.target.value)
+                  }
+                  options={ALLOWED_DROPDOWN_STATUSES.map((s) => ({
+                    label: getStatusLabel(s),
+                    value: s,
+                  }))}
+                  placeholder="Status"
+                  className="w-[160px]"
+                />
+              </div>
             )}
           </div>
         </div>

@@ -3,6 +3,7 @@ import Assignment from "../assignments/assignment.model.js";
 import Instructor from "../instructors/instructor.model.js";
 import Publication from "../publications/publication.model.js";
 import Schedule from "../schedules/schedule.model.js";
+import OverdueRecord from "../reports/overdueRecord.model.js";
 import { getStartOfToday, getTodayRange } from "../../utils/dateUtils.js";
 import { CONTENT_STATUSES } from "../../utils/statusUtils.js";
 import { getDeadlineState } from "../../utils/dateUtils.js";
@@ -254,4 +255,23 @@ export const getActivity = async () => {
     await import("../activityLog/activityLog.service.js");
   const result = await getActivityLog({ page: 1, limit: 15 });
   return result.data;
+};
+
+/**
+ * GET /api/dashboard/overdue-history
+ * Returns historical overdue records
+ */
+export const getOverdueHistory = async (query = {}) => {
+  const { monthYear, instructorId } = query;
+
+  const filter = {};
+  if (monthYear) filter.monthYear = monthYear;
+  if (instructorId) filter.instructorId = instructorId;
+
+  const records = await OverdueRecord.find(filter)
+    .populate("instructorId", "name email designation profileImage")
+    .populate("contentId", "title status contentType dueDate isOverdue")
+    .sort({ recordedAt: -1, monthYear: -1 });
+
+  return records;
 };

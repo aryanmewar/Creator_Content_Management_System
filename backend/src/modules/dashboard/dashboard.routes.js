@@ -11,5 +11,6 @@ router.get("/upcoming", dashboardController.getUpcoming);
 router.get("/overdue", dashboardController.getOverdue);
 router.get("/recent", dashboardController.getRecent);
 router.get("/activity", dashboardController.getActivity);
+router.get("/overdue-history", dashboardController.getOverdueHistory);
 
 export default router;

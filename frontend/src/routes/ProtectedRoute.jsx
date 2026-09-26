@@ -27,7 +27,13 @@ const ProtectedRoute = ({ allowedRoles }) => {
 
   return (
     <DashboardLayout>
-      <Suspense fallback={<div className="flex h-full w-full items-center justify-center py-20"><Loader text="Loading..." /></div>}>
+      <Suspense
+        fallback={
+          <div className="flex h-full w-full items-center justify-center py-20">
+            <Loader text="Loading..." />
+          </div>
+        }
+      >
         <Outlet />
       </Suspense>
     </DashboardLayout>

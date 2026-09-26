@@ -138,7 +138,20 @@ const Content = () => {
   };
 
   // Show only contents created via Owners Content page
-  const ownersContents = contents.filter((c) => c.isOwnerContent === true);
+  // Sort them by date priority (earliest first / ascending)
+  const getSortDate = (c) => {
+    return new Date(
+      c.dueDate ||
+        c.completionDate ||
+        c.scheduledDate ||
+        c.publishedDate ||
+        c.createdAt,
+    ).getTime();
+  };
+
+  const ownersContents = contents
+    .filter((c) => c.isOwnerContent === true)
+    .sort((a, b) => getSortDate(a) - getSortDate(b));
 
   return (
     <>

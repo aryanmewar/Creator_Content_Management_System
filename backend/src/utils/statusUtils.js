@@ -18,14 +18,14 @@ export const CONTENT_STATUSES = {
 // Valid transitions: key → array of allowed next statuses
 const TRANSITION_MAP = {
   DRAFT: ["ASSIGNED"],
-  ASSIGNED: ["IN_PROGRESS"],
-  IN_PROGRESS: ["COMPLETED", "SUBMITTED"],
-  COMPLETED: ["APPROVED", "REJECTED"],
-  SUBMITTED: ["APPROVED", "REJECTED"],
-  REJECTED: ["IN_PROGRESS"],
-  APPROVED: ["SCHEDULED"],
-  SCHEDULED: ["PUBLISHED"],
-  PUBLISHED: [], // terminal state
+  ASSIGNED: ["IN_PROGRESS", "DRAFT"],
+  IN_PROGRESS: ["COMPLETED", "SUBMITTED", "ASSIGNED"],
+  COMPLETED: ["APPROVED", "REJECTED", "ASSIGNED"],
+  SUBMITTED: ["APPROVED", "REJECTED", "ASSIGNED"],
+  REJECTED: ["IN_PROGRESS", "ASSIGNED"],
+  APPROVED: ["SCHEDULED", "PUBLISHED", "ASSIGNED"],
+  SCHEDULED: ["PUBLISHED", "ASSIGNED", "DRAFT"],
+  PUBLISHED: ["ASSIGNED", "DRAFT"], 
 };
 
 /**
@@ -55,7 +55,7 @@ export const getAllowedTransitions = (currentStatus) => {
  */
 export const validateTransition = (fromStatus, toStatus) => {
   if (fromStatus === toStatus) return null; // Allow metadata updates without status change
-  
+
   if (!CONTENT_STATUSES[fromStatus]) {
     return `Invalid current status: ${fromStatus}`;
   }

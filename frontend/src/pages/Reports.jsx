@@ -46,6 +46,7 @@ const Reports = () => {
   });
   const [selectedMonth, setSelectedMonth] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [overdueHistory, setOverdueHistory] = useState([]);
 
   const monthOptions = useMemo(() => generateMonthOptions(), []);
 
@@ -72,14 +73,42 @@ const Reports = () => {
     load();
   }, []);
 
-  const { summary, contentByType, instructorPerf, deliveredContent, statusData } = useMemo(() => {
-    if (!rawData.summary) return { summary: null, contentByType: [], instructorPerf: [], deliveredContent: [], statusData: [] };
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const res = await dashboardService.getOverdueHistory({
+          monthYear: selectedMonth,
+        });
+        setOverdueHistory(res.data || []);
+      } catch (err) {
+        console.error("Failed to fetch overdue history:", err);
+      }
+    };
+    fetchHistory();
+  }, [selectedMonth]);
+
+  const {
+    summary,
+    contentByType,
+    instructorPerf,
+    deliveredContent,
+    statusData,
+  } = useMemo(() => {
+    if (!rawData.summary)
+      return {
+        summary: null,
+        contentByType: [],
+        instructorPerf: [],
+        deliveredContent: [],
+        statusData: [],
+      };
 
     // Filter content by selected month
     const filteredContent = selectedMonth
       ? rawData.allContent.filter((c) => {
           // Prioritize created/published dates for general content filtering
-          const dateToCheck = c.publishedDate || c.scheduledDate || c.dueDate || c.createdAt;
+          const dateToCheck =
+            c.publishedDate || c.scheduledDate || c.dueDate || c.createdAt;
           return isSameMonth(dateToCheck, selectedMonth);
         })
       : rawData.allContent;
@@ -87,9 +116,15 @@ const Reports = () => {
     // 1. Recompute Summary
     let computedSummary = rawData.summary;
     if (selectedMonth) {
-      const scheduled = filteredContent.filter((c) => c.status === "SCHEDULED").length;
-      const published = filteredContent.filter((c) => c.status === "PUBLISHED").length;
-      const pendingReview = filteredContent.filter((c) => c.status === "SUBMITTED").length;
+      const scheduled = filteredContent.filter(
+        (c) => c.status === "SCHEDULED",
+      ).length;
+      const published = filteredContent.filter(
+        (c) => c.status === "PUBLISHED",
+      ).length;
+      const pendingReview = filteredContent.filter(
+        (c) => c.status === "SUBMITTED",
+      ).length;
       const overdue = filteredContent.filter((c) => c.isOverdue).length;
 
       computedSummary = {
@@ -108,11 +143,15 @@ const Reports = () => {
     filteredContent.forEach((c) => {
       typeMap[c.contentType] = (typeMap[c.contentType] || 0) + 1;
 
-      if (c.status === "PUBLISHED" && isSameMonth(c.publishedDate || c.createdAt, selectedMonth)) {
+      if (
+        c.status === "PUBLISHED" &&
+        isSameMonth(c.publishedDate || c.createdAt, selectedMonth)
+      ) {
         let byWhom = "Unassigned";
         if (c.contributors?.length > 0)
           byWhom = c.contributors.map((cont) => cont.name).join(", ");
-        else if (c.instructor) byWhom = c.instructor.name || "Assigned Instructor";
+        else if (c.instructor)
+          byWhom = c.instructor.name || "Assigned Instructor";
         else if (c.createdBy) byWhom = c.createdBy.name || "Creator";
 
         const platforms = [];
@@ -132,8 +171,12 @@ const Reports = () => {
       }
     });
 
-    delivered.sort((a, b) => new Date(a.publishedDate || 0) - new Date(b.publishedDate || 0));
-    const computedContentByType = Object.entries(typeMap).map(([name, count]) => ({ name, count }));
+    delivered.sort(
+      (a, b) => new Date(a.publishedDate || 0) - new Date(b.publishedDate || 0),
+    );
+    const computedContentByType = Object.entries(typeMap).map(
+      ([name, count]) => ({ name, count }),
+    );
 
     // 3. Status Distribution
     const computedStatusData = [
@@ -168,37 +211,45 @@ const Reports = () => {
     // 4. Instructor Performance
     let computedInstructorPerf = [];
     if (selectedMonth) {
-      computedInstructorPerf = rawData.instructors.map((i) => {
-        let total = 0;
-        let completed = 0;
-        let overdue = 0;
+      computedInstructorPerf = rawData.instructors
+        .map((i) => {
+          let total = 0;
+          let completed = 0;
+          let overdue = 0;
 
-        filteredContent.forEach((c) => {
-          const isAssigned =
-            c.contributors?.some((cont) => cont._id === i._id || cont === i._id) ||
-            (c.instructor && (c.instructor._id === i._id || c.instructor === i._id));
-            
-          if (isAssigned) {
-            total++;
-            if (c.status === "PUBLISHED" || c.status === "APPROVED") completed++;
-            if (c.isOverdue) overdue++;
-          }
-        });
+          filteredContent.forEach((c) => {
+            const isAssigned =
+              c.contributors?.some(
+                (cont) => cont._id === i._id || cont === i._id,
+              ) ||
+              (c.instructor &&
+                (c.instructor._id === i._id || c.instructor === i._id));
 
-        return {
-          name: i.name.split(" ")[0],
-          total,
-          completed,
-          overdue,
-        };
-      }).filter((p) => p.total > 0);
+            if (isAssigned) {
+              total++;
+              if (c.status === "PUBLISHED" || c.status === "APPROVED")
+                completed++;
+              if (c.isOverdue) overdue++;
+            }
+          });
+
+          return {
+            name: i.name.split(" ")[0],
+            total,
+            completed,
+            overdue,
+          };
+        })
+        .filter((p) => p.total > 0);
     } else {
-      computedInstructorPerf = rawData.instructors.map((i) => ({
-        name: i.name.split(" ")[0],
-        total: i.stats?.total || 0,
-        completed: i.stats?.completed || 0,
-        overdue: i.stats?.overdue || 0,
-      })).filter((p) => p.total > 0);
+      computedInstructorPerf = rawData.instructors
+        .map((i) => ({
+          name: i.name.split(" ")[0],
+          total: i.stats?.total || 0,
+          completed: i.stats?.completed || 0,
+          overdue: i.stats?.overdue || 0,
+        }))
+        .filter((p) => p.total > 0);
     }
 
     return {
@@ -552,10 +603,96 @@ const Reports = () => {
             </>
           )}
         </div>
+
+        {/* Historical Overdue Records */}
+        <div className="card p-6 xl:col-span-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <h3 className="section-title">Historical Overdue Log</h3>
+          </div>
+          {overdueHistory.length === 0 ? (
+            <p className="text-sm text-slate-400 text-center py-8">
+              No overdue records found for {selectedMonth || "all time"}
+            </p>
+          ) : (
+            <>
+              {/* Desktop Table */}
+              <div className="hidden lg:block overflow-x-auto">
+                <div className="max-h-[500px] overflow-y-auto pr-1">
+                  <table className="w-full text-left text-sm border-collapse">
+                    <thead className="sticky top-0 bg-white z-10">
+                      <tr className="border-b border-slate-200 text-slate-500">
+                        <th className="py-3 px-4 font-semibold">
+                          Content Title
+                        </th>
+                        <th className="py-3 px-4 font-semibold">Contributor</th>
+                        <th className="py-3 px-4 font-semibold">
+                          Recorded Date
+                        </th>
+                        <th className="py-3 px-4 font-semibold">
+                          Current Status
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {overdueHistory.map((item, i) => (
+                        <tr
+                          key={i}
+                          className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors"
+                        >
+                          <td className="py-3 px-4 font-medium text-slate-700">
+                            {item.contentId?.title || "Unknown Content"}
+                          </td>
+                          <td className="py-3 px-4 text-slate-600">
+                            {item.instructorId?.name || "Unknown"}
+                          </td>
+                          <td className="py-3 px-4 text-slate-600">
+                            {formatToDDMMYYYY(item.recordedAt)}
+                          </td>
+                          <td className="py-3 px-4 text-slate-600">
+                            <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-200 text-slate-700 px-2 py-0.5 rounded-md">
+                              {item.contentId?.status || "N/A"}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Mobile Card List */}
+              <div className="lg:hidden flex flex-col gap-3 max-h-[500px] overflow-y-auto pr-1">
+                {overdueHistory.map((item, i) => (
+                  <div
+                    key={i}
+                    className="p-4 rounded-xl border border-slate-100 bg-slate-50"
+                  >
+                    <p className="font-semibold text-slate-800 mb-1">
+                      {item.contentId?.title || "Unknown Content"}
+                    </p>
+                    <p className="text-xs text-slate-500 mb-2">
+                      Contributor:{" "}
+                      <span className="font-medium text-slate-700">
+                        {item.instructorId?.name || "Unknown"}
+                      </span>
+                    </p>
+                    <div className="flex justify-between items-center mt-3 pt-3 border-t border-slate-200">
+                      <p className="text-xs text-slate-500">
+                        {formatToDDMMYYYY(item.recordedAt)}
+                      </p>
+                      <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-200 text-slate-700 px-2 py-0.5 rounded-md">
+                        {item.contentId?.status || "N/A"}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </>
   );
 };
 
 export default Reports;
-

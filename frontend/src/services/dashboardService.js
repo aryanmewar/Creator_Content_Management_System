@@ -30,4 +30,9 @@ export const dashboardService = {
     const { data } = await api.get("/dashboard/activity");
     return data;
   },
+
+  getOverdueHistory: async (params = {}) => {
+    const { data } = await api.get("/dashboard/overdue-history", { params });
+    return data;
+  },
 };

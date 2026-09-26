@@ -2,6 +2,7 @@ import app from "./app.js";
 import connectDB from "./config/db.js";
 import env from "./config/env.js";
 import { initScheduleMonitor } from "./jobs/scheduleMonitor.js";
+import { initOverdueMonitor } from "./jobs/overdueMonitor.js";
 
 const startServer = async () => {
   try {
@@ -9,6 +10,7 @@ const startServer = async () => {
 
     // Initialize Background Jobs
     initScheduleMonitor();
+    initOverdueMonitor();
 
     app.listen(env.PORT, () => {
       console.log(`\n🚀 Content Manager API`);

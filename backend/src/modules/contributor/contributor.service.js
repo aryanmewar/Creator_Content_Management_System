@@ -136,29 +136,7 @@ export const getAssignments = async (userId) => {
 
   const pipeline = [
     { $match: { contributors: instructor._id, status: { $ne: "DRAFT" } } },
-    {
-      $addFields: {
-        sortPriority: { $literal: 1 },
-        sortDate: {
-          $cond: {
-            if: { $in: ["$status", ["PUBLISHED", "SCHEDULED"]] },
-            then: {
-              $ifNull: [
-                "$publishedDate",
-                { $ifNull: ["$scheduledDate", "$updatedAt"] },
-              ],
-            },
-            else: {
-              $ifNull: [
-                "$completionDate",
-                { $ifNull: ["$updatedAt", "$createdAt"] },
-              ],
-            },
-          },
-        },
-      },
-    },
-    { $sort: { sortPriority: 1, sortDate: -1 } },
+    { $sort: { updatedAt: -1 } },
   ];
   const contentDocs = await Content.aggregate(pipeline);
   const contentItems = contentDocs.map((doc) => Content.hydrate(doc));
@@ -191,29 +169,7 @@ export const getReport = async (userId) => {
 
   const pipeline = [
     { $match: { contributors: instructor._id, status: { $ne: "DRAFT" } } },
-    {
-      $addFields: {
-        sortPriority: { $literal: 1 },
-        sortDate: {
-          $cond: {
-            if: { $in: ["$status", ["PUBLISHED", "SCHEDULED"]] },
-            then: {
-              $ifNull: [
-                "$publishedDate",
-                { $ifNull: ["$scheduledDate", "$updatedAt"] },
-              ],
-            },
-            else: {
-              $ifNull: [
-                "$completionDate",
-                { $ifNull: ["$updatedAt", "$createdAt"] },
-              ],
-            },
-          },
-        },
-      },
-    },
-    { $sort: { sortPriority: 1, sortDate: -1 } },
+    { $sort: { updatedAt: -1 } },
   ];
   const contentDocs = await Content.aggregate(pipeline);
   const contentItems = contentDocs.map((doc) => Content.hydrate(doc));

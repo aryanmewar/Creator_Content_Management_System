@@ -1,6 +1,6 @@
 import env from "../config/env.js";
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 /**
  * Centralized Express error handler.
  * Must be registered as the LAST middleware in app.js.
@@ -9,7 +9,12 @@ const errorHandler = (err, req, res, next) => {
   // In development, log full stack. In production, log only message.
   if (env.NODE_ENV === "development") {
     console.error(`[ERROR] ${req.method} ${req.originalUrl}:`, err);
-    try { fs.appendFileSync(path.join(process.cwd(), 'error.log'), `[ERROR] ${req.method} ${req.originalUrl}: ${err.message}\n${err.stack}\n\n`); } catch(e) {}
+    try {
+      fs.appendFileSync(
+        path.join(process.cwd(), "error.log"),
+        `[ERROR] ${req.method} ${req.originalUrl}: ${err.message}\n${err.stack}\n\n`,
+      );
+    } catch (e) {}
   } else {
     console.error(`[ERROR] ${req.method} ${req.originalUrl}: ${err.message}`);
   }

@@ -20,6 +20,7 @@ const InstructorCard = ({ instructor, onEdit, onToggleStatus, onDelete }) => {
           <div className="relative">
             {profileImage?.url ? (
               <img
+                loading="lazy"
                 src={profileImage.url}
                 alt={name}
                 className="w-12 h-12 rounded-full object-cover ring-2 ring-slate-100"

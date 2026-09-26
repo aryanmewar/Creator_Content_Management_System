@@ -146,9 +146,20 @@ const AssignContent = () => {
   };
 
   // Filter content to ONLY show items that have additional contributors
-  const assignedContents = contents.filter(
-    (c) => c.contributors && c.contributors.length > 0,
-  );
+  // Sort them by date priority (earliest first / ascending)
+  const getSortDate = (c) => {
+    return new Date(
+      c.dueDate ||
+        c.completionDate ||
+        c.scheduledDate ||
+        c.publishedDate ||
+        c.createdAt,
+    ).getTime();
+  };
+
+  const assignedContents = contents
+    .filter((c) => c.contributors && c.contributors.length > 0)
+    .sort((a, b) => getSortDate(a) - getSortDate(b));
 
   return (
     <>
@@ -226,6 +237,7 @@ const AssignContent = () => {
                   onDelete={() => setDeleteTarget(c)}
                   onStatusChange={handleStatusChange}
                   onViewDetails={() => navigate(`/content/${c._id}`)}
+                  showEmailOption={true}
                 />
               ))}
             </div>

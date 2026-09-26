@@ -4,7 +4,7 @@ import { sendSuccess, sendError } from "../../utils/response.js";
 export const getSavedLinks = async (req, res, next) => {
   try {
     const savedLinks = await SavedLink.find({ createdBy: req.user._id }).sort(
-      "-createdAt",
+      "-updatedAt",
     );
     return sendSuccess(res, { data: savedLinks });
   } catch (error) {

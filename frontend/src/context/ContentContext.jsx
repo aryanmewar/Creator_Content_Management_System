@@ -150,11 +150,11 @@ export const ContentProvider = ({ children }) => {
       try {
         const response = await contentService.getContent(
           { ...state.filters, ...params },
-          { signal: fetchAbortControllerRef.current.signal }
+          { signal: fetchAbortControllerRef.current.signal },
         );
         dispatch({ type: "SET_CONTENT", payload: response });
       } catch (err) {
-        if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') {
+        if (err.name === "CanceledError" || err.code === "ERR_CANCELED") {
           return; // Ignore aborted requests
         }
         dispatch({
