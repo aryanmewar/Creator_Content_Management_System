@@ -133,17 +133,29 @@ const ContentCard = ({
     displayText = content.createdBy.name;
   }
 
+  const isOverdue = content.isOverdue || (dueDate && 
+    status === "ASSIGNED" && 
+    new Date(dueDate).setHours(0,0,0,0) < new Date().setHours(0,0,0,0));
+
   return (
     <Card className="mb-4 hover:border-slate-300 transition-colors shadow-sm">
       <CardHeader className="pb-3 pt-5">
         <div className="flex justify-between items-start gap-4">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 md:gap-3">
             <CardTitle
               className="text-lg hover:text-primary cursor-pointer transition-colors"
               onClick={onViewDetails}
             >
               {title}
             </CardTitle>
+            {isOverdue && (
+              <Badge
+                variant="destructive"
+                className="bg-red-500 hover:bg-red-600 font-bold px-2 py-0.5 text-[10px] uppercase tracking-wider shadow-sm flex items-center gap-1"
+              >
+                Overdue
+              </Badge>
+            )}
             <Badge
               variant="secondary"
               className={`${getStatusColor(status)} border-transparent font-semibold`}

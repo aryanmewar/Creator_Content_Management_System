@@ -57,7 +57,9 @@ export const getInstructors = async ({
 const enrichInstructorStats = async (instructor) => {
   const user = await User.findOne({ email: instructor.email });
   const query = { $or: [{ contributors: instructor._id }] };
-  if (user) query.$or.push({ createdBy: user._id });
+  if (user) {
+    query.$or.push({ createdBy: user._id, contributors: { $size: 0 } });
+  }
 
   const contentItems = await Content.find(query);
   const today = getStartOfToday();
@@ -74,9 +76,8 @@ const enrichInstructorStats = async (instructor) => {
       continue;
     }
     if (
-      c.completionDate && 
-      new Date(c.completionDate) < today &&
-      ["ASSIGNED", "DRAFT"].includes(c.status)
+      c.isOverdue || 
+      (c.status === "ASSIGNED" && c.dueDate && new Date(c.dueDate) < today)
     ) {
       overdue++;
       continue;
@@ -109,7 +110,9 @@ export const getInstructorById = async (id) => {
 
   const user = await User.findOne({ email: instructor.email });
   const query = { $or: [{ contributors: id }] };
-  if (user) query.$or.push({ createdBy: user._id });
+  if (user) {
+    query.$or.push({ createdBy: user._id, contributors: { $size: 0 } });
+  }
 
   const contentItems = await Content.find(query).sort({ createdAt: -1 });
 

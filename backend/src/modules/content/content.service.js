@@ -290,6 +290,25 @@ export const updateContentStatus = async (
     throw err;
   }
 
+  // ── Enforce transition rules ──────────────────────────────────────────────
+  const oldStatus = content.status; // Capture BEFORE mutation (fixes activity log)
+  const transitionError = validateTransition(oldStatus, newStatus);
+  if (transitionError) {
+    const err = new Error(transitionError);
+    err.statusCode = 400;
+    err.code = "INVALID_TRANSITION";
+    throw err;
+  }
+
+  // If content is currently ASSIGNED and overdue, lock the overdue state
+  if (
+    oldStatus === CONTENT_STATUSES.ASSIGNED &&
+    content.dueDate &&
+    new Date(content.dueDate).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0)
+  ) {
+    content.isOverdue = true;
+  }
+
   content.status = newStatus;
 
   if (scheduledDate !== undefined) {

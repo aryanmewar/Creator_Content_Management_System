@@ -14,7 +14,7 @@ const AnimatedSearch = ({
       {/* Animated Theme Border */}
       <div className="absolute -inset-0.5 bg-primary/40 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-500 group-focus-within:opacity-70 group-focus-within:duration-200"></div>
 
-      <div className="relative flex items-center bg-white rounded-2xl overflow-hidden shadow-sm h-full w-full">
+      <div className="relative flex items-center bg-white rounded-2xl overflow-hidden shadow-sm h-full w-full min-w-0">
         <div className="pl-3 pr-2 h-full flex items-center justify-center">
           <Search className="h-4 w-4 text-slate-400 group-focus-within:text-primary transition-colors duration-300" />
         </div>

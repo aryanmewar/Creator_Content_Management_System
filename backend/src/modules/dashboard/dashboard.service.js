@@ -44,8 +44,10 @@ export const getSummary = async () => {
       status: { $in: ["ASSIGNED", "DRAFT"] },
     }),
     Content.countDocuments({
-      dueDate: { $lt: today },
-      status: { $in: ["ASSIGNED", "DRAFT"] },
+      $or: [
+        { isOverdue: true },
+        { dueDate: { $lt: today }, status: "ASSIGNED" }
+      ]
     }),
   ]);
 
@@ -148,8 +150,10 @@ export const getOverdue = async () => {
   }));
 
   const contents = await Content.find({
-    dueDate: { $lt: today },
-    status: { $in: ["DRAFT", "ASSIGNED"] },
+    $or: [
+      { isOverdue: true },
+      { dueDate: { $lt: today }, status: "ASSIGNED" }
+    ]
   })
     .populate("createdBy", "name email profileImage")
     .populate("contributors", "name email profileImage")

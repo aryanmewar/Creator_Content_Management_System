@@ -486,3 +486,41 @@ Error: Invalid email or password.
     at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
     at async login (file:///C:/Content%20App/backend/src/modules/auth/auth.controller.js:26:29)
 
+[2026-09-26T08:32:42.577Z] POST /api/auth/login
+MongoServerSelectionError: read ECONNRESET
+    at Topology.selectServer (C:\Content App\backend\node_modules\mongodb\lib\sdam\topology.js:327:38)
+    at async tryOperation (C:\Content App\backend\node_modules\mongodb\lib\operations\execute_operation.js:148:18)
+    at async executeOperation (C:\Content App\backend\node_modules\mongodb\lib\operations\execute_operation.js:78:16)
+    at async FindCursor._initialize (C:\Content App\backend\node_modules\mongodb\lib\cursor\find_cursor.js:62:26)
+    at async FindCursor.cursorInit (C:\Content App\backend\node_modules\mongodb\lib\cursor\abstract_cursor.js:632:27)
+    at async FindCursor.fetchBatch (C:\Content App\backend\node_modules\mongodb\lib\cursor\abstract_cursor.js:666:13)
+    at async FindCursor.next (C:\Content App\backend\node_modules\mongodb\lib\cursor\abstract_cursor.js:342:17)
+    at async Collection.findOne (C:\Content App\backend\node_modules\mongodb\lib\collection.js:313:24)
+    at async model.Query._findOne (C:\Content App\backend\node_modules\mongoose\lib\query.js:2710:15)
+    at async model.Query.exec (C:\Content App\backend\node_modules\mongoose\lib\query.js:4622:63)
+
+[2026-09-26T08:32:50.907Z] POST /api/auth/login
+MongoServerSelectionError: read ECONNRESET
+    at Topology.selectServer (C:\Content App\backend\node_modules\mongodb\lib\sdam\topology.js:327:38)
+    at async tryOperation (C:\Content App\backend\node_modules\mongodb\lib\operations\execute_operation.js:148:18)
+    at async executeOperation (C:\Content App\backend\node_modules\mongodb\lib\operations\execute_operation.js:78:16)
+    at async FindCursor._initialize (C:\Content App\backend\node_modules\mongodb\lib\cursor\find_cursor.js:62:26)
+    at async FindCursor.cursorInit (C:\Content App\backend\node_modules\mongodb\lib\cursor\abstract_cursor.js:632:27)
+    at async FindCursor.fetchBatch (C:\Content App\backend\node_modules\mongodb\lib\cursor\abstract_cursor.js:666:13)
+    at async FindCursor.next (C:\Content App\backend\node_modules\mongodb\lib\cursor\abstract_cursor.js:342:17)
+    at async Collection.findOne (C:\Content App\backend\node_modules\mongodb\lib\collection.js:313:24)
+    at async model.Query._findOne (C:\Content App\backend\node_modules\mongoose\lib\query.js:2710:15)
+    at async model.Query.exec (C:\Content App\backend\node_modules\mongoose\lib\query.js:4622:63)
+
+[2026-09-26T08:36:47.432Z] POST /api/auth/login
+MongooseError: Operation `users.findOne()` buffering timed out after 10000ms
+    at Timeout.<anonymous> (C:\Content App\backend\node_modules\mongoose\lib\drivers\node-mongodb-native\collection.js:187:23)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7)
+
+[2026-09-26T08:37:30.305Z] POST /api/auth/login
+MongooseError: Operation `users.findOne()` buffering timed out after 10000ms
+    at Timeout.<anonymous> (C:\Content App\backend\node_modules\mongoose\lib\drivers\node-mongodb-native\collection.js:187:23)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7)
+

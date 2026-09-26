@@ -92,6 +92,10 @@ const contentSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isOverdue: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

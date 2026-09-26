@@ -131,7 +131,7 @@ const Content = () => {
     <DashboardLayout>
       <div className="sm:pb-0">
       {/* Tabs, Filters, and Actions */}
-      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-5 w-full">
+      <div className="flex flex-col gap-5 mb-6 w-full">
         {/* Tab Bar */}
         <div className="w-full xl:w-auto bg-white border border-slate-200 p-1.5 rounded-2xl shadow-sm overflow-x-auto no-scrollbar">
           <div className="flex gap-1 bg-slate-50 rounded-xl p-1 shrink-0 w-max">
@@ -158,7 +158,7 @@ const Content = () => {
         </div>
 
         {/* Filters & Actions */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full xl:w-auto pb-2 xl:pb-0">
+        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 w-full">
           <div className="w-full sm:w-auto">
             <ContentFilters
               filters={filters}
