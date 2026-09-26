@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { TrendingUp, Award, Target, Download } from "lucide-react";
+import React, { useEffect, useState, useMemo } from "react";
+import { TrendingUp, Award, Target, Download, Calendar } from "lucide-react";
 import ExcelJS from "exceljs";
 import {
   BarChart,
@@ -30,11 +30,19 @@ const formatToDDMMYYYY = (dateString) => {
   return `${day}/${month}/${year}`;
 };
 
+const isSameMonth = (dateString, selectedMonth) => {
+  if (!selectedMonth) return true;
+  if (!dateString) return false;
+  return dateString.substring(0, 7) === selectedMonth;
+};
+
 const Reports = () => {
-  const [summary, setSummary] = useState(null);
-  const [contentByType, setContentByType] = useState([]);
-  const [instructorPerf, setInstructorPerf] = useState([]);
-  const [deliveredContent, setDeliveredContent] = useState([]);
+  const [rawData, setRawData] = useState({
+    summary: null,
+    allContent: [],
+    instructors: [],
+  });
+  const [selectedMonth, setSelectedMonth] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -45,55 +53,12 @@ const Reports = () => {
           contentService.getContent({ limit: 1000 }),
           instructorService.getInstructors({ limit: 100 }),
         ]);
-        setSummary(s.data);
 
-        // Group by content type and extract delivered content
-        const typeMap = {};
-        const delivered = [];
-        (allContent.data || []).forEach((c) => {
-          typeMap[c.contentType] = (typeMap[c.contentType] || 0) + 1;
-
-          if (c.status === "PUBLISHED") {
-            let byWhom = "Unassigned";
-            if (c.contributors?.length > 0)
-              byWhom = c.contributors.map((cont) => cont.name).join(", ");
-            else if (c.instructor) byWhom = c.instructor.name;
-            else if (c.createdBy) byWhom = c.createdBy.name;
-
-            const platforms = [];
-            if (c.publishedLinks) {
-              if (c.publishedLinks.youtube) platforms.push("YouTube");
-              if (c.publishedLinks.instagram) platforms.push("Instagram");
-              if (c.publishedLinks.linkedin) platforms.push("LinkedIn");
-              if (c.publishedLinks.facebook) platforms.push("Facebook");
-            }
-
-            delivered.push({
-              title: c.title,
-              byWhom,
-              publishedDate: c.publishedDate,
-              platforms: platforms.join(", ") || "N/A",
-            });
-          }
+        setRawData({
+          summary: s.data,
+          allContent: allContent.data || [],
+          instructors: instructors.data || [],
         });
-
-        delivered.sort(
-          (a, b) =>
-            new Date(a.publishedDate || 0) - new Date(b.publishedDate || 0),
-        );
-        setContentByType(
-          Object.entries(typeMap).map(([name, count]) => ({ name, count })),
-        );
-        setDeliveredContent(delivered);
-
-        // Instructor performance
-        const perfData = (instructors.data || []).map((i) => ({
-          name: i.name.split(" ")[0],
-          total: i.stats?.total || 0,
-          completed: i.stats?.completed || 0,
-          overdue: i.stats?.overdue || 0,
-        }));
-        setInstructorPerf(perfData.filter((p) => p.total > 0));
       } catch (err) {
         console.error("Reports load error:", err);
       } finally {
@@ -103,36 +68,143 @@ const Reports = () => {
     load();
   }, []);
 
-  const statusData = summary
-    ? [
-        {
-          name: "Draft",
-          value: Math.max(
-            0,
-            summary.totalContent -
-              summary.scheduled -
-              summary.published -
-              summary.pendingReview,
-          ),
-          color: "#94a3b8",
-        },
-        {
-          name: "In Progress",
-          value: summary.pendingReview,
-          color: "#f59e0b",
-        },
-        {
-          name: "Scheduled",
-          value: summary.scheduled,
-          color: "#38bdf8",
-        },
-        {
-          name: "Published",
-          value: summary.published,
-          color: "#4ade80",
-        },
-      ].filter((d) => d.value > 0)
-    : [];
+  const { summary, contentByType, instructorPerf, deliveredContent, statusData } = useMemo(() => {
+    if (!rawData.summary) return { summary: null, contentByType: [], instructorPerf: [], deliveredContent: [], statusData: [] };
+
+    // Filter content by selected month
+    const filteredContent = selectedMonth
+      ? rawData.allContent.filter((c) => {
+          // Prioritize created/published dates for general content filtering
+          const dateToCheck = c.publishedDate || c.scheduledDate || c.dueDate || c.createdAt;
+          return isSameMonth(dateToCheck, selectedMonth);
+        })
+      : rawData.allContent;
+
+    // 1. Recompute Summary
+    let computedSummary = rawData.summary;
+    if (selectedMonth) {
+      const scheduled = filteredContent.filter((c) => c.status === "SCHEDULED").length;
+      const published = filteredContent.filter((c) => c.status === "PUBLISHED").length;
+      const pendingReview = filteredContent.filter((c) => c.status === "SUBMITTED").length;
+      const overdue = filteredContent.filter((c) => c.isOverdue).length;
+
+      computedSummary = {
+        totalContent: filteredContent.length,
+        scheduled,
+        published,
+        pendingReview,
+        overdue,
+      };
+    }
+
+    // 2. Compute Content by Type & Delivered
+    const typeMap = {};
+    const delivered = [];
+
+    filteredContent.forEach((c) => {
+      typeMap[c.contentType] = (typeMap[c.contentType] || 0) + 1;
+
+      if (c.status === "PUBLISHED" && isSameMonth(c.publishedDate || c.createdAt, selectedMonth)) {
+        let byWhom = "Unassigned";
+        if (c.contributors?.length > 0)
+          byWhom = c.contributors.map((cont) => cont.name).join(", ");
+        else if (c.instructor) byWhom = c.instructor.name || "Assigned Instructor";
+        else if (c.createdBy) byWhom = c.createdBy.name || "Creator";
+
+        const platforms = [];
+        if (c.publishedLinks) {
+          if (c.publishedLinks.youtube) platforms.push("YouTube");
+          if (c.publishedLinks.instagram) platforms.push("Instagram");
+          if (c.publishedLinks.linkedin) platforms.push("LinkedIn");
+          if (c.publishedLinks.facebook) platforms.push("Facebook");
+        }
+
+        delivered.push({
+          title: c.title,
+          byWhom,
+          publishedDate: c.publishedDate,
+          platforms: platforms.join(", ") || "N/A",
+        });
+      }
+    });
+
+    delivered.sort((a, b) => new Date(a.publishedDate || 0) - new Date(b.publishedDate || 0));
+    const computedContentByType = Object.entries(typeMap).map(([name, count]) => ({ name, count }));
+
+    // 3. Status Distribution
+    const computedStatusData = [
+      {
+        name: "Draft",
+        value: Math.max(
+          0,
+          computedSummary.totalContent -
+            computedSummary.scheduled -
+            computedSummary.published -
+            computedSummary.pendingReview,
+        ),
+        color: "#94a3b8",
+      },
+      {
+        name: "In Progress",
+        value: computedSummary.pendingReview,
+        color: "#f59e0b",
+      },
+      {
+        name: "Scheduled",
+        value: computedSummary.scheduled,
+        color: "#38bdf8",
+      },
+      {
+        name: "Published",
+        value: computedSummary.published,
+        color: "#4ade80",
+      },
+    ].filter((d) => d.value > 0);
+
+    // 4. Instructor Performance
+    let computedInstructorPerf = [];
+    if (selectedMonth) {
+      computedInstructorPerf = rawData.instructors.map((i) => {
+        let total = 0;
+        let completed = 0;
+        let overdue = 0;
+
+        filteredContent.forEach((c) => {
+          const isAssigned =
+            c.contributors?.some((cont) => cont._id === i._id || cont === i._id) ||
+            (c.instructor && (c.instructor._id === i._id || c.instructor === i._id));
+            
+          if (isAssigned) {
+            total++;
+            if (c.status === "PUBLISHED" || c.status === "APPROVED") completed++;
+            if (c.isOverdue) overdue++;
+          }
+        });
+
+        return {
+          name: i.name.split(" ")[0],
+          total,
+          completed,
+          overdue,
+        };
+      }).filter((p) => p.total > 0);
+    } else {
+      computedInstructorPerf = rawData.instructors.map((i) => ({
+        name: i.name.split(" ")[0],
+        total: i.stats?.total || 0,
+        completed: i.stats?.completed || 0,
+        overdue: i.stats?.overdue || 0,
+      })).filter((p) => p.total > 0);
+    }
+
+    return {
+      summary: computedSummary,
+      contentByType: computedContentByType,
+      instructorPerf: computedInstructorPerf,
+      deliveredContent: delivered,
+      statusData: computedStatusData,
+    };
+  }, [rawData, selectedMonth]);
 
   const downloadExcel = async () => {
     if (deliveredContent.length === 0) return;
@@ -147,7 +219,6 @@ const Reports = () => {
       { header: "Platform", key: "platforms", width: 35 },
     ];
 
-    // Style header row
     sheet.getRow(1).font = { bold: true };
 
     deliveredContent.forEach((item) => {
@@ -166,7 +237,7 @@ const Reports = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "Delivered_Content_Report.xlsx";
+    a.download = `Delivered_Content_Report_${selectedMonth || "All"}.xlsx`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -180,6 +251,31 @@ const Reports = () => {
 
   return (
     <>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+        <h2 className="text-xl font-bold text-slate-800">Overview</h2>
+        <div className="flex items-center gap-3">
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Calendar className="h-4 w-4 text-slate-400 group-hover:text-blue-500 transition-colors" />
+            </div>
+            <input
+              type="month"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="pl-9 pr-4 py-2 border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm font-medium text-slate-700 shadow-sm cursor-pointer"
+            />
+          </div>
+          {selectedMonth && (
+            <button
+              onClick={() => setSelectedMonth("")}
+              className="text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors px-2"
+            >
+              Clear Filter
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Summary Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <StatsCard
@@ -470,3 +566,4 @@ const Reports = () => {
 };
 
 export default Reports;
+

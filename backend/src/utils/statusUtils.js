@@ -54,6 +54,8 @@ export const getAllowedTransitions = (currentStatus) => {
  * @returns {string|null} error message or null if valid
  */
 export const validateTransition = (fromStatus, toStatus) => {
+  if (fromStatus === toStatus) return null; // Allow metadata updates without status change
+  
   if (!CONTENT_STATUSES[fromStatus]) {
     return `Invalid current status: ${fromStatus}`;
   }

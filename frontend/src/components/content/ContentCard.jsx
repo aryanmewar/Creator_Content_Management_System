@@ -14,7 +14,7 @@ import {
   FaFacebook,
   FaPen,
 } from "react-icons/fa";
-import { getStatusColor, getStatusLabel } from "@/utils/statusUtils.js";
+import { getStatusColor, getStatusLabel, getAllowedTransitions } from "@/utils/statusUtils.js";
 import { formatDate, formatTime12Hour } from "@/utils/dateUtils.js";
 
 import {
@@ -30,14 +30,6 @@ import Select from "@/components/common/Select.jsx";
 import TimePicker from "@/components/common/TimePicker.jsx";
 import { Input } from "@/components/ui/input";
 
-const ALLOWED_DROPDOWN_STATUSES = [
-  "ASSIGNED",
-  "IN_PROGRESS",
-  "COMPLETED",
-  "APPROVED",
-  "SCHEDULED",
-  "PUBLISHED",
-];
 
 const ContentCard = ({
   content,
@@ -394,7 +386,7 @@ const ContentCard = ({
                 onChange={(e) =>
                   onStatusChange && onStatusChange(content._id, e.target.value)
                 }
-                options={ALLOWED_DROPDOWN_STATUSES.map((s) => ({
+                options={getAllowedTransitions(status).map((s) => ({
                   label: getStatusLabel(s),
                   value: s,
                 }))}
