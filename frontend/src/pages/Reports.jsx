@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { BarChart3, TrendingUp, Award, Target, Download } from "lucide-react";
+import { TrendingUp, Award, Target, Download } from "lucide-react";
 import * as XLSX from "xlsx";
 import {
   BarChart,

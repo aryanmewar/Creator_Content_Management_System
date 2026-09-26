@@ -8,12 +8,14 @@ export const initScheduleMonitor = () => {
     try {
       const now = new Date();
 
-      // Find all scheduled content that hasn't been notified yet
+      // Limit batch size to avoid loading all content into memory
       const scheduledContents = await Content.find({
         status: "SCHEDULED",
         scheduledDate: { $ne: null },
         scheduleNotificationSent: { $ne: true },
-      });
+      })
+        .select("title scheduledDate scheduledTime createdBy scheduleNotificationSent")
+        .limit(100);
 
       for (const content of scheduledContents) {
         // Construct the exact scheduled datetime

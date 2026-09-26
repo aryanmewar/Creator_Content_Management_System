@@ -1,5 +1,5 @@
 import React from "react";
-import { Globe, ExternalLink } from "lucide-react";
+import { Globe } from "lucide-react";
 import { formatDate } from "../../utils/dateUtils.js";
 import { getPlatformColor } from "../../utils/statusUtils.js";
 

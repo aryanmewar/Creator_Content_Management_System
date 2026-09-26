@@ -40,8 +40,10 @@ export const getDashboard = async (userId) => {
       }),
       Content.countDocuments({
         contributors: instructor._id,
-        dueDate: { $lt: getStartOfToday() },
-        status: { $in: ["ASSIGNED", "DRAFT"] },
+        $or: [
+          { isOverdue: true },
+          { dueDate: { $lt: getStartOfToday() }, status: "ASSIGNED" },
+        ],
       }),
     ]);
 

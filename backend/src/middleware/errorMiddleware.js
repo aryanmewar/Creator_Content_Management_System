@@ -4,15 +4,13 @@ import env from "../config/env.js";
  * Centralized Express error handler.
  * Must be registered as the LAST middleware in app.js.
  */
-import fs from "fs";
 const errorHandler = (err, req, res, next) => {
-  console.error(`[ERROR] ${req.method} ${req.originalUrl}:`, err);
-  try {
-    fs.appendFileSync(
-      "error_log.txt",
-      `[${new Date().toISOString()}] ${req.method} ${req.originalUrl}\n${err.stack}\n\n`,
-    );
-  } catch (e) {}
+  // In development, log full stack. In production, log only message.
+  if (env.NODE_ENV === "development") {
+    console.error(`[ERROR] ${req.method} ${req.originalUrl}:`, err);
+  } else {
+    console.error(`[ERROR] ${req.method} ${req.originalUrl}: ${err.message}`);
+  }
 
   // Mongoose validation error
   if (err.name === "ValidationError") {

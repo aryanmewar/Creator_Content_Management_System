@@ -1,11 +1,6 @@
 import React from "react";
 import { Clock, ChevronRight, PartyPopper } from "lucide-react";
-import { Link } from "react-router-dom";
-import {
-  getStatusColor,
-  getStatusLabel,
-} from "../../utils/statusUtils.js";
-import { getInitials, truncate } from "../../utils/formatUtils.js";
+import { getInitials } from "../../utils/formatUtils.js";
 
 const TodayDeadlines = ({ deadlines = [] }) => {
   if (!deadlines.length) {

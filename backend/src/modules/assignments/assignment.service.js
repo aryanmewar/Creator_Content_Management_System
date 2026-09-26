@@ -172,7 +172,14 @@ export const createAssignment = async (data, userId) => {
  * Update assignment details (deadline, priority, instructions).
  */
 export const updateAssignment = async (id, data, userId) => {
-  const assignment = await Assignment.findByIdAndUpdate(id, data, {
+  // Whitelist only the fields a manager is allowed to update
+  const allowedFields = {};
+  if (data.deadline !== undefined) allowedFields.deadline = data.deadline;
+  if (data.priority !== undefined) allowedFields.priority = data.priority;
+  if (data.instructions !== undefined) allowedFields.instructions = data.instructions;
+  if (data.notes !== undefined) allowedFields.notes = data.notes;
+
+  const assignment = await Assignment.findByIdAndUpdate(id, allowedFields, {
     new: true,
     runValidators: true,
   })

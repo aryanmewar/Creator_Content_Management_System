@@ -213,10 +213,19 @@ export const createContent = async (data, userId) => {
  * Update content fields (does NOT change status — use updateContentStatus for that).
  */
 export const updateContent = async (id, data, userId) => {
-  // Don't allow status change via regular update
-  delete data.status;
+  // Explicitly whitelist only the fields that a manager is allowed to update
+  const allowedFields = {};
+  const editableFields = [
+    "title", "referenceLink", "contentType", "otherContentType",
+    "contributors", "dueDate", "completionDate", "notes",
+    "scheduledDate", "scheduledTime", "publishedLinks", "publishedDate",
+    "thumbnail", "isOwnerContent",
+  ];
+  editableFields.forEach((field) => {
+    if (data[field] !== undefined) allowedFields[field] = data[field];
+  });
 
-  const content = await Content.findByIdAndUpdate(id, data, {
+  const content = await Content.findByIdAndUpdate(id, allowedFields, {
     new: true,
     runValidators: true,
   })
@@ -235,7 +244,7 @@ export const updateContent = async (id, data, userId) => {
     action: "CONTENT_UPDATED",
     entityType: "Content",
     entityId: content._id,
-    metadata: { title: content.title, updatedFields: Object.keys(data) },
+    metadata: { title: content.title, updatedFields: Object.keys(allowedFields) },
   });
 
   return content;
@@ -353,7 +362,7 @@ export const updateContentStatus = async (
     entityId: content._id,
     metadata: {
       title: content.title,
-      from: content.status,
+      from: oldStatus,
       to: newStatus,
       feedback,
     },

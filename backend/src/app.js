@@ -27,19 +27,29 @@ const app = express();
 // ─── Security Middleware ─────────────────────────────────────────────────────
 app.use(helmet());
 
+// Restrict CORS to configured origin only
+const allowedOrigins = env.CLIENT_URL
+  ? env.CLIENT_URL.split(",").map((o) => o.trim())
+  : ["http://localhost:5173"];
+
 app.use(
   cors({
-    origin: (origin, callback) => callback(null, true),
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, server-to-server)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error(`CORS: origin '${origin}' not allowed`));
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
 
-// Rate limiting
+// Rate limiting — 500 requests per 15 minutes per IP
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5000,
+  max: 500,
   message: {
     success: false,
     message: "Too many requests. Please try again later.",
@@ -49,15 +59,17 @@ const limiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Stricter limiter for auth routes
+// Stricter limiter for auth routes — 10 attempts per 15 minutes
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 20,
+  max: 10,
   message: {
     success: false,
     message: "Too many login attempts. Please try again later.",
     code: "AUTH_RATE_LIMIT",
   },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 app.use(limiter);

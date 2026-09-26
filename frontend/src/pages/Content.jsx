@@ -26,7 +26,7 @@ const STATUS_TABS = [
 
 const Content = () => {
   const navigate = useNavigate();
-  const { contents, isLoading, pagination, statusCounts, filters, dispatch, fetchContent } =
+  const { contents, isLoading, statusCounts, filters, dispatch, fetchContent } =
     useContentContext();
   const [activeTab, setActiveTab] = useState("All");
   const [isFormOpen, setIsFormOpen] = useState(false);
