@@ -70,7 +70,7 @@ const Sidebar = ({
         />
       )}
       <aside
-        className={`fixed left-0 top-0 h-screen bg-slate-900 flex flex-col z-50 transition-all duration-500 ease-out ${isVisualCollapsed ? "w-16" : "w-64"} ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
+        className={`fixed left-0 top-0 h-[100dvh] bg-slate-900 flex flex-col z-50 transition-all duration-500 ease-out ${isVisualCollapsed ? "w-16" : "w-64"} ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
       >
         {/* Logo */}
         <div className="px-4 py-5 border-b border-white/10 flex items-center relative">
@@ -116,7 +116,7 @@ const Sidebar = ({
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
+        <nav className="flex-1 min-h-0 px-3 py-4 space-y-1.5 overflow-y-auto">
           {navItems.map(({ to, icon: Icon, label }) => (
             <NavLink
               key={to}
@@ -149,7 +149,7 @@ const Sidebar = ({
         </nav>
 
         {/* User section */}
-        <div className="px-3 py-4 border-t border-white/10">
+        <div className="px-3 py-4 border-t border-white/10 shrink-0">
           {/* User info */}
           <div
             className={`flex items-center h-10 mb-2 relative ${isVisualCollapsed ? "justify-center" : "px-3"}`}
