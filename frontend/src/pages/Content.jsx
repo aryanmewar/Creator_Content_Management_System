@@ -149,9 +149,24 @@ const Content = () => {
     ).getTime();
   };
 
+  const isContentOverdue = (c) => {
+    return (
+      c.isOverdue ||
+      (c.dueDate &&
+        c.status === "ASSIGNED" &&
+        new Date(c.dueDate).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0))
+    );
+  };
+
   const ownersContents = contents
     .filter((c) => c.isOwnerContent === true)
-    .sort((a, b) => getSortDate(a) - getSortDate(b));
+    .sort((a, b) => {
+      const aOverdue = isContentOverdue(a);
+      const bOverdue = isContentOverdue(b);
+      if (aOverdue && !bOverdue) return -1;
+      if (!aOverdue && bOverdue) return 1;
+      return getSortDate(b) - getSortDate(a);
+    });
 
   return (
     <>

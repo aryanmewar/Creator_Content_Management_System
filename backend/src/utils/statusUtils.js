@@ -62,9 +62,9 @@ export const validateTransition = (fromStatus, toStatus) => {
   if (!CONTENT_STATUSES[toStatus]) {
     return `Invalid target status: ${toStatus}`;
   }
-  if (!isValidTransition(fromStatus, toStatus)) {
-    return `Cannot transition from ${fromStatus} to ${toStatus}. Allowed: ${getAllowedTransitions(fromStatus).join(", ") || "none"}`;
-  }
+  
+  // Allow ultimate flexibility in the CMS by disabling strict transition mapping.
+  // Any valid status can transition to any other valid status.
   return null;
 };
 
