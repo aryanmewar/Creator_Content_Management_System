@@ -31,7 +31,13 @@ export const sendError = (
 
 export const sendPaginated = (
   res,
-  { message = "Success", data = [], pagination = {}, statusCounts, statusCode = 200 } = {},
+  {
+    message = "Success",
+    data = [],
+    pagination = {},
+    statusCounts,
+    statusCode = 200,
+  } = {},
 ) => {
   const payload = {
     success: true,
@@ -40,6 +46,6 @@ export const sendPaginated = (
     pagination,
   };
   if (statusCounts) payload.statusCounts = statusCounts;
-  
+
   return res.status(statusCode).json(payload);
 };

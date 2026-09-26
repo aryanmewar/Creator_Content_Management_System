@@ -21,14 +21,14 @@ export const formatTime12Hour = (timeStr) => {
   if (!timeStr) return "";
   const [hours, minutes] = timeStr.split(":");
   if (!hours || !minutes) return timeStr;
-  
+
   const h = parseInt(hours, 10);
   const m = parseInt(minutes, 10);
-  
+
   const ampm = h >= 12 ? "PM" : "AM";
   const formattedHours = h % 12 || 12;
   const formattedMinutes = m.toString().padStart(2, "0");
-  
+
   return `${formattedHours}:${formattedMinutes} ${ampm}`;
 };
 
@@ -64,7 +64,13 @@ export const getDeadlineLabel = (date) => {
  * Calculate deadline state dynamically (mirrors backend logic)
  */
 export const getDeadlineState = (deadline, contentStatus) => {
-  const completedStatuses = ["IN_PROGRESS", "SUBMITTED", "PUBLISHED", "APPROVED", "SCHEDULED"];
+  const completedStatuses = [
+    "IN_PROGRESS",
+    "SUBMITTED",
+    "PUBLISHED",
+    "APPROVED",
+    "SCHEDULED",
+  ];
   if (completedStatuses.includes(contentStatus)) return "COMPLETED";
   if (!deadline) return "UPCOMING";
 

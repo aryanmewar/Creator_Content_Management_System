@@ -40,8 +40,8 @@ export const getSchedules = async ({
       select: "title contentType status createdBy contributors",
       populate: [
         { path: "createdBy", select: "name email" },
-        { path: "contributors", select: "name email profileImage" }
-      ]
+        { path: "contributors", select: "name email profileImage" },
+      ],
     })
     .populate("createdBy", "name email")
     .sort({ scheduledDate: 1, scheduledTime: 1 })
@@ -151,7 +151,9 @@ export const createSchedule = async (data, userId) => {
     },
   });
 
-  const assignment = await Assignment.findOne({ contentId: content._id }).populate("instructorId");
+  const assignment = await Assignment.findOne({
+    contentId: content._id,
+  }).populate("instructorId");
   if (assignment && assignment.instructorId && assignment.instructorId.userId) {
     await notificationService.createNotification({
       userId: assignment.instructorId.userId,

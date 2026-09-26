@@ -76,7 +76,7 @@ const enrichInstructorStats = async (instructor) => {
       continue;
     }
     if (
-      c.isOverdue || 
+      c.isOverdue ||
       (c.status === "ASSIGNED" && c.dueDate && new Date(c.dueDate) < today)
     ) {
       overdue++;
@@ -152,7 +152,8 @@ export const createInstructor = async (data, userId) => {
   }
 
   // Auto-generate password if not provided
-  const finalPassword = data.password || Math.random().toString(36).slice(-8) + "A1!";
+  const finalPassword =
+    data.password || Math.random().toString(36).slice(-8) + "A1!";
 
   const user = await User.create({
     name: data.name,
@@ -213,9 +214,11 @@ export const updateInstructor = async (id, data, userId) => {
   // Sync with User model if needed
   if (data.email || data.password || data.role) {
     // Find associated user by userId or fallback to original email
-    const userQuery = currentInstructor.userId ? { _id: currentInstructor.userId } : { email: currentInstructor.email };
+    const userQuery = currentInstructor.userId
+      ? { _id: currentInstructor.userId }
+      : { email: currentInstructor.email };
     let user = await User.findOne(userQuery);
-    
+
     if (user) {
       if (data.email) user.email = data.email;
       if (data.password) user.passwordHash = data.password; // hashed in pre('save')
@@ -227,7 +230,8 @@ export const updateInstructor = async (id, data, userId) => {
       user = await User.create({
         name: data.name || currentInstructor.name,
         email: data.email || currentInstructor.email,
-        passwordHash: data.password || Math.random().toString(36).slice(-8) + "A1!",
+        passwordHash:
+          data.password || Math.random().toString(36).slice(-8) + "A1!",
         role: data.role || USER_ROLES.CONTRIBUTOR,
       });
       // Link the new user to the instructor

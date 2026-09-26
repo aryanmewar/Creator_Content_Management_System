@@ -321,4 +321,26 @@
   .animate-float-up {
     animation: float-up 20s linear infinite;
   }
+
+  /* ── Accessibility: Respect OS motion preference ─────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+
+    .animate-spin,
+    .animate-blob,
+    .animate-float-up,
+    .animate-gradient,
+    .animate-pan,
+    .animate-bounce,
+    .animate-pulse {
+      animation: none !important;
+    }
+  }
 }

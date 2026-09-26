@@ -15,7 +15,12 @@ import Select from "../common/Select.jsx";
 const schema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
-  password: z.union([z.string().min(6, "Password must be at least 6 characters"), z.literal("")]).optional(),
+  password: z
+    .union([
+      z.string().min(6, "Password must be at least 6 characters"),
+      z.literal(""),
+    ])
+    .optional(),
   designation: z.string().optional(),
   customDesignation: z.string().optional(),
   role: z.enum(["CONTRIBUTOR", "SUPER_ADMIN"]).optional(),
@@ -160,11 +165,14 @@ const InstructorForm = ({
 
           <div className="space-y-1.5">
             <label className={labelClasses}>
-              {instructor ? "New Password (Optional)" : "Password"} {!instructor && <span className="text-rose-500">*</span>}
+              {instructor ? "New Password (Optional)" : "Password"}{" "}
+              {!instructor && <span className="text-rose-500">*</span>}
             </label>
             <input
               type="text"
-              placeholder={instructor ? "Leave blank to keep current" : "Set a password"}
+              placeholder={
+                instructor ? "Leave blank to keep current" : "Set a password"
+              }
               {...register("password")}
               className={`${inputClasses} ${errors.password ? "border-rose-400 ring-2 ring-rose-200" : ""}`}
             />
@@ -210,7 +218,10 @@ const InstructorForm = ({
                   {...field}
                   options={[
                     { label: "Contributor (Standard)", value: "CONTRIBUTOR" },
-                    { label: "Super Admin (Full Access)", value: "SUPER_ADMIN" },
+                    {
+                      label: "Super Admin (Full Access)",
+                      value: "SUPER_ADMIN",
+                    },
                   ]}
                   placeholder="Select role..."
                   className="w-full h-10"

@@ -25,7 +25,9 @@ const OverdueContent = ({ items = [] }) => {
         <h3 className="section-title flex items-center gap-2">
           <AlertCircle className="w-5 h-5 text-red-500" />
           Overdue Content
-          <span className="badge bg-red-100 text-red-600 ml-1">{items.length}</span>
+          <span className="badge bg-red-100 text-red-600 ml-1">
+            {items.length}
+          </span>
         </h3>
       </div>
 

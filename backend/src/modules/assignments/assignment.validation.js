@@ -13,10 +13,14 @@ export const createAssignmentSchema = z
     priority: z.enum(PRIORITY_LEVELS).optional().default("MEDIUM"),
     instructions: z.string().max(2000).optional().nullable(),
   })
-  .refine((data) => !data.deadline || new Date(data.deadline) >= new Date(data.assignedAt), {
-    message: "Deadline cannot be before the assignment date.",
-    path: ["deadline"],
-  });
+  .refine(
+    (data) =>
+      !data.deadline || new Date(data.deadline) >= new Date(data.assignedAt),
+    {
+      message: "Deadline cannot be before the assignment date.",
+      path: ["deadline"],
+    },
+  );
 
 export const updateAssignmentSchema = z.object({
   deadline: z.coerce.date().optional(),

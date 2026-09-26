@@ -3,6 +3,7 @@ import * as contentController from "./content.controller.js";
 import protect from "../../middleware/authMiddleware.js";
 import validate from "../../middleware/validateMiddleware.js";
 import { uploadSingle } from "../../middleware/uploadMiddleware.js";
+import { validateObjectId } from "../../middleware/validateObjectId.js";
 import {
   createContentSchema,
   updateContentSchema,
@@ -19,16 +20,18 @@ router.post(
   validate(createContentSchema),
   contentController.createContent,
 );
-router.get("/:id", contentController.getContentById);
+router.get("/:id", validateObjectId(), contentController.getContentById);
 router.put(
   "/:id",
+  validateObjectId(),
   ...uploadSingle("thumbnail"),
   validate(updateContentSchema),
   contentController.updateContent,
 );
-router.delete("/:id", contentController.deleteContent);
+router.delete("/:id", validateObjectId(), contentController.deleteContent);
 router.patch(
   "/:id/status",
+  validateObjectId(),
   validate(updateStatusSchema),
   contentController.updateContentStatus,
 );

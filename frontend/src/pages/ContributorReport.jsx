@@ -3,7 +3,19 @@ import DashboardLayout from "../components/layout/DashboardLayout.jsx";
 import StatsCard from "../components/dashboard/StatsCard.jsx";
 import Loader from "../components/common/Loader.jsx";
 import { Award, AlertTriangle, Activity, TrendingUp } from "lucide-react";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from "recharts";
 import { contributorService } from "../services/contributorService.js";
 
 const ContributorReport = () => {
@@ -62,7 +74,7 @@ const ContributorReport = () => {
       const dateString = item.submittedAt || item.deadline || item.dueDate;
       if (dateString) {
         const d = new Date(dateString);
-        const month = d.toLocaleString('default', { month: 'short' });
+        const month = d.toLocaleString("default", { month: "short" });
         acc[month] = (acc[month] || 0) + 1;
       }
       return acc;
@@ -126,7 +138,9 @@ const ContributorReport = () => {
                 <h3 className="section-title mb-6">Status Distribution</h3>
                 <div className="h-[300px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                    <PieChart
+                      margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+                    >
                       <Pie
                         data={pieData}
                         cx="50%"
@@ -137,11 +151,16 @@ const ContributorReport = () => {
                         dataKey="value"
                       >
                         {pieData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={STATUS_COLORS[entry.status] || "#94a3b8"} />
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={STATUS_COLORS[entry.status] || "#94a3b8"}
+                          />
                         ))}
                       </Pie>
                       <Tooltip />
-                      <Legend wrapperStyle={{ fontSize: "12px", paddingTop: "10px" }} />
+                      <Legend
+                        wrapperStyle={{ fontSize: "12px", paddingTop: "10px" }}
+                      />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
@@ -153,12 +172,33 @@ const ContributorReport = () => {
                   <div className="w-full overflow-x-auto no-scrollbar h-full">
                     <div className="min-w-[400px] h-full">
                       <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={barData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                          <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b'}} />
-                          <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{fill: '#64748b'}} />
-                          <Tooltip cursor={{fill: '#f1f5f9'}} />
-                          <Bar dataKey="Assignments" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                        <BarChart
+                          data={barData}
+                          margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+                        >
+                          <CartesianGrid
+                            strokeDasharray="3 3"
+                            vertical={false}
+                            stroke="#e2e8f0"
+                          />
+                          <XAxis
+                            dataKey="name"
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: "#64748b" }}
+                          />
+                          <YAxis
+                            allowDecimals={false}
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: "#64748b" }}
+                          />
+                          <Tooltip cursor={{ fill: "#f1f5f9" }} />
+                          <Bar
+                            dataKey="Assignments"
+                            fill="#6366f1"
+                            radius={[4, 4, 0, 0]}
+                          />
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
@@ -180,8 +220,12 @@ const ContributorReport = () => {
                   <thead>
                     <tr className="border-b border-slate-200 text-slate-500">
                       <th className="py-3 px-4 font-semibold">Title</th>
-                      <th className="py-3 px-4 font-semibold">Target Shoot Date</th>
-                      <th className="py-3 px-4 font-semibold">Shoot Completion</th>
+                      <th className="py-3 px-4 font-semibold">
+                        Target Shoot Date
+                      </th>
+                      <th className="py-3 px-4 font-semibold">
+                        Shoot Completion
+                      </th>
                       <th className="py-3 px-4 font-semibold">Submitted At</th>
                       <th className="py-3 px-4 font-semibold">Status</th>
                     </tr>
@@ -196,10 +240,14 @@ const ContributorReport = () => {
                           {item.contentId?.title || "Unknown Title"}
                         </td>
                         <td className="py-3 px-4 text-slate-600">
-                          {item.dueDate ? new Date(item.dueDate).toLocaleDateString() : "-"}
+                          {item.dueDate
+                            ? new Date(item.dueDate).toLocaleDateString()
+                            : "-"}
                         </td>
                         <td className="py-3 px-4 text-slate-600">
-                          {item.deadline ? new Date(item.deadline).toLocaleDateString() : "-"}
+                          {item.deadline
+                            ? new Date(item.deadline).toLocaleDateString()
+                            : "-"}
                         </td>
                         <td className="py-3 px-4 text-slate-600">
                           {item.submittedAt

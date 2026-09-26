@@ -14,7 +14,9 @@ export const initScheduleMonitor = () => {
         scheduledDate: { $ne: null },
         scheduleNotificationSent: { $ne: true },
       })
-        .select("title scheduledDate scheduledTime createdBy scheduleNotificationSent")
+        .select(
+          "title scheduledDate scheduledTime createdBy scheduleNotificationSent",
+        )
         .limit(100);
 
       for (const content of scheduledContents) {
@@ -32,7 +34,14 @@ export const initScheduleMonitor = () => {
           minutes = parseInt(m, 10);
         }
 
-        const exactScheduledTime = new Date(year, month, date, hours, minutes, 0);
+        const exactScheduledTime = new Date(
+          year,
+          month,
+          date,
+          hours,
+          minutes,
+          0,
+        );
 
         // If the current time has passed the scheduled time
         if (now >= exactScheduledTime) {
@@ -42,7 +51,7 @@ export const initScheduleMonitor = () => {
             title: "Content Schedule Time Reached",
             message: `The scheduled time for the content "${content.title}" has arrived. Please verify if it has been published and update its status.`,
             type: "INFO",
-            link: `/content`
+            link: `/content`,
           });
 
           // Mark as notified

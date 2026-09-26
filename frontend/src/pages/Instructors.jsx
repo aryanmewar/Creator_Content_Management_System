@@ -1,11 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import {
-  Plus,
-  Users,
-  ShieldCheck,
-  XCircle,
-  FileText,
-} from "lucide-react";
+import { Plus, Users, ShieldCheck, XCircle, FileText } from "lucide-react";
 import toast from "react-hot-toast";
 import DashboardLayout from "../components/layout/DashboardLayout.jsx";
 import InstructorTable from "../components/instructors/InstructorTable.jsx";
@@ -43,7 +37,10 @@ const Instructors = () => {
     try {
       const response = await authService.createContributor(formData);
       // Ensure the instructor object returned from the auth route is passed to context
-      dispatch({ type: "ADD_INSTRUCTOR", payload: response.data?.instructor || response.data });
+      dispatch({
+        type: "ADD_INSTRUCTOR",
+        payload: response.data?.instructor || response.data,
+      });
       toast.success("Contributor created successfully!");
       setIsFormOpen(false);
     } catch (err) {
@@ -59,7 +56,7 @@ const Instructors = () => {
     setFormLoading(true);
     try {
       const formData = new FormData();
-      Object.keys(payload).forEach(key => {
+      Object.keys(payload).forEach((key) => {
         formData.append(key, payload[key]);
       });
 
@@ -109,7 +106,9 @@ const Instructors = () => {
       toast.success("Contributor removed successfully.");
       setDeleteTarget(null);
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to remove contributor.");
+      toast.error(
+        err.response?.data?.message || "Failed to remove contributor.",
+      );
     } finally {
       setConfirmLoading(false);
     }

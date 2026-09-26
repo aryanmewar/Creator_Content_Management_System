@@ -21,7 +21,7 @@ const initialState = {
     contentType: "",
     instructor: "",
     page: 1,
-    limit: 1000,
+    limit: 50,
     sortBy: "publishedDate",
     sortOrder: "desc",
   },
@@ -45,22 +45,29 @@ const contentReducer = (state, action) => {
       return { ...state, selectedContent: action.payload, isLoading: false };
     case "ADD_CONTENT": {
       const newContents = [action.payload, ...state.contents];
-      if (state.filters.sortBy === "publishedDate" && state.filters.sortOrder === "desc") {
+      if (
+        state.filters.sortBy === "publishedDate" &&
+        state.filters.sortOrder === "desc"
+      ) {
         newContents.sort((a, b) => {
           const priorityA = a.status === "DRAFT" ? 0 : 1;
           const priorityB = b.status === "DRAFT" ? 0 : 1;
-          
+
           if (priorityA !== priorityB) return priorityA - priorityB;
-          
+
           // Same priority group
-          const dateA = ["PUBLISHED", "SCHEDULED"].includes(a.status) 
-             ? (a.publishedDate || a.scheduledDate || a.updatedAt) 
-             : (a.status === "DRAFT" ? (a.updatedAt || a.createdAt) : (a.completionDate || a.updatedAt || a.createdAt));
-             
-          const dateB = ["PUBLISHED", "SCHEDULED"].includes(b.status) 
-             ? (b.publishedDate || b.scheduledDate || b.updatedAt) 
-             : (b.status === "DRAFT" ? (b.updatedAt || b.createdAt) : (b.completionDate || b.updatedAt || b.createdAt));
-          
+          const dateA = ["PUBLISHED", "SCHEDULED"].includes(a.status)
+            ? a.publishedDate || a.scheduledDate || a.updatedAt
+            : a.status === "DRAFT"
+              ? a.updatedAt || a.createdAt
+              : a.completionDate || a.updatedAt || a.createdAt;
+
+          const dateB = ["PUBLISHED", "SCHEDULED"].includes(b.status)
+            ? b.publishedDate || b.scheduledDate || b.updatedAt
+            : b.status === "DRAFT"
+              ? b.updatedAt || b.createdAt
+              : b.completionDate || b.updatedAt || b.createdAt;
+
           const timeA = dateA ? new Date(dateA).getTime() : 0;
           const timeB = dateB ? new Date(dateB).getTime() : 0;
           return timeB - timeA;
@@ -73,22 +80,29 @@ const contentReducer = (state, action) => {
         c._id === action.payload._id ? action.payload : c,
       );
 
-      if (state.filters.sortBy === "publishedDate" && state.filters.sortOrder === "desc") {
+      if (
+        state.filters.sortBy === "publishedDate" &&
+        state.filters.sortOrder === "desc"
+      ) {
         updatedContents.sort((a, b) => {
           const priorityA = a.status === "DRAFT" ? 0 : 1;
           const priorityB = b.status === "DRAFT" ? 0 : 1;
-          
+
           if (priorityA !== priorityB) return priorityA - priorityB;
-          
+
           // Same priority group
-          const dateA = ["PUBLISHED", "SCHEDULED"].includes(a.status) 
-             ? (a.publishedDate || a.scheduledDate || a.updatedAt) 
-             : (a.status === "DRAFT" ? (a.updatedAt || a.createdAt) : (a.completionDate || a.updatedAt || a.createdAt));
-             
-          const dateB = ["PUBLISHED", "SCHEDULED"].includes(b.status) 
-             ? (b.publishedDate || b.scheduledDate || b.updatedAt) 
-             : (b.status === "DRAFT" ? (b.updatedAt || b.createdAt) : (b.completionDate || b.updatedAt || b.createdAt));
-          
+          const dateA = ["PUBLISHED", "SCHEDULED"].includes(a.status)
+            ? a.publishedDate || a.scheduledDate || a.updatedAt
+            : a.status === "DRAFT"
+              ? a.updatedAt || a.createdAt
+              : a.completionDate || a.updatedAt || a.createdAt;
+
+          const dateB = ["PUBLISHED", "SCHEDULED"].includes(b.status)
+            ? b.publishedDate || b.scheduledDate || b.updatedAt
+            : b.status === "DRAFT"
+              ? b.updatedAt || b.createdAt
+              : b.completionDate || b.updatedAt || b.createdAt;
+
           const timeA = dateA ? new Date(dateA).getTime() : 0;
           const timeB = dateB ? new Date(dateB).getTime() : 0;
           return timeB - timeA;

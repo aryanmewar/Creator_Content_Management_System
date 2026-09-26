@@ -12,22 +12,22 @@ const typeOptions = CONTENT_TYPES.map((t) => ({ label: t, value: t }));
 const generateMonthOptions = () => {
   const options = [];
   const currentDate = new Date();
-  
+
   const startYear = 2026;
   const startMonth = 8; // September (0-indexed)
-  
+
   let iterYear = currentDate.getFullYear();
   let iterMonth = currentDate.getMonth();
 
   while (
-    iterYear > startYear || 
+    iterYear > startYear ||
     (iterYear === startYear && iterMonth >= startMonth)
   ) {
     const d = new Date(iterYear, iterMonth, 1);
-    const monthStr = d.toLocaleString('default', { month: 'short' });
-    const valStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const monthStr = d.toLocaleString("default", { month: "short" });
+    const valStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
     options.push({ label: `${monthStr} ${d.getFullYear()}`, value: valStr });
-    
+
     iterMonth--;
     if (iterMonth < 0) {
       iterMonth = 11;

@@ -1,7 +1,16 @@
 import React from "react";
 import DashboardLayout from "../components/layout/DashboardLayout.jsx";
 import { useNotification } from "../context/NotificationContext.jsx";
-import { Bell, Trash2, CheckCircle, Info, AlertTriangle, AlertCircle, Trash, ChevronLeft } from "lucide-react";
+import {
+  Bell,
+  Trash2,
+  CheckCircle,
+  Info,
+  AlertTriangle,
+  AlertCircle,
+  Trash,
+  ChevronLeft,
+} from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
 
@@ -81,7 +90,8 @@ const Notifications = () => {
               All Caught Up!
             </h3>
             <p className="text-sm text-slate-500 max-w-sm">
-              You don't have any new notifications right now. When you do, they'll show up here.
+              You don't have any new notifications right now. When you do,
+              they'll show up here.
             </p>
           </div>
         ) : (
@@ -101,14 +111,16 @@ const Notifications = () => {
                   {isUnread && (
                     <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-primary to-blue-400" />
                   )}
-                  
+
                   <div className="flex gap-4">
                     <div className="flex-shrink-0 mt-0.5">
-                      <div className={`p-2.5 rounded-xl ${isUnread ? "bg-primary/10" : "bg-slate-200/50"}`}>
+                      <div
+                        className={`p-2.5 rounded-xl ${isUnread ? "bg-primary/10" : "bg-slate-200/50"}`}
+                      >
                         {getIcon(notif.type)}
                       </div>
                     </div>
-                    
+
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start mb-1.5">
                         <h4
@@ -127,7 +139,7 @@ const Notifications = () => {
                       <p className="text-sm text-slate-600 mb-4 leading-relaxed max-w-3xl">
                         {notif.message}
                       </p>
-                      
+
                       <div className="flex items-center gap-3">
                         {isUnread && (
                           <button
@@ -149,7 +161,7 @@ const Notifications = () => {
                         )}
                       </div>
                     </div>
-                    
+
                     <div className="flex-shrink-0 flex items-start ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => deleteNotification(notif._id)}

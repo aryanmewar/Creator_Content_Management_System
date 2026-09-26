@@ -7,16 +7,21 @@ import User from "../modules/auth/auth.model.js";
  */
 const protect = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    // Prefer HttpOnly cookie; fall back to Authorization Bearer for API clients
+    let token = req.cookies?.cms_token;
+    if (!token) {
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith("Bearer ")) {
+        token = authHeader.split(" ")[1];
+      }
+    }
+    if (!token) {
       return sendError(res, {
         message: "Access denied. No token provided.",
         code: "NO_TOKEN",
         statusCode: 401,
       });
     }
-
-    const token = authHeader.split(" ")[1];
     const decoded = verifyToken(token);
 
     const user = await User.findById(decoded.id).select("-passwordHash");

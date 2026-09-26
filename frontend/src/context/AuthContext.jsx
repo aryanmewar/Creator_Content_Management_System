@@ -11,7 +11,6 @@ const AuthContext = createContext(null);
 
 const initialState = {
   user: null,
-  token: null,
   isLoading: true,
   isAuthenticated: false,
 };
@@ -24,7 +23,6 @@ const authReducer = (state, action) => {
       return {
         ...state,
         user: action.payload.user,
-        token: action.payload.token,
         isAuthenticated: true,
         isLoading: false,
       };
@@ -40,26 +38,29 @@ const authReducer = (state, action) => {
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  // Rehydrate from localStorage on mount
+  // On mount — verify the HttpOnly cookie by calling /me.
+  // If the cookie is valid, the server returns the user. No localStorage needed.
   useEffect(() => {
-    const token = localStorage.getItem("cms_token");
-    const user = localStorage.getItem("cms_user");
-    if (token && user) {
-      dispatch({
-        type: "INIT",
-        payload: { token, user: JSON.parse(user), isAuthenticated: true },
-      });
-    } else {
-      dispatch({ type: "INIT", payload: { isAuthenticated: false } });
-    }
+    const init = async () => {
+      try {
+        const response = await authService.getMe();
+        dispatch({
+          type: "INIT",
+          payload: { user: response.data, isAuthenticated: true },
+        });
+      } catch {
+        // Cookie absent or expired — user is not authenticated
+        dispatch({ type: "INIT", payload: { isAuthenticated: false } });
+      }
+    };
+    init();
   }, []);
 
   const login = useCallback(async (credentials) => {
     const response = await authService.login(credentials);
-    const { user, token } = response.data;
-    localStorage.setItem("cms_token", token);
-    localStorage.setItem("cms_user", JSON.stringify(user));
-    dispatch({ type: "LOGIN", payload: { user, token } });
+    // Token is now in an HttpOnly cookie — we only store the user object in state
+    const { user } = response.data;
+    dispatch({ type: "LOGIN", payload: { user } });
     return response;
   }, []);
 

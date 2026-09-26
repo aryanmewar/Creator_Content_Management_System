@@ -5,7 +5,7 @@ export const notificationService = {
     const { data } = await api.get("/notifications");
     return data.data; // sendSuccess structure { success: true, data: [...] }
   },
-  
+
   markAsRead: async (id) => {
     const { data } = await api.put(`/notifications/${id}/read`);
     return data;

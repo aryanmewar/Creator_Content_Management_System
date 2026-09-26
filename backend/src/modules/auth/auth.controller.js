@@ -10,9 +10,16 @@ export const register = async (req, res, next) => {
       password,
       role,
     });
+    // Set JWT as HttpOnly cookie — inaccessible to JS (XSS-safe)
+    res.cookie("cms_token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
     return sendSuccess(res, {
       message: "Account created successfully.",
-      data: { user, token },
+      data: { user },
       statusCode: 201,
     });
   } catch (error) {
@@ -24,9 +31,16 @@ export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const { user, token } = await authService.loginUser({ email, password });
+    // Set JWT as HttpOnly cookie — inaccessible to JS (XSS-safe)
+    res.cookie("cms_token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
     return sendSuccess(res, {
       message: "Login successful.",
-      data: { user, token },
+      data: { user },
     });
   } catch (error) {
     next(error);
@@ -44,8 +58,12 @@ export const getMe = async (req, res, next) => {
 
 export const logout = async (req, res, next) => {
   try {
-    // JWT is stateless; logout is client-side token removal.
-    // In future, token blacklisting can be added here.
+    // Clear the HttpOnly cookie server-side
+    res.clearCookie("cms_token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
     return sendSuccess(res, { message: "Logged out successfully." });
   } catch (error) {
     next(error);

@@ -33,7 +33,7 @@ export const markAsRead = async (id, userId) => {
   return await Notification.findOneAndUpdate(
     { _id: id, userId },
     { isRead: true },
-    { new: true }
+    { new: true },
   );
 };
 

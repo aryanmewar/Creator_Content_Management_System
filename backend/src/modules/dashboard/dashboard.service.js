@@ -46,8 +46,8 @@ export const getSummary = async () => {
     Content.countDocuments({
       $or: [
         { isOverdue: true },
-        { dueDate: { $lt: today }, status: "ASSIGNED" }
-      ]
+        { dueDate: { $lt: today }, status: "ASSIGNED" },
+      ],
     }),
   ]);
 
@@ -67,7 +67,7 @@ export const getSummary = async () => {
  */
 export const getDeadlines = async () => {
   const { start, end } = getTodayRange();
-  
+
   const assignments = await Assignment.find({
     deadline: { $gte: start, $lte: end },
     status: { $nin: ["PUBLISHED", "APPROVED", "SCHEDULED"] },
@@ -97,12 +97,15 @@ export const getDeadlines = async () => {
       _id: c._id,
       title: c.title,
       contentType: c.contentType,
-      status: c.status
+      status: c.status,
     },
-    instructorId: c.contributors && c.contributors.length > 0 ? c.contributors[0] : c.createdBy,
+    instructorId:
+      c.contributors && c.contributors.length > 0
+        ? c.contributors[0]
+        : c.createdBy,
     deadline: c.dueDate,
     deadlineState: "DUE_TODAY",
-    isShootDate: true
+    isShootDate: true,
   }));
 
   return [...mappedAssignments, ...mappedContents];
@@ -150,10 +153,7 @@ export const getOverdue = async () => {
   }));
 
   const contents = await Content.find({
-    $or: [
-      { isOverdue: true },
-      { dueDate: { $lt: today }, status: "ASSIGNED" }
-    ]
+    $or: [{ isOverdue: true }, { dueDate: { $lt: today }, status: "ASSIGNED" }],
   })
     .populate("createdBy", "name email profileImage")
     .populate("contributors", "name email profileImage")
@@ -166,15 +166,20 @@ export const getOverdue = async () => {
       _id: c._id,
       title: c.title,
       contentType: c.contentType,
-      status: c.status
+      status: c.status,
     },
-    instructorId: c.contributors && c.contributors.length > 0 ? c.contributors[0] : c.createdBy,
+    instructorId:
+      c.contributors && c.contributors.length > 0
+        ? c.contributors[0]
+        : c.createdBy,
     deadline: c.dueDate,
     deadlineState: "OVERDUE",
-    isShootDate: true
+    isShootDate: true,
   }));
 
-  return [...mappedAssignments, ...mappedContents].sort((a, b) => new Date(a.deadline) - new Date(b.deadline)).slice(0, 20);
+  return [...mappedAssignments, ...mappedContents]
+    .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
+    .slice(0, 20);
 };
 
 /**
@@ -196,8 +201,11 @@ export const getRecent = async () => {
 
   const publications = [];
   publishedContent.forEach((c) => {
-    const publishedBy = c.contributors && c.contributors.length > 0 ? c.contributors[0] : c.createdBy;
-    
+    const publishedBy =
+      c.contributors && c.contributors.length > 0
+        ? c.contributors[0]
+        : c.createdBy;
+
     let cType = Array.isArray(c.contentType) ? c.contentType[0] : c.contentType;
     if (cType === "Others" && c.otherContentType) cType = c.otherContentType;
 
@@ -232,7 +240,9 @@ export const getRecent = async () => {
     }
   });
 
-  return publications.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt)).slice(0, 10);
+  return publications
+    .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
+    .slice(0, 10);
 };
 
 /**

@@ -58,7 +58,7 @@ const ContributorDashboard = () => {
             <TodaySchedule schedules={stats.todaySchedules || []} />
             <TodayDeadlines deadlines={stats.todayDeadlines || []} />
           </div>
-          
+
           <div className="space-y-6">
             <StatsCard
               title="Total Assigned"
@@ -119,10 +119,14 @@ const ContributorDashboard = () => {
                       {item.contentId?.contentType || "N/A"}
                     </td>
                     <td className="py-3 px-4 text-slate-600">
-                      {item.dueDate ? new Date(item.dueDate).toLocaleDateString() : "-"}
+                      {item.dueDate
+                        ? new Date(item.dueDate).toLocaleDateString()
+                        : "-"}
                     </td>
                     <td className="py-3 px-4 text-slate-600">
-                      {item.deadline ? new Date(item.deadline).toLocaleDateString() : "-"}
+                      {item.deadline
+                        ? new Date(item.deadline).toLocaleDateString()
+                        : "-"}
                     </td>
                     <td className="py-3 px-4">
                       <span

@@ -2,6 +2,7 @@ import { Router } from "express";
 import * as assignmentController from "./assignment.controller.js";
 import protect from "../../middleware/authMiddleware.js";
 import validate from "../../middleware/validateMiddleware.js";
+import { validateObjectId } from "../../middleware/validateObjectId.js";
 import {
   createAssignmentSchema,
   updateAssignmentSchema,
@@ -16,9 +17,10 @@ router.post(
   validate(createAssignmentSchema),
   assignmentController.createAssignment,
 );
-router.get("/:id", assignmentController.getAssignmentById);
+router.get("/:id", validateObjectId(), assignmentController.getAssignmentById);
 router.put(
   "/:id",
+  validateObjectId(),
   validate(updateAssignmentSchema),
   assignmentController.updateAssignment,
 );

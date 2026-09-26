@@ -26,10 +26,12 @@ export const NotificationProvider = ({ children }) => {
 
   useEffect(() => {
     loadNotifications();
-    // Poll for notifications every 30 seconds
+    // Poll for notifications every 2 minutes, but only if the tab is visible
     const interval = setInterval(() => {
-      loadNotifications();
-    }, 30000);
+      if (document.visibilityState === "visible") {
+        loadNotifications();
+      }
+    }, 120000);
     return () => clearInterval(interval);
   }, [user]);
 
@@ -37,7 +39,7 @@ export const NotificationProvider = ({ children }) => {
     try {
       await notificationService.markAsRead(id);
       setNotifications((prev) =>
-        prev.map((n) => (n._id === id ? { ...n, isRead: true } : n))
+        prev.map((n) => (n._id === id ? { ...n, isRead: true } : n)),
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (error) {

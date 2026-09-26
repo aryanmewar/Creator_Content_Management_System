@@ -11,7 +11,7 @@ const TimePicker = ({ value, onChange }) => {
       const [h, m] = value.split(":");
       let hourNum = parseInt(h, 10);
       const isPm = hourNum >= 12;
-      
+
       if (hourNum === 0) hourNum = 12;
       else if (hourNum > 12) hourNum -= 12;
 
@@ -24,10 +24,10 @@ const TimePicker = ({ value, onChange }) => {
   const updateTime = (h, m, ap) => {
     let hr24 = parseInt(h || "0", 10);
     const minNum = parseInt(m || "0", 10);
-    
+
     if (ap === "PM" && hr24 < 12) hr24 += 12;
     if (ap === "AM" && hr24 === 12) hr24 = 0;
-    
+
     const formatted24Hour = hr24.toString().padStart(2, "0");
     const formattedMinute = minNum.toString().padStart(2, "0");
     onChange(`${formatted24Hour}:${formattedMinute}`);

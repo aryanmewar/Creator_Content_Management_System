@@ -45,7 +45,7 @@ export const getContent = async ({
   }
   if (instructor) {
     // Content is a Mongoose model, so we can access mongoose through it
-    const mongoose = Content.base; 
+    const mongoose = Content.base;
     query.contributors = new mongoose.Types.ObjectId(instructor);
   }
   if (dateFrom || dateTo) {
@@ -73,12 +73,22 @@ export const getContent = async ({
           sortDate: {
             $cond: {
               if: { $in: ["$status", ["PUBLISHED", "SCHEDULED"]] },
-              then: { $ifNull: ["$publishedDate", { $ifNull: ["$scheduledDate", "$updatedAt"] }] },
+              then: {
+                $ifNull: [
+                  "$publishedDate",
+                  { $ifNull: ["$scheduledDate", "$updatedAt"] },
+                ],
+              },
               else: {
                 $cond: {
                   if: { $eq: ["$status", "DRAFT"] },
                   then: { $ifNull: ["$updatedAt", "$createdAt"] },
-                  else: { $ifNull: ["$completionDate", { $ifNull: ["$updatedAt", "$createdAt"] }] },
+                  else: {
+                    $ifNull: [
+                      "$completionDate",
+                      { $ifNull: ["$updatedAt", "$createdAt"] },
+                    ],
+                  },
                 },
               },
             },
@@ -105,17 +115,43 @@ export const getContent = async ({
       .limit(parseInt(limit));
   }
 
-  // Attach assignment deadline info
-  const enriched = await Promise.all(content.map(enrichContentWithDeadline));
+  // ── Single $lookup to join assignments — eliminates N+1 queries ──────────
+  // Collect all content IDs in one pass, then lookup all assignments at once
+  const contentIds = content.map((c) => c._id || c.id);
+  const assignments = await Assignment.find(
+    { contentId: { $in: contentIds } },
+    { contentId: 1, deadline: 1, priority: 1, createdAt: 1 },
+  ).sort({ createdAt: -1 });
+
+  // Build a map: contentId → most recent assignment
+  const assignmentMap = {};
+  assignments.forEach((a) => {
+    const key = a.contentId.toString();
+    if (!assignmentMap[key]) assignmentMap[key] = a; // already sorted desc
+  });
+
+  const enriched = content.map((item) => {
+    const doc = typeof item.toObject === "function" ? item.toObject() : item;
+    const asgn = assignmentMap[doc._id.toString()];
+    const deadlineState = asgn
+      ? getDeadlineState(asgn.deadline, doc.status)
+      : null;
+    return {
+      ...doc,
+      assignment: asgn
+        ? { deadline: asgn.deadline, priority: asgn.priority, deadlineState }
+        : null,
+    };
+  });
 
   // Get status counts for the current query (ignoring status filter)
   const countQuery = { ...query };
   delete countQuery.status;
   const statusCountsAggr = await Content.aggregate([
     { $match: countQuery },
-    { $group: { _id: "$status", count: { $sum: 1 } } }
+    { $group: { _id: "$status", count: { $sum: 1 } } },
   ]);
-  
+
   const totalCount = await Content.countDocuments(countQuery);
   const statusCounts = { All: totalCount };
   statusCountsAggr.forEach(({ _id, count }) => {
@@ -131,29 +167,6 @@ export const getContent = async ({
       totalPages: Math.ceil(total / limit),
     },
     statusCounts,
-  };
-};
-
-/**
- * Attach the latest assignment deadline and deadline state to content.
- */
-const enrichContentWithDeadline = async (content) => {
-  const assignment = await Assignment.findOne({ contentId: content._id }).sort({
-    createdAt: -1,
-  });
-  const deadlineState = assignment
-    ? getDeadlineState(assignment.deadline, content.status)
-    : null;
-
-  return {
-    ...content.toObject(),
-    assignment: assignment
-      ? {
-          deadline: assignment.deadline,
-          priority: assignment.priority,
-          deadlineState,
-        }
-      : null,
   };
 };
 
@@ -216,10 +229,20 @@ export const updateContent = async (id, data, userId) => {
   // Explicitly whitelist only the fields that a manager is allowed to update
   const allowedFields = {};
   const editableFields = [
-    "title", "referenceLink", "contentType", "otherContentType",
-    "contributors", "dueDate", "completionDate", "notes",
-    "scheduledDate", "scheduledTime", "publishedLinks", "publishedDate",
-    "thumbnail", "isOwnerContent",
+    "title",
+    "referenceLink",
+    "contentType",
+    "otherContentType",
+    "contributors",
+    "dueDate",
+    "completionDate",
+    "notes",
+    "scheduledDate",
+    "scheduledTime",
+    "publishedLinks",
+    "publishedDate",
+    "thumbnail",
+    "isOwnerContent",
   ];
   editableFields.forEach((field) => {
     if (data[field] !== undefined) allowedFields[field] = data[field];
@@ -244,7 +267,10 @@ export const updateContent = async (id, data, userId) => {
     action: "CONTENT_UPDATED",
     entityType: "Content",
     entityId: content._id,
-    metadata: { title: content.title, updatedFields: Object.keys(allowedFields) },
+    metadata: {
+      title: content.title,
+      updatedFields: Object.keys(allowedFields),
+    },
   });
 
   return content;
@@ -313,7 +339,8 @@ export const updateContentStatus = async (
   if (
     oldStatus === CONTENT_STATUSES.ASSIGNED &&
     content.dueDate &&
-    new Date(content.dueDate).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0)
+    new Date(content.dueDate).setHours(0, 0, 0, 0) <
+      new Date().setHours(0, 0, 0, 0)
   ) {
     content.isOverdue = true;
   }
@@ -369,11 +396,17 @@ export const updateContentStatus = async (
   });
 
   // Notifications
-  const assignment = await Assignment.findOne({ contentId: id }).populate("instructorId");
-  
+  const assignment = await Assignment.findOne({ contentId: id }).populate(
+    "instructorId",
+  );
+
   if (assignment && assignment.instructorId && assignment.instructorId.userId) {
     // If Admin/Manager changes status, notify the contributor
-    if (newStatus === CONTENT_STATUSES.APPROVED || newStatus === CONTENT_STATUSES.REJECTED || newStatus === CONTENT_STATUSES.PUBLISHED) {
+    if (
+      newStatus === CONTENT_STATUSES.APPROVED ||
+      newStatus === CONTENT_STATUSES.REJECTED ||
+      newStatus === CONTENT_STATUSES.PUBLISHED
+    ) {
       await notificationService.createNotification({
         userId: assignment.instructorId.userId,
         title: "Content Status Updated",

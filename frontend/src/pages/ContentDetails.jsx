@@ -1,11 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import {
-  ArrowLeft,
-  ExternalLink,
-  Globe,
-  CheckCircle,
-} from "lucide-react";
+import { ArrowLeft, ExternalLink, Globe, CheckCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import DashboardLayout from "../components/layout/DashboardLayout.jsx";
 import Loader from "../components/common/Loader.jsx";
@@ -112,9 +107,17 @@ const ContentDetails = () => {
                   {content.title}
                 </h2>
                 <div className="flex items-center gap-2 flex-wrap">
-                  {(Array.isArray(content.contentType) ? content.contentType : [content.contentType]).map((type, idx) => (
-                    <span key={idx} className="badge bg-slate-100 text-slate-600">
-                      {type === "Others" && content.otherContentType ? `Others (${content.otherContentType})` : type}
+                  {(Array.isArray(content.contentType)
+                    ? content.contentType
+                    : [content.contentType]
+                  ).map((type, idx) => (
+                    <span
+                      key={idx}
+                      className="badge bg-slate-100 text-slate-600"
+                    >
+                      {type === "Others" && content.otherContentType
+                        ? `Others (${content.otherContentType})`
+                        : type}
                     </span>
                   ))}
                   <span className={`badge ${getStatusColor(content.status)}`}>

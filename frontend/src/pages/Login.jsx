@@ -3,13 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import {
-  Eye,
-  EyeOff,
-  Mail,
-  Lock,
-  Zap,
-} from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, Zap } from "lucide-react";
 import toast from "react-hot-toast";
 import useAuth from "../hooks/useAuth.js";
 import Button from "../components/common/Button.jsx";

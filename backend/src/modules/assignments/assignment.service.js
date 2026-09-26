@@ -176,7 +176,8 @@ export const updateAssignment = async (id, data, userId) => {
   const allowedFields = {};
   if (data.deadline !== undefined) allowedFields.deadline = data.deadline;
   if (data.priority !== undefined) allowedFields.priority = data.priority;
-  if (data.instructions !== undefined) allowedFields.instructions = data.instructions;
+  if (data.instructions !== undefined)
+    allowedFields.instructions = data.instructions;
   if (data.notes !== undefined) allowedFields.notes = data.notes;
 
   const assignment = await Assignment.findByIdAndUpdate(id, allowedFields, {

@@ -17,9 +17,8 @@ export const authService = {
   },
 
   logout: async () => {
+    // Server clears the HttpOnly cookie; nothing to clear client-side
     await api.post("/auth/logout");
-    localStorage.removeItem("cms_token");
-    localStorage.removeItem("cms_user");
   },
 
   createContributor: async (data) => {

@@ -50,7 +50,6 @@ const InstructorTable = ({ instructors, onEdit, onToggleStatus, onDelete }) => {
               stats,
             } = instructor;
 
-
             return (
               <tr
                 key={_id}
@@ -79,7 +78,9 @@ const InstructorTable = ({ instructors, onEdit, onToggleStatus, onDelete }) => {
                   </div>
                 </td>
                 <td className="px-4 py-4 text-slate-500 text-xs">
-                  <div className="font-medium text-slate-700">{designation || "Instructor"}</div>
+                  <div className="font-medium text-slate-700">
+                    {designation || "Instructor"}
+                  </div>
                   {instructor.role === "SUPER_ADMIN" && (
                     <div className="mt-1 text-[9px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded uppercase tracking-wider inline-block">
                       SUPER ADMIN
@@ -107,16 +108,19 @@ const InstructorTable = ({ instructors, onEdit, onToggleStatus, onDelete }) => {
                 <td className="px-4 py-4 border-l border-slate-100">
                   <span
                     className={
-                      instructor.lastLoginAt && new Date() - new Date(instructor.lastLoginAt) < 300000 // 5 mins
+                      instructor.lastLoginAt &&
+                      new Date() - new Date(instructor.lastLoginAt) < 300000 // 5 mins
                         ? "text-emerald-600 text-xs font-medium"
                         : "text-slate-500 text-xs font-medium"
                     }
                   >
-                    {instructor.lastLoginAt ? timeAgo(instructor.lastLoginAt) : "Never"}
+                    {instructor.lastLoginAt
+                      ? timeAgo(instructor.lastLoginAt)
+                      : "Never"}
                   </span>
                 </td>
                 <td className="px-4 py-4 text-right relative">
-                  <div 
+                  <div
                     className="relative group/menu inline-block"
                     onClick={(e) => e.stopPropagation()}
                   >

@@ -103,7 +103,8 @@ export const createContributorAccount = async ({
   }
 
   // Auto-generate password if not provided
-  const finalPassword = password || Math.random().toString(36).slice(-8) + "A1!";
+  const finalPassword =
+    password || Math.random().toString(36).slice(-8) + "A1!";
 
   // 1. Create User with specified role (default CONTRIBUTOR)
   const user = await User.create({

@@ -44,10 +44,7 @@ const Select = forwardRef(
     };
 
     return (
-      <div
-        ref={wrapperRef}
-        className={`relative inline-block ${className}`}
-      >
+      <div ref={wrapperRef} className={`relative inline-block ${className}`}>
         {label && (
           <label className="form-label block mb-1">
             {label}

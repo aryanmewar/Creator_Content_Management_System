@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { TrendingUp, Award, Target, Download } from "lucide-react";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import {
   BarChart,
   Bar,
@@ -108,7 +108,13 @@ const Reports = () => {
     ? [
         {
           name: "Draft",
-          value: Math.max(0, summary.totalContent - summary.scheduled - summary.published - summary.pendingReview),
+          value: Math.max(
+            0,
+            summary.totalContent -
+              summary.scheduled -
+              summary.published -
+              summary.pendingReview,
+          ),
           color: "#94a3b8",
         },
         {
@@ -129,31 +135,41 @@ const Reports = () => {
       ].filter((d) => d.value > 0)
     : [];
 
-  const downloadExcel = () => {
+  const downloadExcel = async () => {
     if (deliveredContent.length === 0) return;
-    
-    const wsData = [
-      ["Content Title", "By Whom", "Published Date", "Platform"],
-      ...deliveredContent.map((item) => [
-        item.title,
-        item.byWhom,
-        formatToDDMMYYYY(item.publishedDate),
-        item.platforms
-      ])
+
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet("Delivered Content");
+
+    sheet.columns = [
+      { header: "Content Title", key: "title", width: 45 },
+      { header: "By Whom", key: "byWhom", width: 25 },
+      { header: "Published Date", key: "publishedDate", width: 15 },
+      { header: "Platform", key: "platforms", width: 35 },
     ];
 
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    // Style header row
+    sheet.getRow(1).font = { bold: true };
 
-    ws['!cols'] = [
-      { wch: 45 },
-      { wch: 25 },
-      { wch: 15 },
-      { wch: 35 },
-    ];
+    deliveredContent.forEach((item) => {
+      sheet.addRow({
+        title: item.title,
+        byWhom: item.byWhom,
+        publishedDate: formatToDDMMYYYY(item.publishedDate),
+        platforms: item.platforms,
+      });
+    });
 
-    XLSX.utils.book_append_sheet(wb, ws, "Delivered Content");
-    XLSX.writeFile(wb, "Delivered_Content_Report.xlsx");
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "Delivered_Content_Report.xlsx";
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   if (isLoading)
@@ -249,20 +265,20 @@ const Reports = () => {
             </p>
           ) : (
             <ResponsiveContainer width="100%" height={250}>
-                <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                  <Pie
-                    data={statusData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={70}
-                    dataKey="value"
-                    label={({ name, percent }) =>
-                      `${name} ${(percent * 100).toFixed(0)}%`
-                    }
-                    labelLine={{ stroke: "#cbd5e1", strokeWidth: 1 }}
-                    stroke="none"
-                  >
+              <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                <Pie
+                  data={statusData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={50}
+                  outerRadius={70}
+                  dataKey="value"
+                  label={({ name, percent }) =>
+                    `${name} ${(percent * 100).toFixed(0)}%`
+                  }
+                  labelLine={{ stroke: "#cbd5e1", strokeWidth: 1 }}
+                  stroke="none"
+                >
                   {statusData.map((entry, i) => (
                     <Cell key={i} fill={entry.color} />
                   ))}
@@ -293,55 +309,59 @@ const Reports = () => {
             <div className="w-full overflow-x-auto no-scrollbar">
               <div className="min-w-[600px] h-[280px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={instructorPerf} barSize={20} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  vertical={false}
-                  stroke="#f1f5f9"
-                />
-                <XAxis
-                  dataKey="name"
-                  tick={{ fontSize: 12, fill: "#64748b" }}
-                  axisLine={{ stroke: "#e2e8f0" }}
-                  tickLine={false}
-                />
-                <YAxis
-                  tick={{ fontSize: 12, fill: "#64748b" }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip
-                  cursor={{ fill: "#f8fafc" }}
-                  contentStyle={{
-                    borderRadius: "8px",
-                    border: "none",
-                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                  }}
-                />
-                <Legend
-                  iconType="circle"
-                  wrapperStyle={{ fontSize: "12px", color: "#475569" }}
-                />
-                <Bar
-                  dataKey="total"
-                  name="Total"
-                  fill="#94a3b8"
-                  radius={[4, 4, 0, 0]}
-                />
-                <Bar
-                  dataKey="completed"
-                  name="Published"
-                  fill="#10b981"
-                  radius={[4, 4, 0, 0]}
-                />
-                <Bar
-                  dataKey="overdue"
-                  name="Overdue"
-                  fill="#ef4444"
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+                  <BarChart
+                    data={instructorPerf}
+                    barSize={20}
+                    margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+                  >
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      vertical={false}
+                      stroke="#f1f5f9"
+                    />
+                    <XAxis
+                      dataKey="name"
+                      tick={{ fontSize: 12, fill: "#64748b" }}
+                      axisLine={{ stroke: "#e2e8f0" }}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 12, fill: "#64748b" }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <Tooltip
+                      cursor={{ fill: "#f8fafc" }}
+                      contentStyle={{
+                        borderRadius: "8px",
+                        border: "none",
+                        boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                      }}
+                    />
+                    <Legend
+                      iconType="circle"
+                      wrapperStyle={{ fontSize: "12px", color: "#475569" }}
+                    />
+                    <Bar
+                      dataKey="total"
+                      name="Total"
+                      fill="#94a3b8"
+                      radius={[4, 4, 0, 0]}
+                    />
+                    <Bar
+                      dataKey="completed"
+                      name="Published"
+                      fill="#10b981"
+                      radius={[4, 4, 0, 0]}
+                    />
+                    <Bar
+                      dataKey="overdue"
+                      name="Overdue"
+                      fill="#ef4444"
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </div>
           )}
@@ -373,35 +393,37 @@ const Reports = () => {
                   <table className="w-full text-left text-sm border-collapse">
                     <thead className="sticky top-0 bg-white z-10">
                       <tr className="border-b border-slate-200 text-slate-500">
-                      <th className="py-3 px-4 font-semibold">Content Title</th>
-                      <th className="py-3 px-4 font-semibold">By Whom</th>
-                      <th className="py-3 px-4 font-semibold">
-                        Published Date
-                      </th>
-                      <th className="py-3 px-4 font-semibold">Platform</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {deliveredContent.map((item, i) => (
-                      <tr
-                        key={i}
-                        className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors"
-                      >
-                        <td className="py-3 px-4 font-medium text-slate-700">
-                          {item.title}
-                        </td>
-                        <td className="py-3 px-4 text-slate-600">
-                          {item.byWhom}
-                        </td>
-                        <td className="py-3 px-4 text-slate-600">
-                          {formatToDDMMYYYY(item.publishedDate)}
-                        </td>
-                        <td className="py-3 px-4 text-slate-600">
-                          {item.platforms}
-                        </td>
+                        <th className="py-3 px-4 font-semibold">
+                          Content Title
+                        </th>
+                        <th className="py-3 px-4 font-semibold">By Whom</th>
+                        <th className="py-3 px-4 font-semibold">
+                          Published Date
+                        </th>
+                        <th className="py-3 px-4 font-semibold">Platform</th>
                       </tr>
-                    ))}
-                  </tbody>
+                    </thead>
+                    <tbody>
+                      {deliveredContent.map((item, i) => (
+                        <tr
+                          key={i}
+                          className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors"
+                        >
+                          <td className="py-3 px-4 font-medium text-slate-700">
+                            {item.title}
+                          </td>
+                          <td className="py-3 px-4 text-slate-600">
+                            {item.byWhom}
+                          </td>
+                          <td className="py-3 px-4 text-slate-600">
+                            {formatToDDMMYYYY(item.publishedDate)}
+                          </td>
+                          <td className="py-3 px-4 text-slate-600">
+                            {item.platforms}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
                   </table>
                 </div>
               </div>

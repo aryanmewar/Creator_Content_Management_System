@@ -51,13 +51,19 @@ const TodaySchedule = ({ schedules = [] }) => {
                 </p>
                 <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
                   <p className="text-xs text-slate-600 font-medium truncate max-w-[150px] sm:max-w-[200px]">
-                    {s.contentId?.contributors && s.contentId.contributors.length > 0
+                    {s.contentId?.contributors &&
+                    s.contentId.contributors.length > 0
                       ? s.contentId.contributors[0].name
                       : s.contentId?.createdBy?.name || "Owner"}
                   </p>
-                  <span className="text-slate-300 text-[10px] hidden sm:inline">•</span>
+                  <span className="text-slate-300 text-[10px] hidden sm:inline">
+                    •
+                  </span>
                   <p className="text-xs text-muted-foreground truncate w-full sm:w-auto">
-                    Today{s.scheduledTime ? ` at ${formatTime12Hour(s.scheduledTime)}` : ""}
+                    Today
+                    {s.scheduledTime
+                      ? ` at ${formatTime12Hour(s.scheduledTime)}`
+                      : ""}
                   </p>
                 </div>
               </div>

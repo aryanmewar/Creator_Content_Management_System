@@ -13,10 +13,7 @@ import {
 } from "lucide-react";
 import DashboardLayout from "../components/layout/DashboardLayout.jsx";
 import Loader from "../components/common/Loader.jsx";
-import {
-  getStatusColor,
-  getStatusLabel,
-} from "../utils/statusUtils.js";
+import { getStatusColor, getStatusLabel } from "../utils/statusUtils.js";
 import { formatDate } from "../utils/dateUtils.js";
 import { getInitials, timeAgo } from "../utils/formatUtils.js";
 import { instructorService } from "../services/instructorService.js";
@@ -115,7 +112,9 @@ const InstructorDetails = () => {
             </div>
             <div className="flex items-center gap-2 text-slate-600">
               <Clock className="w-4 h-4 text-slate-400" />
-              <span>Last Active: {lastLoginAt ? timeAgo(lastLoginAt) : "Never"}</span>
+              <span>
+                Last Active: {lastLoginAt ? timeAgo(lastLoginAt) : "Never"}
+              </span>
             </div>
           </div>
 

@@ -28,15 +28,15 @@ const StatsCard = ({
       ring: "ring-white/20",
       cardBorder: "border-l-amber-500",
     },
-    danger: { 
-      bg: "bg-gradient-to-br from-rose-400 to-red-600 shadow-lg shadow-rose-500/30", 
-      icon: "text-white", 
+    danger: {
+      bg: "bg-gradient-to-br from-rose-400 to-red-600 shadow-lg shadow-rose-500/30",
+      icon: "text-white",
       ring: "ring-white/20",
       cardBorder: "border-l-rose-500",
     },
-    info: { 
-      bg: "bg-gradient-to-br from-cyan-400 to-blue-500 shadow-lg shadow-cyan-500/30", 
-      icon: "text-white", 
+    info: {
+      bg: "bg-gradient-to-br from-cyan-400 to-blue-500 shadow-lg shadow-cyan-500/30",
+      icon: "text-white",
       ring: "ring-white/20",
       cardBorder: "border-l-cyan-500",
     },
@@ -50,7 +50,9 @@ const StatsCard = ({
   const c = colorMap[color] || colorMap.primary;
 
   return (
-    <div className={`card p-5 border-l-4 ${c.cardBorder} hover:-translate-y-1 hover:shadow-xl transition-all duration-300 relative overflow-hidden group bg-white/70 backdrop-blur-md`}>
+    <div
+      className={`card p-5 border-l-4 ${c.cardBorder} hover:-translate-y-1 hover:shadow-xl transition-all duration-300 relative overflow-hidden group bg-white/70 backdrop-blur-md`}
+    >
       <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-gradient-to-br from-slate-50 to-slate-100 rounded-full blur-2xl opacity-50 group-hover:opacity-100 transition-opacity pointer-events-none" />
       <div className="flex items-start justify-between relative z-10">
         <div>

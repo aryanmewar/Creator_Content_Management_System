@@ -12,39 +12,54 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-const CONTENT_TYPES_OPTIONS = ["Reel", "Post", "Lecture video", "Others"].map((t) => ({
-  label: t,
-  value: t,
-}));
+const CONTENT_TYPES_OPTIONS = ["Reel", "Post", "Lecture video", "Others"].map(
+  (t) => ({
+    label: t,
+    value: t,
+  }),
+);
 
 const getSchema = (isOwnerView) =>
-  z.object({
-    title: z.string().min(2, "Title must be at least 2 characters").max(200),
-    referenceLink: z.string().url("Must be a valid URL").optional().or(z.literal("")),
-    contentType: z
-      .array(z.string())
-      .min(1, "Please select at least one content type"),
-    contributors: isOwnerView
-      ? z.array(z.string()).optional()
-      : z.array(z.string()).min(1, "Please select at least one contributor"),
-    dueDate: z
-      .string()
-      .optional()
-      .refine((val) => !val || !isNaN(new Date(val).getTime()), {
-        message: "Invalid due date",
-      }),
-    completionDate: z
-      .string()
-      .optional()
-      .refine((val) => !val || !isNaN(new Date(val).getTime()), {
-        message: "Invalid date",
-      }),
-    notes: z.string().max(2000).optional(),
-    otherContentType: z.string().optional(),
-  }).refine(data => !data.contentType.includes("Others") || (data.contentType.includes("Others") && data.otherContentType && data.otherContentType.trim().length > 0), {
-    message: "Please specify the other content type",
-    path: ["otherContentType"]
-  });
+  z
+    .object({
+      title: z.string().min(2, "Title must be at least 2 characters").max(200),
+      referenceLink: z
+        .string()
+        .url("Must be a valid URL")
+        .optional()
+        .or(z.literal("")),
+      contentType: z
+        .array(z.string())
+        .min(1, "Please select at least one content type"),
+      contributors: isOwnerView
+        ? z.array(z.string()).optional()
+        : z.array(z.string()).min(1, "Please select at least one contributor"),
+      dueDate: z
+        .string()
+        .optional()
+        .refine((val) => !val || !isNaN(new Date(val).getTime()), {
+          message: "Invalid due date",
+        }),
+      completionDate: z
+        .string()
+        .optional()
+        .refine((val) => !val || !isNaN(new Date(val).getTime()), {
+          message: "Invalid date",
+        }),
+      notes: z.string().max(2000).optional(),
+      otherContentType: z.string().optional(),
+    })
+    .refine(
+      (data) =>
+        !data.contentType.includes("Others") ||
+        (data.contentType.includes("Others") &&
+          data.otherContentType &&
+          data.otherContentType.trim().length > 0),
+      {
+        message: "Please specify the other content type",
+        path: ["otherContentType"],
+      },
+    );
 
 const ContentForm = ({
   isOpen,
@@ -119,10 +134,14 @@ const ContentForm = ({
       title: data.title,
       referenceLink: data.referenceLink === "" ? null : data.referenceLink,
       contentType: data.contentType,
-      otherContentType: data.contentType.includes("Others") ? data.otherContentType : null,
+      otherContentType: data.contentType.includes("Others")
+        ? data.otherContentType
+        : null,
       contributors: data.contributors,
       dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : null,
-      completionDate: data.completionDate ? new Date(data.completionDate).toISOString() : null,
+      completionDate: data.completionDate
+        ? new Date(data.completionDate).toISOString()
+        : null,
       notes: data.notes === "" ? null : data.notes,
       isOwnerContent: isOwnerView,
     };
@@ -179,9 +198,7 @@ const ContentForm = ({
               </div>
 
               <div className="space-y-1.5">
-                <label className={labelClasses}>
-                  Reference Link
-                </label>
+                <label className={labelClasses}>Reference Link</label>
                 <input
                   type="url"
                   placeholder="https://example.com"
@@ -213,7 +230,7 @@ const ContentForm = ({
                     />
                   )}
                 />
-                
+
                 {showOtherInput && (
                   <div className="space-y-1.5 mt-3 animate-in fade-in slide-in-from-top-1">
                     <label className={labelClasses}>
@@ -261,9 +278,7 @@ const ContentForm = ({
               <div className="grid grid-cols-2 gap-4">
                 {!hideDueDate && (
                   <div className="space-y-1.5">
-                    <label className={labelClasses}>
-                      Target Shoot Date
-                    </label>
+                    <label className={labelClasses}>Target Shoot Date</label>
                     <input
                       type="date"
                       {...register("dueDate")}
@@ -280,9 +295,7 @@ const ContentForm = ({
                 <div
                   className={`space-y-1.5 ${hideDueDate ? "col-span-2" : ""}`}
                 >
-                  <label className={labelClasses}>
-                    Shoot Completion
-                  </label>
+                  <label className={labelClasses}>Shoot Completion</label>
                   <input
                     type="date"
                     {...register("completionDate")}

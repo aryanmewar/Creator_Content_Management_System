@@ -9,7 +9,7 @@ const InstructorCard = ({ instructor, onEdit, onToggleStatus, onDelete }) => {
     instructor;
 
   return (
-    <div 
+    <div
       onClick={() => navigate(`/instructors/${_id}`)}
       className="card p-5 hover:shadow-card-hover transition-all duration-200 group cursor-pointer"
     >
@@ -57,10 +57,8 @@ const InstructorCard = ({ instructor, onEdit, onToggleStatus, onDelete }) => {
         <span className="truncate">{email}</span>
       </div>
 
-
-
       {/* Actions */}
-      <div 
+      <div
         className="flex gap-2 pt-3 border-t border-slate-100"
         onClick={(e) => e.stopPropagation()}
       >

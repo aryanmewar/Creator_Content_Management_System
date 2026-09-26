@@ -85,8 +85,14 @@ export const deleteContent = async (req, res, next) => {
 
 export const updateContentStatus = async (req, res, next) => {
   try {
-    const { status, feedback, scheduledDate, scheduledTime, publishedLinks, publishedDate } =
-      req.body;
+    const {
+      status,
+      feedback,
+      scheduledDate,
+      scheduledTime,
+      publishedLinks,
+      publishedDate,
+    } = req.body;
     const content = await contentService.updateContentStatus(
       req.params.id,
       status,

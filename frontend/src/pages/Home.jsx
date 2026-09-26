@@ -71,9 +71,12 @@ const Home = () => {
         const mappedContents = scheduledContentList
           .filter((c) => c.scheduledDate)
           .map((c) => {
-            let cType = Array.isArray(c.contentType) ? c.contentType[0] : c.contentType;
-            if (cType === "Others" && c.otherContentType) cType = c.otherContentType;
-            
+            let cType = Array.isArray(c.contentType)
+              ? c.contentType[0]
+              : c.contentType;
+            if (cType === "Others" && c.otherContentType)
+              cType = c.otherContentType;
+
             return {
               _id: `content-${c._id}`,
               contentId: c,

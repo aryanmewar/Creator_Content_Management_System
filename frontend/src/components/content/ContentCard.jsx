@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { Calendar, Users, Save, Edit2, Trash2, ExternalLink } from "lucide-react";
+import {
+  Calendar,
+  Users,
+  Save,
+  Edit2,
+  Trash2,
+  ExternalLink,
+} from "lucide-react";
 import {
   FaYoutube,
   FaInstagram,
@@ -39,7 +46,15 @@ const ContentCard = ({
   onStatusChange,
   onViewDetails,
 }) => {
-  const { title, contentType, status, contributors, completionDate, dueDate, notes } = content;
+  const {
+    title,
+    contentType,
+    status,
+    contributors,
+    completionDate,
+    dueDate,
+    notes,
+  } = content;
 
   const hasLinks = !!(
     content.publishedLinks?.youtube ||
@@ -133,9 +148,11 @@ const ContentCard = ({
     displayText = content.createdBy.name;
   }
 
-  const isOverdue = content.isOverdue || (dueDate && 
-    status === "ASSIGNED" && 
-    new Date(dueDate).setHours(0,0,0,0) < new Date().setHours(0,0,0,0));
+  const isOverdue =
+    content.isOverdue ||
+    (dueDate &&
+      status === "ASSIGNED" &&
+      new Date(dueDate).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0));
 
   return (
     <Card className="mb-4 hover:border-slate-300 transition-colors shadow-sm">
@@ -204,7 +221,9 @@ const ContentCard = ({
                   variant="outline"
                   className="text-[10px] font-bold uppercase tracking-wider bg-slate-50 text-slate-600"
                 >
-                  {type === "Others" && content.otherContentType ? `Others (${content.otherContentType})` : type}
+                  {type === "Others" && content.otherContentType
+                    ? `Others (${content.otherContentType})`
+                    : type}
                 </Badge>
               ))}
             </div>
@@ -218,9 +237,9 @@ const ContentCard = ({
           {content.referenceLink && (
             <div className="flex items-center gap-1.5">
               <ExternalLink className="w-4 h-4 opacity-70 text-blue-500" />
-              <a 
-                href={content.referenceLink} 
-                target="_blank" 
+              <a
+                href={content.referenceLink}
+                target="_blank"
                 rel="noopener noreferrer"
                 className="font-medium text-blue-600 hover:text-blue-800 hover:underline"
                 onClick={(e) => e.stopPropagation()}
@@ -257,7 +276,9 @@ const ContentCard = ({
 
         {notes && (
           <div className="mb-4 text-sm bg-amber-50/50 p-3 rounded-lg border border-amber-100/50 text-slate-600">
-            <span className="font-semibold text-slate-700 block mb-1">Notes:</span>
+            <span className="font-semibold text-slate-700 block mb-1">
+              Notes:
+            </span>
             {notes}
           </div>
         )}
@@ -270,7 +291,9 @@ const ContentCard = ({
               <div className="flex items-center gap-2 bg-blue-50/50 px-3 py-1.5 rounded-md border border-blue-100">
                 <Calendar className="w-4 h-4 text-blue-500" />
                 <span className="text-sm font-medium text-blue-700">
-                  Scheduled for {formatDate(content.scheduledDate)}{content.scheduledTime && ` at ${formatTime12Hour(content.scheduledTime)}`}
+                  Scheduled for {formatDate(content.scheduledDate)}
+                  {content.scheduledTime &&
+                    ` at ${formatTime12Hour(content.scheduledTime)}`}
                 </span>
                 <Button
                   variant="ghost"
@@ -404,10 +427,7 @@ const ContentCard = ({
               Time (Optional)
             </label>
             <div className="h-9 flex items-center">
-              <TimePicker
-                value={scheduledTime}
-                onChange={setScheduledTime}
-              />
+              <TimePicker value={scheduledTime} onChange={setScheduledTime} />
             </div>
           </div>
           <Button

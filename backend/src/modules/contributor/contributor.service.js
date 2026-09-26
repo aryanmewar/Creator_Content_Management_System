@@ -25,7 +25,10 @@ export const getDashboard = async (userId) => {
 
   const [totalAssigned, inProgress, pendingReview, published, overdue] =
     await Promise.all([
-      Content.countDocuments({ contributors: instructor._id, status: { $ne: "DRAFT" } }),
+      Content.countDocuments({
+        contributors: instructor._id,
+        status: { $ne: "DRAFT" },
+      }),
       Content.countDocuments({
         contributors: instructor._id,
         status: { $in: ["ASSIGNED", "IN_PROGRESS", "REJECTED"] },
@@ -139,8 +142,18 @@ export const getAssignments = async (userId) => {
         sortDate: {
           $cond: {
             if: { $in: ["$status", ["PUBLISHED", "SCHEDULED"]] },
-            then: { $ifNull: ["$publishedDate", { $ifNull: ["$scheduledDate", "$updatedAt"] }] },
-            else: { $ifNull: ["$completionDate", { $ifNull: ["$updatedAt", "$createdAt"] }] },
+            then: {
+              $ifNull: [
+                "$publishedDate",
+                { $ifNull: ["$scheduledDate", "$updatedAt"] },
+              ],
+            },
+            else: {
+              $ifNull: [
+                "$completionDate",
+                { $ifNull: ["$updatedAt", "$createdAt"] },
+              ],
+            },
           },
         },
       },
@@ -154,13 +167,19 @@ export const getAssignments = async (userId) => {
     _id: c._id,
     contentId: {
       title: c.title,
-      contentType: Array.isArray(c.contentType) ? c.contentType.join(", ") : c.contentType,
+      contentType: Array.isArray(c.contentType)
+        ? c.contentType.join(", ")
+        : c.contentType,
       status: c.status,
     },
     dueDate: c.dueDate,
     deadline: c.completionDate,
     status: c.status,
-    submittedAt: ["SUBMITTED", "APPROVED", "SCHEDULED", "PUBLISHED"].includes(c.status) ? c.updatedAt : null,
+    submittedAt: ["SUBMITTED", "APPROVED", "SCHEDULED", "PUBLISHED"].includes(
+      c.status,
+    )
+      ? c.updatedAt
+      : null,
   }));
 };
 
@@ -178,8 +197,18 @@ export const getReport = async (userId) => {
         sortDate: {
           $cond: {
             if: { $in: ["$status", ["PUBLISHED", "SCHEDULED"]] },
-            then: { $ifNull: ["$publishedDate", { $ifNull: ["$scheduledDate", "$updatedAt"] }] },
-            else: { $ifNull: ["$completionDate", { $ifNull: ["$updatedAt", "$createdAt"] }] },
+            then: {
+              $ifNull: [
+                "$publishedDate",
+                { $ifNull: ["$scheduledDate", "$updatedAt"] },
+              ],
+            },
+            else: {
+              $ifNull: [
+                "$completionDate",
+                { $ifNull: ["$updatedAt", "$createdAt"] },
+              ],
+            },
           },
         },
       },
@@ -193,13 +222,19 @@ export const getReport = async (userId) => {
     _id: c._id,
     contentId: {
       title: c.title,
-      contentType: Array.isArray(c.contentType) ? c.contentType.join(", ") : c.contentType,
+      contentType: Array.isArray(c.contentType)
+        ? c.contentType.join(", ")
+        : c.contentType,
       status: c.status,
     },
     dueDate: c.dueDate,
     deadline: c.completionDate,
     status: c.status,
-    submittedAt: ["SUBMITTED", "APPROVED", "SCHEDULED", "PUBLISHED"].includes(c.status) ? c.updatedAt : null,
+    submittedAt: ["SUBMITTED", "APPROVED", "SCHEDULED", "PUBLISHED"].includes(
+      c.status,
+    )
+      ? c.updatedAt
+      : null,
   }));
 
   // Compute a simple performance report

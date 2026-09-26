@@ -64,11 +64,17 @@ const Schedule = () => {
         .filter((c) => {
           if (!c.scheduledDate) return false;
           const d = new Date(c.scheduledDate);
-          return d.getMonth() === date.getMonth() && d.getFullYear() === date.getFullYear();
+          return (
+            d.getMonth() === date.getMonth() &&
+            d.getFullYear() === date.getFullYear()
+          );
         })
         .map((c) => {
-          let cType = Array.isArray(c.contentType) ? c.contentType[0] : c.contentType;
-          if (cType === "Others" && c.otherContentType) cType = c.otherContentType;
+          let cType = Array.isArray(c.contentType)
+            ? c.contentType[0]
+            : c.contentType;
+          if (cType === "Others" && c.otherContentType)
+            cType = c.otherContentType;
 
           return {
             _id: `content-${c._id}`,
@@ -197,7 +203,10 @@ const Schedule = () => {
                             className={`text-[10px] px-1.5 py-0.5 rounded font-medium truncate ${getPlatformColor(s.platform)}`}
                             title={`${s.contentId?.title} on ${s.platform} at ${s.scheduledTime ? formatTime12Hour(s.scheduledTime) : ""}`}
                           >
-                            {s.scheduledTime ? formatTime12Hour(s.scheduledTime) : ""} {s.contentId?.title}
+                            {s.scheduledTime
+                              ? formatTime12Hour(s.scheduledTime)
+                              : ""}{" "}
+                            {s.contentId?.title}
                           </div>
                         ))}
                         {daySchedules.length > 3 && (
@@ -222,9 +231,12 @@ const Schedule = () => {
         {(() => {
           const currentMonthSchedules = schedules.filter((s) => {
             const d = new Date(s.scheduledDate);
-            return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
+            return (
+              d.getMonth() === currentDate.getMonth() &&
+              d.getFullYear() === currentDate.getFullYear()
+            );
           });
-          
+
           return currentMonthSchedules.length === 0 ? (
             <p className="text-sm text-slate-400 text-center py-6">
               No schedules this month.
@@ -248,7 +260,9 @@ const Schedule = () => {
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {format(new Date(s.scheduledDate), "MMM d, yyyy")}
-                      {s.scheduledTime ? ` at ${formatTime12Hour(s.scheduledTime)}` : ""}
+                      {s.scheduledTime
+                        ? ` at ${formatTime12Hour(s.scheduledTime)}`
+                        : ""}
                     </p>
                   </div>
                   <Badge
