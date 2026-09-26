@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { TrendingUp, Award, Target, Download, Calendar } from "lucide-react";
+import Select from "../components/common/Select.jsx";
+import { generateMonthOptions } from "../utils/dateUtils.js";
 import ExcelJS from "exceljs";
 import {
   BarChart,
@@ -44,6 +46,8 @@ const Reports = () => {
   });
   const [selectedMonth, setSelectedMonth] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+
+  const monthOptions = useMemo(() => generateMonthOptions(), []);
 
   useEffect(() => {
     const load = async () => {
@@ -254,25 +258,13 @@ const Reports = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
         <h2 className="text-xl font-bold text-slate-800">Overview</h2>
         <div className="flex items-center gap-3">
-          <div className="relative group">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Calendar className="h-4 w-4 text-slate-400 group-hover:text-blue-500 transition-colors" />
-            </div>
-            <input
-              type="month"
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(e.target.value)}
-              className="pl-9 pr-4 py-2 border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm font-medium text-slate-700 shadow-sm cursor-pointer"
-            />
-          </div>
-          {selectedMonth && (
-            <button
-              onClick={() => setSelectedMonth("")}
-              className="text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors px-2"
-            >
-              Clear Filter
-            </button>
-          )}
+          <Select
+            options={monthOptions}
+            placeholder="All Months"
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+            className="w-40 h-10 [&>div]:rounded-xl [&>div]:h-full"
+          />
         </div>
       </div>
 

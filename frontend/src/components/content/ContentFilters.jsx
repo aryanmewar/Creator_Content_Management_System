@@ -2,41 +2,13 @@ import React, { useMemo } from "react";
 import Select from "../common/Select.jsx";
 import AnimatedSearch from "../common/AnimatedSearch.jsx";
 import { CONTENT_TYPES, CONTENT_STATUSES } from "../../utils/constants.js";
+import { generateMonthOptions } from "../../utils/dateUtils.js";
 
 const statusOptions = Object.values(CONTENT_STATUSES).map((s) => ({
   label: s.replace("_", " "),
   value: s,
 }));
 const typeOptions = CONTENT_TYPES.map((t) => ({ label: t, value: t }));
-
-const generateMonthOptions = () => {
-  const options = [];
-  const currentDate = new Date();
-
-  const startYear = 2026;
-  const startMonth = 8; // September (0-indexed)
-
-  let iterYear = currentDate.getFullYear();
-  let iterMonth = currentDate.getMonth();
-
-  while (
-    iterYear > startYear ||
-    (iterYear === startYear && iterMonth >= startMonth)
-  ) {
-    const d = new Date(iterYear, iterMonth, 1);
-    const monthStr = d.toLocaleString("default", { month: "short" });
-    const valStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-    options.push({ label: `${monthStr} ${d.getFullYear()}`, value: valStr });
-
-    iterMonth--;
-    if (iterMonth < 0) {
-      iterMonth = 11;
-      iterYear--;
-    }
-  }
-
-  return options;
-};
 
 const ContentFilters = ({
   filters,

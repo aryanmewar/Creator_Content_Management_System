@@ -30,6 +30,14 @@ import Select from "@/components/common/Select.jsx";
 import TimePicker from "@/components/common/TimePicker.jsx";
 import { Input } from "@/components/ui/input";
 
+const ALLOWED_DROPDOWN_STATUSES = [
+  "ASSIGNED",
+  "IN_PROGRESS",
+  "COMPLETED",
+  "APPROVED",
+  "SCHEDULED",
+  "PUBLISHED",
+];
 
 const ContentCard = ({
   content,
@@ -386,7 +394,7 @@ const ContentCard = ({
                 onChange={(e) =>
                   onStatusChange && onStatusChange(content._id, e.target.value)
                 }
-                options={getAllowedTransitions(status).map((s) => ({
+                options={ALLOWED_DROPDOWN_STATUSES.map((s) => ({
                   label: getStatusLabel(s),
                   value: s,
                 }))}

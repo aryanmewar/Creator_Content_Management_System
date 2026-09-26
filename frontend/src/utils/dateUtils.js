@@ -93,3 +93,37 @@ export const deadlineStateLabel = {
   UPCOMING: "Upcoming",
   COMPLETED: "Completed",
 };
+
+/**
+ * Generate month options for filter dropdowns (e.g. "Sep 2024")
+ * Starts from Sept 2026 backwards
+ */
+export const generateMonthOptions = () => {
+  const options = [];
+  const currentDate = new Date();
+
+  const startYear = 2026;
+  const startMonth = 8; // September (0-indexed)
+
+  let iterYear = currentDate.getFullYear();
+  let iterMonth = currentDate.getMonth();
+
+  while (
+    iterYear > startYear ||
+    (iterYear === startYear && iterMonth >= startMonth)
+  ) {
+    const d = new Date(iterYear, iterMonth, 1);
+    const monthStr = d.toLocaleString("default", { month: "short" });
+    const valStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    options.push({ label: `${monthStr} ${d.getFullYear()}`, value: valStr });
+
+    iterMonth--;
+    if (iterMonth < 0) {
+      iterMonth = 11;
+      iterYear--;
+    }
+  }
+
+  return options;
+};
+
