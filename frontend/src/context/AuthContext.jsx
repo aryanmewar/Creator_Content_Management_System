@@ -49,7 +49,8 @@ export const AuthProvider = ({ children }) => {
           payload: { user: response.data, isAuthenticated: true },
         });
       } catch {
-        // Cookie absent or expired — user is not authenticated
+        // Cookie absent or expired and no valid localStorage token — user is not authenticated
+        localStorage.removeItem("cms_token");
         dispatch({ type: "INIT", payload: { isAuthenticated: false } });
       }
     };
@@ -58,8 +59,10 @@ export const AuthProvider = ({ children }) => {
 
   const login = useCallback(async (credentials) => {
     const response = await authService.login(credentials);
-    // Token is now in an HttpOnly cookie — we only store the user object in state
-    const { user } = response.data;
+    const { user, token } = response.data;
+    if (token) {
+      localStorage.setItem("cms_token", token);
+    }
     dispatch({ type: "LOGIN", payload: { user } });
     return response;
   }, []);
@@ -68,6 +71,7 @@ export const AuthProvider = ({ children }) => {
     try {
       await authService.logout();
     } finally {
+      localStorage.removeItem("cms_token");
       dispatch({ type: "LOGOUT" });
     }
   }, []);

@@ -19,7 +19,7 @@ export const register = async (req, res, next) => {
     });
     return sendSuccess(res, {
       message: "Account created successfully.",
-      data: { user },
+      data: { user, token },
       statusCode: 201,
     });
   } catch (error) {
@@ -40,7 +40,7 @@ export const login = async (req, res, next) => {
     });
     return sendSuccess(res, {
       message: "Login successful.",
-      data: { user },
+      data: { user, token },
     });
   } catch (error) {
     next(error);

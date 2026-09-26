@@ -9,6 +9,16 @@ const api = axios.create({
   withCredentials: true,
 });
 
+// ── Request Interceptor — attach token ────────────────────────────────────────
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("cms_token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+
 // ── Response Interceptor — handle 401 globally ────────────────────────────────
 api.interceptors.response.use(
   (response) => response,
