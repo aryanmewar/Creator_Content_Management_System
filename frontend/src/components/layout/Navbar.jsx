@@ -13,6 +13,8 @@ const pageTitles = {
   "/reports": "Reports & Analytics",
   "/future-projects": "Future Projects",
   "/settings": "Settings",
+  "/my-dashboard": "My Dashboard",
+  "/my-report": "My Performance Report",
 };
 
 const pageSubtitles = {
@@ -25,6 +27,8 @@ const pageSubtitles = {
   "/reports": "Content performance overview",
   "/future-projects": "Save links and ideas for your upcoming content",
   "/settings": "Manage your account and preferences",
+  "/my-dashboard": "View your assigned content and tasks",
+  "/my-report": "Track your completed content and on-time rate",
 };
 
 const Navbar = ({ onMenuClick }) => {

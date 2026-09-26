@@ -39,10 +39,6 @@ const ContributorDashboard = () => {
 
   return (
     <>
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-slate-800">My Dashboard</h2>
-        <p className="text-slate-500">View your assigned content and tasks.</p>
-      </div>
 
       {error && (
         <div className="p-3 mb-4 rounded-lg bg-red-50 text-red-600 text-sm">
@@ -94,58 +90,112 @@ const ContributorDashboard = () => {
             You have no assigned content.
           </p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm border-collapse">
-              <thead>
-                <tr className="border-b border-slate-200 text-slate-500">
-                  <th className="py-3 px-4 font-semibold">Title</th>
-                  <th className="py-3 px-4 font-semibold">Type</th>
-                  <th className="py-3 px-4 font-semibold">Target Shoot Date</th>
-                  <th className="py-3 px-4 font-semibold">Shoot Completion</th>
-                  <th className="py-3 px-4 font-semibold">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {assignments.map((item) => (
-                  <tr
-                    key={item._id}
-                    className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
-                  >
-                    <td className="py-3 px-4 font-medium text-slate-800">
-                      {item.contentId?.title || "Unknown Title"}
-                    </td>
-                    <td className="py-3 px-4 text-slate-600">
-                      {item.contentId?.contentType || "N/A"}
-                    </td>
-                    <td className="py-3 px-4 text-slate-600">
-                      {item.dueDate
-                        ? new Date(item.dueDate).toLocaleDateString()
-                        : "-"}
-                    </td>
-                    <td className="py-3 px-4 text-slate-600">
-                      {item.deadline
-                        ? new Date(item.deadline).toLocaleDateString()
-                        : "-"}
-                    </td>
-                    <td className="py-3 px-4">
-                      <span
-                        className={`px-2.5 py-1 text-xs font-medium rounded-full ${
-                          item.status === "PUBLISHED" ||
-                          item.status === "APPROVED"
-                            ? "bg-green-100 text-green-700"
-                            : item.status === "SUBMITTED"
-                              ? "bg-purple-100 text-purple-700"
-                              : "bg-blue-100 text-blue-700"
-                        }`}
-                      >
-                        {item.status.replace("_", " ")}
-                      </span>
-                    </td>
+          <>
+            {/* Desktop View: Table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-sm border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-200 text-slate-500">
+                    <th className="py-3 px-4 font-semibold">Title</th>
+                    <th className="py-3 px-4 font-semibold">Type</th>
+                    <th className="py-3 px-4 font-semibold">Target Shoot Date</th>
+                    <th className="py-3 px-4 font-semibold">Shoot Completion</th>
+                    <th className="py-3 px-4 font-semibold">Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {assignments.map((item) => (
+                    <tr
+                      key={item._id}
+                      className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
+                    >
+                      <td className="py-3 px-4 font-medium text-slate-800">
+                        {item.contentId?.title || "Unknown Title"}
+                      </td>
+                      <td className="py-3 px-4 text-slate-600">
+                        {item.contentId?.contentType || "N/A"}
+                      </td>
+                      <td className="py-3 px-4 text-slate-600">
+                        {item.dueDate
+                          ? new Date(item.dueDate).toLocaleDateString()
+                          : "-"}
+                      </td>
+                      <td className="py-3 px-4 text-slate-600">
+                        {item.deadline
+                          ? new Date(item.deadline).toLocaleDateString()
+                          : "-"}
+                      </td>
+                      <td className="py-3 px-4">
+                        <span
+                          className={`px-2.5 py-1 text-xs font-medium rounded-full ${
+                            item.status === "PUBLISHED" ||
+                            item.status === "APPROVED"
+                              ? "bg-green-100 text-green-700"
+                              : item.status === "SUBMITTED"
+                                ? "bg-purple-100 text-purple-700"
+                                : "bg-blue-100 text-blue-700"
+                          }`}
+                        >
+                          {item.status.replace("_", " ")}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile View: Cards */}
+            <div className="md:hidden space-y-4">
+              {assignments.map((item) => (
+                <div
+                  key={item._id}
+                  className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm"
+                >
+                  <div className="flex justify-between items-start mb-3 gap-2">
+                    <h4 className="font-semibold text-slate-800 line-clamp-2">
+                      {item.contentId?.title || "Unknown Title"}
+                    </h4>
+                    <span
+                      className={`shrink-0 px-2.5 py-1 text-xs font-medium rounded-full ${
+                        item.status === "PUBLISHED" ||
+                        item.status === "APPROVED"
+                          ? "bg-green-100 text-green-700"
+                          : item.status === "SUBMITTED"
+                            ? "bg-purple-100 text-purple-700"
+                            : "bg-blue-100 text-blue-700"
+                      }`}
+                    >
+                      {item.status.replace("_", " ")}
+                    </span>
+                  </div>
+                  
+                  <div className="space-y-2 text-sm text-slate-600">
+                    <div className="flex justify-between">
+                      <span className="font-medium text-slate-500">Type:</span>
+                      <span>{item.contentId?.contentType || "N/A"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium text-slate-500">Target Shoot Date:</span>
+                      <span>
+                        {item.dueDate
+                          ? new Date(item.dueDate).toLocaleDateString()
+                          : "-"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium text-slate-500">Shoot Completion:</span>
+                      <span>
+                        {item.deadline
+                          ? new Date(item.deadline).toLocaleDateString()
+                          : "-"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </>
