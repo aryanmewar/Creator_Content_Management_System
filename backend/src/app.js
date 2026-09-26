@@ -30,7 +30,7 @@ app.use(helmet());
 
 // Restrict CORS to configured origin only
 const allowedOrigins = env.CLIENT_URL
-  ? env.CLIENT_URL.split(",").map((o) => o.trim())
+  ? env.CLIENT_URL.split(",").map((o) => o.trim().replace(/\/$/, ""))
   : ["http://localhost:5173"];
 
 app.use(
