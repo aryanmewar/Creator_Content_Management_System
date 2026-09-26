@@ -94,6 +94,10 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());
 
 // ─── Health Check ─────────────────────────────────────────────────────────────
+app.get("/", (req, res) => {
+  res.send("Creator Content Management System API is running.");
+});
+
 app.get("/api/health", (req, res) => {
   res.json({
     success: true,
