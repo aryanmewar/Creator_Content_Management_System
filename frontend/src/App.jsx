@@ -7,8 +7,14 @@ import { InstructorProvider } from "./context/InstructorContext.jsx";
 import { NotificationProvider } from "./context/NotificationContext.jsx";
 import AppRoutes from "./routes/AppRoutes.jsx";
 import ErrorBoundary from "./components/common/ErrorBoundary.jsx";
+import { syncWorldTime } from "./utils/dateUtils.js";
 
-const App = () => (
+const App = () => {
+  React.useEffect(() => {
+    syncWorldTime();
+  }, []);
+
+  return (
   <ErrorBoundary>
     <BrowserRouter>
       <AuthProvider>
@@ -40,6 +46,7 @@ const App = () => (
       </AuthProvider>
     </BrowserRouter>
   </ErrorBoundary>
-);
+  );
+};
 
 export default App;

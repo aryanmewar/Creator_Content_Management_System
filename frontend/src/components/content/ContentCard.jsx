@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Calendar,
   Users,
@@ -22,7 +22,7 @@ import {
   getStatusLabel,
   getAllowedTransitions,
 } from "@/utils/statusUtils.js";
-import { formatDate, formatTime12Hour } from "@/utils/dateUtils.js";
+import { formatDate, formatTime12Hour, getRealDate } from "@/utils/dateUtils.js";
 
 import {
   Card,
@@ -108,8 +108,44 @@ const ContentCard = ({
   const showDateForm =
     status === "SCHEDULED" && (!hasScheduledDate || forceEditDate);
 
+  useEffect(() => {
+    if (showDateForm && !scheduledDate && !scheduledTime) {
+      const now = getRealDate();
+      now.setMinutes(now.getMinutes() + 30);
+      
+      const newDate = now.toISOString().split("T")[0];
+      const newHours = now.getHours().toString().padStart(2, "0");
+      const newMins = now.getMinutes().toString().padStart(2, "0");
+      
+      setScheduledDate(newDate);
+      setScheduledTime(`${newHours}:${newMins}`);
+    }
+  }, [showDateForm, scheduledDate, scheduledTime]);
+
   const handleSaveExpanded = async (e) => {
     e?.stopPropagation();
+
+    if (showDateForm && scheduledDate) {
+      const today = getRealDate().toISOString().split("T")[0];
+      if (scheduledDate < today) {
+        toast.error("Cannot set a scheduled date in the past.");
+        return;
+      }
+      if (scheduledDate === today && scheduledTime) {
+        const [hours, minutes] = scheduledTime.split(":");
+        const scheduledDateTime = getRealDate();
+        scheduledDateTime.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+        
+        const thirtyMinsFromNow = getRealDate();
+        thirtyMinsFromNow.setMinutes(thirtyMinsFromNow.getMinutes() + 30);
+        
+        if (scheduledDateTime < thirtyMinsFromNow) {
+          toast.error("Scheduled time must be at least 30 minutes in the future.");
+          return;
+        }
+      }
+    }
+
     setIsSaving(true);
     if (onStatusChange) {
       const cleanLinks = {};
@@ -202,7 +238,7 @@ const ContentCard = ({
     content.isOverdue ||
     (dueDate &&
       status === "ASSIGNED" &&
-      new Date(dueDate).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0));
+      new Date(dueDate).setHours(0, 0, 0, 0) < getRealDate().setHours(0, 0, 0, 0));
 
   return (
     <Card className="mb-4 hover:border-slate-300 transition-colors shadow-sm">
@@ -484,6 +520,7 @@ const ContentCard = ({
               type="date"
               className="h-9 py-1 px-3 text-sm bg-white"
               style={{ minHeight: "36px", height: "36px" }}
+              min={getRealDate().toISOString().split("T")[0]}
               value={scheduledDate}
               onChange={(e) => setScheduledDate(e.target.value)}
             />

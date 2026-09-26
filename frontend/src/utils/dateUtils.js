@@ -5,6 +5,32 @@ import {
   isTomorrow,
   isPast,
 } from "date-fns";
+import api from "../services/api.js";
+
+// Global offset between client device time and reliable server time
+let timeOffset = 0;
+
+export const syncWorldTime = async () => {
+  try {
+    const start = Date.now();
+    const res = await api.get("/health");
+    const end = Date.now();
+    const latency = (end - start) / 2;
+    const serverTime = new Date(res.data.timestamp).getTime() + latency;
+    timeOffset = serverTime - Date.now();
+    console.log("World time synced. Offset:", timeOffset, "ms");
+  } catch (err) {
+    console.warn("Failed to sync world time. Using local device time.", err);
+  }
+};
+
+/**
+ * Returns a new Date object representing the real world time, 
+ * independent of the local device clock.
+ */
+export const getRealDate = () => {
+  return new Date(Date.now() + timeOffset);
+};
 
 /**
  * Format a date as "Sep 20, 2024"
@@ -74,7 +100,7 @@ export const getDeadlineState = (deadline, contentStatus) => {
   if (completedStatuses.includes(contentStatus)) return "COMPLETED";
   if (!deadline) return "UPCOMING";
 
-  const now = new Date();
+  const now = getRealDate();
   const dl = new Date(deadline);
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const dlDay = new Date(dl.getFullYear(), dl.getMonth(), dl.getDate());
