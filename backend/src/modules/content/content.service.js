@@ -55,65 +55,33 @@ export const getContent = async ({
   }
 
   const skip = (page - 1) * limit;
-  const total = await Content.countDocuments(query);
+  const countQuery = { ...query };
+  delete countQuery.status;
 
-  let content;
+  const sort = {};
   if (sortBy === "publishedDate") {
-    const pipeline = [
-      { $match: query },
-      {
-        $addFields: {
-          sortPriority: {
-            $cond: {
-              if: { $eq: ["$status", "DRAFT"] },
-              then: 0,
-              else: 1,
-            },
-          },
-          sortDate: {
-            $cond: {
-              if: { $in: ["$status", ["PUBLISHED", "SCHEDULED"]] },
-              then: {
-                $ifNull: [
-                  "$publishedDate",
-                  { $ifNull: ["$scheduledDate", "$updatedAt"] },
-                ],
-              },
-              else: {
-                $cond: {
-                  if: { $eq: ["$status", "DRAFT"] },
-                  then: { $ifNull: ["$updatedAt", "$createdAt"] },
-                  else: {
-                    $ifNull: [
-                      "$completionDate",
-                      { $ifNull: ["$updatedAt", "$createdAt"] },
-                    ],
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      { $sort: { sortPriority: 1, sortDate: sortOrder === "asc" ? 1 : -1 } },
-      { $skip: skip },
-      { $limit: parseInt(limit) },
-    ];
-    const contentDocs = await Content.aggregate(pipeline);
-    const contentModels = contentDocs.map((doc) => Content.hydrate(doc));
-    content = await Content.populate(contentModels, [
-      { path: "contributors", select: "name email designation profileImage" },
-      { path: "createdBy", select: "name email" },
-    ]);
+    sort.publishedDate = sortOrder === "asc" ? 1 : -1;
+    sort.updatedAt = sortOrder === "asc" ? 1 : -1;
   } else {
-    const sort = { [sortBy]: sortOrder === "asc" ? 1 : -1, createdAt: -1 };
-    content = await Content.find(query)
+    sort[sortBy] = sortOrder === "asc" ? 1 : -1;
+    sort.createdAt = -1;
+  }
+
+  // Execute independent database queries in parallel to eliminate sequential latency
+  const [total, content, statusCountsAggr, totalCount] = await Promise.all([
+    Content.countDocuments(query),
+    Content.find(query)
       .populate("contributors", "name email designation profileImage")
       .populate("createdBy", "name email")
       .sort(sort)
       .skip(skip)
-      .limit(parseInt(limit));
-  }
+      .limit(parseInt(limit)),
+    Content.aggregate([
+      { $match: countQuery },
+      { $group: { _id: "$status", count: { $sum: 1 } } },
+    ]),
+    Content.countDocuments(countQuery),
+  ]);
 
   // ── Single $lookup to join assignments — eliminates N+1 queries ──────────
   // Collect all content IDs in one pass, then lookup all assignments at once
@@ -144,15 +112,6 @@ export const getContent = async ({
     };
   });
 
-  // Get status counts for the current query (ignoring status filter)
-  const countQuery = { ...query };
-  delete countQuery.status;
-  const statusCountsAggr = await Content.aggregate([
-    { $match: countQuery },
-    { $group: { _id: "$status", count: { $sum: 1 } } },
-  ]);
-
-  const totalCount = await Content.countDocuments(countQuery);
   const statusCounts = { All: totalCount };
   statusCountsAggr.forEach(({ _id, count }) => {
     if (_id) statusCounts[_id] = count;

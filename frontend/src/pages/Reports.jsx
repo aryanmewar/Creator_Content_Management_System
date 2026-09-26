@@ -14,7 +14,6 @@ import {
   Cell,
   Legend,
 } from "recharts";
-import DashboardLayout from "../components/layout/DashboardLayout.jsx";
 import StatsCard from "../components/dashboard/StatsCard.jsx";
 import Loader from "../components/common/Loader.jsx";
 import { dashboardService } from "../services/dashboardService.js";
@@ -174,13 +173,13 @@ const Reports = () => {
 
   if (isLoading)
     return (
-      <DashboardLayout>
+      <>
         <Loader />
-      </DashboardLayout>
+      </>
     );
 
   return (
-    <DashboardLayout>
+    <>
       {/* Summary Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <StatsCard
@@ -466,7 +465,7 @@ const Reports = () => {
           )}
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 };
 

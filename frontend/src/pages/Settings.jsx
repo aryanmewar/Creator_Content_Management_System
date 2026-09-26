@@ -1,5 +1,4 @@
 import React from "react";
-import DashboardLayout from "../components/layout/DashboardLayout.jsx";
 import useAuth from "../hooks/useAuth.js";
 import { getInitials } from "../utils/formatUtils.js";
 import { User, Shield, Database } from "lucide-react";
@@ -8,7 +7,7 @@ const Settings = () => {
   const { user } = useAuth();
 
   return (
-    <DashboardLayout>
+    <>
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Profile Card */}
         <div className="card p-6">
@@ -80,7 +79,7 @@ const Settings = () => {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 };
 

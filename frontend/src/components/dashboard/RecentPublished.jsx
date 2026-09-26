@@ -1,5 +1,6 @@
 import React from "react";
 import { Globe } from "lucide-react";
+import { motion } from "framer-motion";
 import { formatDate } from "../../utils/dateUtils.js";
 import { getPlatformColor } from "../../utils/statusUtils.js";
 
@@ -26,10 +27,14 @@ const RecentPublished = ({ publications = [] }) => {
       </h3>
 
       <div className="space-y-3">
-        {publications.map((pub) => (
-          <div
+        {publications.map((pub, idx) => (
+          <motion.div
             key={pub._id}
-            className="group flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-r from-emerald-50/50 to-white hover:from-emerald-50/80 hover:to-white border border-slate-100 hover:border-emerald-200 transition-all duration-300 shadow-sm hover:shadow-md relative overflow-hidden"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: idx * 0.1, ease: "easeOut" }}
+            whileHover={{ scale: 1.01 }}
+            className="group flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-r from-emerald-50/50 to-white hover:from-emerald-50/80 hover:to-white border border-slate-100 hover:border-emerald-200 shadow-sm hover:shadow-md relative overflow-hidden cursor-pointer transition-colors"
           >
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="flex-1 min-w-0">
@@ -45,7 +50,7 @@ const RecentPublished = ({ publications = [] }) => {
                 </span>
               </div>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
     </div>

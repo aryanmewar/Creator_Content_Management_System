@@ -157,8 +157,8 @@ const ContentCard = ({
   return (
     <Card className="mb-4 hover:border-slate-300 transition-colors shadow-sm">
       <CardHeader className="pb-3 pt-5">
-        <div className="flex justify-between items-start gap-4">
-          <div className="flex flex-wrap items-center gap-2 md:gap-3">
+        <div className="flex justify-between items-start gap-2 w-full">
+          <div className="flex flex-wrap items-center gap-2 md:gap-3 flex-1 min-w-0">
             <CardTitle
               className="text-lg hover:text-primary cursor-pointer transition-colors"
               onClick={onViewDetails}
@@ -181,7 +181,7 @@ const ContentCard = ({
             </Badge>
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0">
             <Button
               variant="ghost"
               size="icon"

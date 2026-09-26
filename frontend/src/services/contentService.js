@@ -2,8 +2,8 @@ import api from "./api.js";
 import { buildQueryString } from "../utils/formatUtils.js";
 
 export const contentService = {
-  getContent: async (params = {}) => {
-    const { data } = await api.get(`/content${buildQueryString(params)}`);
+  getContent: async (params = {}, config = {}) => {
+    const { data } = await api.get(`/content${buildQueryString(params)}`, config);
     return data;
   },
 

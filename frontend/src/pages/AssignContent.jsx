@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Plus, UserPlus } from "lucide-react";
 import toast from "react-hot-toast";
-import DashboardLayout from "../components/layout/DashboardLayout.jsx";
 import ContentCard from "../components/content/ContentCard.jsx";
 import ContentForm from "../components/content/ContentForm.jsx";
 import ContentFilters from "../components/content/ContentFilters.jsx";
@@ -152,7 +151,7 @@ const AssignContent = () => {
   );
 
   return (
-    <DashboardLayout>
+    <>
       <div className="sm:pb-0">
         {/* Tabs, Filters, and Actions */}
         <div className="flex flex-col gap-5 mb-6 w-full">
@@ -261,7 +260,7 @@ const AssignContent = () => {
           variant="danger"
         />
       </div>
-    </DashboardLayout>
+    </>
   );
 };
 

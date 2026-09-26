@@ -1,7 +1,8 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import useAuth from "../hooks/useAuth.js";
 import Loader from "../components/common/Loader.jsx";
+import DashboardLayout from "../components/layout/DashboardLayout.jsx";
 
 const ProtectedRoute = ({ allowedRoles }) => {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -24,7 +25,13 @@ const ProtectedRoute = ({ allowedRoles }) => {
     );
   }
 
-  return <Outlet />;
+  return (
+    <DashboardLayout>
+      <Suspense fallback={<div className="flex h-full w-full items-center justify-center py-20"><Loader text="Loading..." /></div>}>
+        <Outlet />
+      </Suspense>
+    </DashboardLayout>
+  );
 };
 
 export default ProtectedRoute;

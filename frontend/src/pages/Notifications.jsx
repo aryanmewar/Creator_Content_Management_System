@@ -1,5 +1,4 @@
 import React from "react";
-import DashboardLayout from "../components/layout/DashboardLayout.jsx";
 import { useNotification } from "../context/NotificationContext.jsx";
 import {
   Bell,
@@ -39,7 +38,7 @@ const Notifications = () => {
   } = useNotification();
 
   return (
-    <DashboardLayout>
+    <>
       <div className="max-w-4xl mx-auto pb-10">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <div className="flex items-center gap-4">
@@ -178,7 +177,7 @@ const Notifications = () => {
           </div>
         )}
       </div>
-    </DashboardLayout>
+    </>
   );
 };
 

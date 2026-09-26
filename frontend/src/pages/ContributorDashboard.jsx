@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import DashboardLayout from "../components/layout/DashboardLayout.jsx";
 import StatsCard from "../components/dashboard/StatsCard.jsx";
 import Loader from "../components/common/Loader.jsx";
 import { Target, Clock, CheckCircle, AlertCircle } from "lucide-react";
@@ -33,13 +32,13 @@ const ContributorDashboard = () => {
 
   if (isLoading)
     return (
-      <DashboardLayout>
+      <>
         <Loader />
-      </DashboardLayout>
+      </>
     );
 
   return (
-    <DashboardLayout>
+    <>
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-slate-800">My Dashboard</h2>
         <p className="text-slate-500">View your assigned content and tasks.</p>
@@ -149,7 +148,7 @@ const ContributorDashboard = () => {
           </div>
         )}
       </div>
-    </DashboardLayout>
+    </>
   );
 };
 

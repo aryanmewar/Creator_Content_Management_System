@@ -10,7 +10,6 @@ import {
   isSameDay,
   isToday,
 } from "date-fns";
-import DashboardLayout from "../components/layout/DashboardLayout.jsx";
 import Loader from "../components/common/Loader.jsx";
 import { scheduleService } from "../services/scheduleService.js";
 import { contentService } from "../services/contentService.js";
@@ -141,7 +140,7 @@ const Schedule = () => {
     schedules.filter((s) => isSameDay(new Date(s.scheduledDate), day));
 
   return (
-    <DashboardLayout>
+    <>
       <Card className="p-6 mb-6 border-slate-200 shadow-sm">
         <div className="flex items-center justify-between mb-6">
           <Button variant="ghost" size="icon" onClick={prevMonth}>
@@ -372,7 +371,7 @@ const Schedule = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </DashboardLayout>
+    </>
   );
 };
 

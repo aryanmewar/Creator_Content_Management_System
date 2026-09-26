@@ -11,7 +11,6 @@ import {
 import { dashboardService } from "../services/dashboardService.js";
 import { scheduleService } from "../services/scheduleService.js";
 import { contentService } from "../services/contentService.js";
-import DashboardLayout from "../components/layout/DashboardLayout.jsx";
 import StatsCard from "../components/dashboard/StatsCard.jsx";
 import TodayDeadlines from "../components/dashboard/TodayDeadlines.jsx";
 import TodaySchedule from "../components/dashboard/TodaySchedule.jsx";
@@ -134,13 +133,13 @@ const Home = () => {
 
   if (isLoading)
     return (
-      <DashboardLayout>
+      <>
         <Loader text="Loading dashboard..." />
-      </DashboardLayout>
+      </>
     );
 
   return (
-    <DashboardLayout>
+    <>
       {/* Stats Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
         <StatsCard
@@ -291,7 +290,7 @@ const Home = () => {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 };
 

@@ -137,17 +137,26 @@ const contentReducer = (state, action) => {
 
 export const ContentProvider = ({ children }) => {
   const [state, dispatch] = useReducer(contentReducer, initialState);
+  const fetchAbortControllerRef = React.useRef(null);
 
   const fetchContent = useCallback(
     async (params = {}) => {
       dispatch({ type: "SET_LOADING", payload: true });
+      if (fetchAbortControllerRef.current) {
+        fetchAbortControllerRef.current.abort();
+      }
+      fetchAbortControllerRef.current = new AbortController();
+
       try {
-        const response = await contentService.getContent({
-          ...state.filters,
-          ...params,
-        });
+        const response = await contentService.getContent(
+          { ...state.filters, ...params },
+          { signal: fetchAbortControllerRef.current.signal }
+        );
         dispatch({ type: "SET_CONTENT", payload: response });
       } catch (err) {
+        if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') {
+          return; // Ignore aborted requests
+        }
         dispatch({
           type: "SET_ERROR",
           payload: err.response?.data?.message || "Failed to load content.",

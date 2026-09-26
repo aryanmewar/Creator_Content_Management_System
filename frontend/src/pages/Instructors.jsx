@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Plus, Users, ShieldCheck, XCircle, FileText } from "lucide-react";
 import toast from "react-hot-toast";
-import DashboardLayout from "../components/layout/DashboardLayout.jsx";
 import InstructorTable from "../components/instructors/InstructorTable.jsx";
 import InstructorCard from "../components/instructors/InstructorCard.jsx";
 import InstructorForm from "../components/instructors/InstructorForm.jsx";
@@ -127,7 +126,7 @@ const Instructors = () => {
   }, [instructors]);
 
   return (
-    <DashboardLayout>
+    <>
       <div className="font-sans">
         {/* Top Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -172,11 +171,11 @@ const Instructors = () => {
             placeholder="Search by name, email, or designation..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 w-full sm:max-w-md focus-within:sm:max-w-[500px] h-11"
+            className="w-full sm:flex-1 sm:max-w-md focus-within:sm:max-w-[500px] h-11"
           />
           <Button
             onClick={() => setIsFormOpen(true)}
-            className="w-full sm:w-auto shrink-0 h-11 rounded-full px-6 shadow-sm hover:shadow hover:-translate-y-0.5 transition-all"
+            className="w-full sm:w-auto shrink-0 h-11 rounded-xl px-6 shadow-sm hover:shadow hover:-translate-y-0.5 transition-all"
           >
             <Plus className="mr-2 h-4 w-4" /> Add Contributor
           </Button>
@@ -268,7 +267,7 @@ const Instructors = () => {
           variant="destructive"
         />
       </div>
-    </DashboardLayout>
+    </>
   );
 };
 

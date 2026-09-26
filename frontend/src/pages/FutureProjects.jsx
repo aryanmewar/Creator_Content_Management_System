@@ -8,7 +8,6 @@ import {
   CalendarDays,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import DashboardLayout from "../components/layout/DashboardLayout";
 import savedLinkService from "../services/savedLinkService";
 import Loader from "../components/common/Loader";
 import EmptyState from "../components/common/EmptyState";
@@ -136,7 +135,7 @@ const FutureProjects = () => {
   };
 
   return (
-    <DashboardLayout>
+    <>
       <div className="flex justify-end items-center mb-6">
         <Button onClick={() => setIsFormOpen(true)} className="h-10 rounded-xl">
           <Plus className="mr-2 h-4 w-4" /> Save New Project
@@ -373,7 +372,7 @@ const FutureProjects = () => {
           </div>
         </div>
       )}
-    </DashboardLayout>
+    </>
   );
 };
 

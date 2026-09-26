@@ -109,6 +109,8 @@ contentSchema.index({ title: "text", notes: "text" });
 contentSchema.index({ status: 1, contentType: 1 });
 contentSchema.index({ contributors: 1 });
 contentSchema.index({ createdBy: 1 });
+contentSchema.index({ publishedDate: -1, updatedAt: -1 });
+contentSchema.index({ updatedAt: -1, createdAt: -1 });
 
 const Content = mongoose.model("Content", contentSchema);
 export default Content;

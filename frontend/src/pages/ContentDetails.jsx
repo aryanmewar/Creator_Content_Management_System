@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, ExternalLink, Globe, CheckCircle } from "lucide-react";
 import toast from "react-hot-toast";
-import DashboardLayout from "../components/layout/DashboardLayout.jsx";
 import Loader from "../components/common/Loader.jsx";
 import Button from "../components/common/Button.jsx";
 import Modal from "../components/common/Modal.jsx";
@@ -79,16 +78,16 @@ const ContentDetails = () => {
 
   if (isLoading)
     return (
-      <DashboardLayout>
+      <>
         <Loader />
-      </DashboardLayout>
+      </>
     );
   if (!content) return null;
 
   const allowedTransitions = getAllowedTransitions(content.status);
 
   return (
-    <DashboardLayout>
+    <>
       <button
         onClick={() => navigate("/content")}
         className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 mb-5 transition-colors"
@@ -314,7 +313,7 @@ const ContentDetails = () => {
           />
         </div>
       </Modal>
-    </DashboardLayout>
+    </>
   );
 };
 

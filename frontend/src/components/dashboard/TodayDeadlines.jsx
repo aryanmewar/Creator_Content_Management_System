@@ -42,7 +42,8 @@ const TodayDeadlines = ({ deadlines = [] }) => {
               {assignment.instructorId?.profileImage?.url ? (
                 <img
                   src={assignment.instructorId.profileImage.url}
-                  alt=""
+                  alt={assignment.instructorId.name || ""}
+                  loading="lazy"
                   className="w-9 h-9 rounded-full object-cover"
                 />
               ) : (

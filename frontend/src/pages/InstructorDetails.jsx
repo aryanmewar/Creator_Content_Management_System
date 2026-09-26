@@ -11,7 +11,6 @@ import {
   Bell,
   AlertTriangle,
 } from "lucide-react";
-import DashboardLayout from "../components/layout/DashboardLayout.jsx";
 import Loader from "../components/common/Loader.jsx";
 import { getStatusColor, getStatusLabel } from "../utils/statusUtils.js";
 import { formatDate } from "../utils/dateUtils.js";
@@ -40,9 +39,9 @@ const InstructorDetails = () => {
 
   if (isLoading)
     return (
-      <DashboardLayout>
+      <>
         <Loader />
-      </DashboardLayout>
+      </>
     );
   if (!instructor) return null;
 
@@ -65,7 +64,7 @@ const InstructorDetails = () => {
   );
 
   return (
-    <DashboardLayout>
+    <>
       {/* Back */}
       <button
         onClick={() => navigate("/instructors")}
@@ -223,7 +222,7 @@ const InstructorDetails = () => {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 };
 

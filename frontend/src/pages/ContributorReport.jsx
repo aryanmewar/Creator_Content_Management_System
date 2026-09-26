@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import DashboardLayout from "../components/layout/DashboardLayout.jsx";
 import StatsCard from "../components/dashboard/StatsCard.jsx";
 import Loader from "../components/common/Loader.jsx";
 import { Award, AlertTriangle, Activity, TrendingUp } from "lucide-react";
@@ -39,9 +38,9 @@ const ContributorReport = () => {
 
   if (isLoading)
     return (
-      <DashboardLayout>
+      <>
         <Loader />
-      </DashboardLayout>
+      </>
     );
 
   const STATUS_COLORS = {
@@ -87,7 +86,7 @@ const ContributorReport = () => {
   }
 
   return (
-    <DashboardLayout>
+    <>
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-slate-800">
           My Performance Report
@@ -277,7 +276,7 @@ const ContributorReport = () => {
           </div>
         </>
       )}
-    </DashboardLayout>
+    </>
   );
 };
 

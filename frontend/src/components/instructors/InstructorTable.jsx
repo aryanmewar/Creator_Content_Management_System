@@ -7,7 +7,7 @@ const InstructorTable = ({ instructors, onEdit, onToggleStatus, onDelete }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="w-full rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <div className="w-full rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden overflow-x-auto">
       <table className="w-full text-left text-sm text-slate-700">
         <thead className="text-[11px] uppercase tracking-wider text-slate-500 bg-slate-50 border-b border-slate-200">
           <tr>
@@ -66,6 +66,7 @@ const InstructorTable = ({ instructors, onEdit, onToggleStatus, onDelete }) => {
                         <img
                           src={profileImage.url}
                           alt={name}
+                          loading="lazy"
                           className="w-8 h-8 rounded-full object-cover ring-2 ring-white"
                         />
                       ) : (
