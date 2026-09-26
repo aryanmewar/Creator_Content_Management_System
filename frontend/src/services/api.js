@@ -14,8 +14,10 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Cookie is gone or expired — redirect to login
-      window.location.href = "/login";
+      // Cookie is gone or expired — redirect to login only if not already on login page
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
   },
