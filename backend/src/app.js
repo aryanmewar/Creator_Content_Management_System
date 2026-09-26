@@ -72,19 +72,7 @@ const limiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Stricter limiter for auth routes — 10 attempts per 15 minutes
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
-  message: {
-    success: false,
-    message: "Too many login attempts. Please try again later.",
-    code: "AUTH_RATE_LIMIT",
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-  skip: () => env.NODE_ENV === "development",
-});
+
 
 app.use(limiter);
 
@@ -107,7 +95,7 @@ app.get("/api/health", (req, res) => {
 });
 
 // ─── API Routes ───────────────────────────────────────────────────────────────
-app.use("/api/auth", authLimiter, authRoutes);
+app.use("/api/auth", authRoutes);
 
 // Admin-only Routes
 const adminOnly = [protect, authorize("ADMIN", "CONTENT_MANAGER")];
