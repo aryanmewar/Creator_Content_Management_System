@@ -235,10 +235,9 @@ const ContentCard = ({
   }
 
   const isOverdue =
-    content.isOverdue ||
-    (dueDate &&
-      status === "ASSIGNED" &&
-      new Date(dueDate).setHours(0, 0, 0, 0) < getRealDate().setHours(0, 0, 0, 0));
+    ["ASSIGNED", "DRAFT"].includes(status) &&
+    (content.isOverdue ||
+      (dueDate && new Date(dueDate).setHours(0, 0, 0, 0) < getRealDate().setHours(0, 0, 0, 0)));
 
   return (
     <Card className="mb-4 hover:border-slate-300 transition-colors shadow-sm">

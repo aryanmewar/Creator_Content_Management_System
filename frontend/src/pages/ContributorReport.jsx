@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import StatsCard from "../components/dashboard/StatsCard.jsx";
 import Loader from "../components/common/Loader.jsx";
-import { Award, AlertTriangle, Activity, TrendingUp } from "lucide-react";
+import Select from "../components/common/Select.jsx";
+import { generateMonthOptions, getRealDate } from "../utils/dateUtils.js";
+import { Award, AlertTriangle, Activity, TrendingUp, Calendar } from "lucide-react";
 import {
   PieChart,
   Pie,
@@ -21,6 +23,9 @@ const ContributorReport = () => {
   const [report, setReport] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState("");
+
+  const monthOptions = useMemo(() => generateMonthOptions(), []);
 
   useEffect(() => {
     const loadReport = async () => {
@@ -36,13 +41,6 @@ const ContributorReport = () => {
     loadReport();
   }, []);
 
-  if (isLoading)
-    return (
-      <>
-        <Loader />
-      </>
-    );
-
   const STATUS_COLORS = {
     ASSIGNED: "#3b82f6",
     IN_PROGRESS: "#eab308",
@@ -55,8 +53,51 @@ const ContributorReport = () => {
   let pieData = [];
   let barData = [];
 
-  if (report && report.history) {
-    const statusCounts = report.history.reduce((acc, item) => {
+  const { filteredHistory, filteredMetrics } = useMemo(() => {
+    if (!report) return { filteredHistory: [], filteredMetrics: null };
+
+    const isSameMonth = (dateString, selectedMonth) => {
+      if (!selectedMonth) return true;
+      if (!dateString) return false;
+      return dateString.substring(0, 7) === selectedMonth;
+    };
+
+    const filtered = selectedMonth
+      ? report.history.filter((item) => {
+          const dateToCheck = item.submittedAt || item.deadline || item.dueDate;
+          return isSameMonth(dateToCheck, selectedMonth);
+        })
+      : report.history;
+
+    const total = filtered.length;
+    const published = filtered.filter((a) => a.status === "PUBLISHED").length;
+    const overdue = filtered.filter(
+      (a) =>
+        a.dueDate &&
+        new Date(a.dueDate).setHours(0, 0, 0, 0) < new Date(getRealDate()).setHours(0, 0, 0, 0) &&
+        ["ASSIGNED", "DRAFT"].includes(a.status),
+    ).length;
+
+    const completed = filtered.filter((a) =>
+      ["SUBMITTED", "PUBLISHED", "APPROVED", "SCHEDULED"].includes(a.status),
+    );
+    const onTime = completed.filter((a) => !a.isOverdue).length;
+    const onTimeRate =
+      completed.length > 0 ? (onTime / completed.length) * 100 : 0;
+
+    return {
+      filteredHistory: filtered,
+      filteredMetrics: {
+        total,
+        published,
+        overdue,
+        onTimeRate: onTimeRate.toFixed(1),
+      },
+    };
+  }, [report, selectedMonth]);
+
+  if (report && filteredHistory) {
+    const statusCounts = filteredHistory.reduce((acc, item) => {
       const s = item.status;
       acc[s] = (acc[s] || 0) + 1;
       return acc;
@@ -68,8 +109,8 @@ const ContributorReport = () => {
       value: statusCounts[status],
     }));
 
-    // Group by month for completion (using submittedAt or deadline as a fallback for grouping if they exist)
-    const monthCounts = report.history.reduce((acc, item) => {
+    // Group by month for completion
+    const monthCounts = filteredHistory.reduce((acc, item) => {
       const dateString = item.submittedAt || item.deadline || item.dueDate;
       if (dateString) {
         const d = new Date(dateString);
@@ -85,10 +126,12 @@ const ContributorReport = () => {
     }));
   }
 
+  if (isLoading) {
+    return <Loader />;
+  }
+
   return (
     <>
-
-
       {error && (
         <div className="p-3 mb-4 rounded-lg bg-red-50 text-red-600 text-sm">
           {error}
@@ -97,28 +140,40 @@ const ContributorReport = () => {
 
       {report && (
         <>
+          <div className="flex justify-end mb-6">
+            <div className="w-full sm:w-64">
+              <Select
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(e.target.value)}
+                options={monthOptions}
+                placeholder="All Time"
+                icon={Calendar}
+              />
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
             <StatsCard
               title="Total Handled"
-              value={report.metrics.total}
+              value={filteredMetrics.total}
               icon={Activity}
               color="primary"
             />
             <StatsCard
               title="Total Published"
-              value={report.metrics.published}
+              value={filteredMetrics.published}
               icon={Award}
               color="success"
             />
             <StatsCard
               title="Currently Overdue"
-              value={report.metrics.overdue}
+              value={filteredMetrics.overdue}
               icon={AlertTriangle}
               color="danger"
             />
             <StatsCard
               title="On-Time Rate"
-              value={`${report.metrics.onTimeRate}%`}
+              value={`${filteredMetrics.onTimeRate}%`}
               icon={TrendingUp}
               color="purple"
             />
@@ -202,7 +257,7 @@ const ContributorReport = () => {
 
           <div className="card p-6">
             <h3 className="section-title mb-4">Historical Assignments</h3>
-            {report.history.length === 0 ? (
+            {filteredHistory.length === 0 ? (
               <p className="text-sm text-slate-500 text-center py-8">
                 No assignment history found.
               </p>
@@ -225,7 +280,7 @@ const ContributorReport = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {report.history.map((item) => (
+                      {filteredHistory.map((item) => (
                         <tr
                           key={item._id}
                           className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
@@ -270,7 +325,7 @@ const ContributorReport = () => {
 
                 {/* Mobile View: Cards */}
                 <div className="md:hidden space-y-4">
-                  {report.history.map((item) => (
+                  {filteredHistory.map((item) => (
                     <div
                       key={item._id}
                       className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm"

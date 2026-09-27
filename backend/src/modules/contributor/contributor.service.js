@@ -2,6 +2,7 @@ import Assignment from "../assignments/assignment.model.js";
 import Instructor from "../instructors/instructor.model.js";
 import Content from "../content/content.model.js";
 import Schedule from "../schedules/schedule.model.js";
+import OverdueRecord from "../reports/overdueRecord.model.js";
 import { getStartOfToday, getTodayRange } from "../../utils/dateUtils.js";
 
 /**
@@ -174,6 +175,9 @@ export const getReport = async (userId) => {
   const contentDocs = await Content.aggregate(pipeline);
   const contentItems = contentDocs.map((doc) => Content.hydrate(doc));
 
+  const overdueRecords = await OverdueRecord.find({ instructorId: instructor._id });
+  const overdueContentIds = new Set(overdueRecords.map(r => r.contentId.toString()));
+
   const assignments = contentItems.map((c) => ({
     _id: c._id,
     contentId: {
@@ -186,6 +190,7 @@ export const getReport = async (userId) => {
     dueDate: c.dueDate,
     deadline: c.completionDate,
     status: c.status,
+    isOverdue: c.isOverdue || overdueContentIds.has(c._id.toString()),
     submittedAt: ["SUBMITTED", "APPROVED", "SCHEDULED", "PUBLISHED"].includes(
       c.status,
     )
@@ -205,11 +210,9 @@ export const getReport = async (userId) => {
 
   // Calculate on-time rate
   const completed = assignments.filter((a) =>
-    ["PUBLISHED", "APPROVED", "SCHEDULED"].includes(a.status),
+    ["SUBMITTED", "PUBLISHED", "APPROVED", "SCHEDULED"].includes(a.status),
   );
-  const onTime = completed.filter(
-    (a) => a.submittedAt && a.submittedAt <= a.deadline,
-  ).length;
+  const onTime = completed.filter((a) => !a.isOverdue).length;
   const onTimeRate =
     completed.length > 0 ? (onTime / completed.length) * 100 : 0;
 

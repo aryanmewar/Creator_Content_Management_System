@@ -33,11 +33,11 @@ export const getSummary = async () => {
     // Due today: deadline is today AND content not complete
     Assignment.countDocuments({
       deadline: { $gte: todayStart, $lte: todayEnd },
-      status: { $nin: ["PUBLISHED", "APPROVED", "SCHEDULED"] },
+      status: "ASSIGNED",
     }),
     Content.countDocuments({
       dueDate: { $gte: todayStart, $lte: todayEnd },
-      status: { $nin: ["PUBLISHED", "APPROVED", "SCHEDULED"] },
+      status: "ASSIGNED",
     }),
     // Overdue: deadline < today AND status not moved past ASSIGNED
     Assignment.countDocuments({
@@ -71,7 +71,7 @@ export const getDeadlines = async () => {
 
   const assignments = await Assignment.find({
     deadline: { $gte: start, $lte: end },
-    status: { $nin: ["PUBLISHED", "APPROVED", "SCHEDULED"] },
+    status: "ASSIGNED",
   })
     .populate("contentId", "title contentType status")
     .populate("instructorId", "name email profileImage")
@@ -85,7 +85,7 @@ export const getDeadlines = async () => {
 
   const contents = await Content.find({
     dueDate: { $gte: start, $lte: end },
-    status: { $nin: ["PUBLISHED", "APPROVED", "SCHEDULED"] },
+    status: "ASSIGNED",
   })
     .populate("createdBy", "name email profileImage")
     .populate("contributors", "name email profileImage")

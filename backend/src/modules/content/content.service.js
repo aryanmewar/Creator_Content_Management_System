@@ -2,6 +2,7 @@ import Content from "./content.model.js";
 import Assignment from "../assignments/assignment.model.js";
 import Publication from "../publications/publication.model.js";
 import User from "../auth/auth.model.js";
+import OverdueRecord from "../reports/overdueRecord.model.js";
 import { logActivity } from "../activityLog/activityLog.service.js";
 import * as notificationService from "../notifications/notification.service.js";
 import {
@@ -207,19 +208,41 @@ export const updateContent = async (id, data, userId) => {
     if (data[field] !== undefined) allowedFields[field] = data[field];
   });
 
+  const existingContent = await Content.findById(id).populate("contributors");
+  if (!existingContent) {
+    const err = new Error("Content not found.");
+    err.statusCode = 404;
+    err.code = "NOT_FOUND";
+    throw err;
+  }
+
+  if (allowedFields.dueDate !== undefined) {
+    const newDueDate = allowedFields.dueDate ? new Date(allowedFields.dueDate).setHours(0, 0, 0, 0) : null;
+    const today = new Date().setHours(0, 0, 0, 0);
+
+    if (newDueDate === null || newDueDate >= today) {
+      // If the admin corrects the date to the future (or null), 
+      // it means it was never supposed to be overdue. Clear the history.
+      allowedFields.isOverdue = false;
+      await OverdueRecord.deleteMany({ contentId: id });
+    } else {
+      // If it is changed to the past, we only set isOverdue to true if it is still active.
+      // We don't want to make completed items overdue retroactively unless explicitly required.
+      if (["ASSIGNED", "DRAFT"].includes(existingContent.status)) {
+        allowedFields.isOverdue = true;
+      }
+    }
+
+    // Sync Assignment deadline if dueDate is updated
+    await Assignment.updateMany({ contentId: id }, { deadline: allowedFields.dueDate });
+  }
+
   const content = await Content.findByIdAndUpdate(id, allowedFields, {
     new: true,
     runValidators: true,
   })
     .populate("contributors", "name email designation")
     .populate("createdBy", "name email");
-
-  if (!content) {
-    const err = new Error("Content not found.");
-    err.statusCode = 404;
-    err.code = "NOT_FOUND";
-    throw err;
-  }
 
   await logActivity({
     userId,
@@ -294,14 +317,21 @@ export const updateContentStatus = async (
     throw err;
   }
 
-  // If content is currently ASSIGNED and overdue, lock the overdue state
-  if (
-    oldStatus === CONTENT_STATUSES.ASSIGNED &&
-    content.dueDate &&
-    new Date(content.dueDate).setHours(0, 0, 0, 0) <
-      new Date().setHours(0, 0, 0, 0)
-  ) {
-    content.isOverdue = true;
+  const launchDate = new Date("2026-10-01T00:00:00Z");
+  const isAfterLaunch = content.dueDate && new Date(content.dueDate) >= launchDate;
+
+  const wasOverdue =
+    isAfterLaunch &&
+    (content.isOverdue ||
+      (oldStatus === CONTENT_STATUSES.ASSIGNED &&
+        content.dueDate &&
+        new Date(content.dueDate).setHours(0, 0, 0, 0) <
+          new Date().setHours(0, 0, 0, 0)));
+
+  // If content is currently ASSIGNED and overdue, history is logged below via OverdueRecord.
+  // But we clear the CURRENT overdue flag so the UI tag disappears when status changes.
+  if (oldStatus === CONTENT_STATUSES.ASSIGNED && newStatus !== CONTENT_STATUSES.ASSIGNED) {
+    content.isOverdue = false;
   }
 
   content.status = newStatus;
@@ -386,6 +416,30 @@ export const updateContentStatus = async (
         type: "INFO",
         link: "/content",
       });
+    }
+  }
+
+  // Record Overdue History if status changed while overdue
+  if (wasOverdue) {
+    const instructorToRecord =
+      assignment && assignment.instructorId
+        ? assignment.instructorId._id || assignment.instructorId
+        : content.contributors && content.contributors.length > 0
+          ? content.contributors[0]
+          : null;
+
+    if (instructorToRecord) {
+      const now = new Date();
+      const monthYear = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+      await OverdueRecord.updateOne(
+        {
+          contentId: id,
+          instructorId: instructorToRecord,
+          monthYear,
+        },
+        { $setOnInsert: { recordedAt: new Date() } },
+        { upsert: true }
+      );
     }
   }
 

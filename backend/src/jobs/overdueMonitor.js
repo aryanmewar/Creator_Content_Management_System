@@ -4,14 +4,11 @@ import OverdueRecord from "../modules/reports/overdueRecord.model.js";
 import { getDeadlineState, getStartOfToday } from "../utils/dateUtils.js";
 
 export const runOverdueCheck = async () => {
+  // As per requirement: active overdue contents should NOT enter history.
+  // History is only populated upon status change (in updateContentStatus).
+  return;
+  
   try {
-    const now = new Date();
-    const monthYear = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-
-    const today = getStartOfToday();
-
-    // Find all assignments with a deadline in the past
-    // The exact check depends on content status, so we fetch and check using the utility
     const assignments = await Assignment.find({
       deadline: { $lt: today },
       status: { $nin: ["APPROVED", "PUBLISHED", "SCHEDULED"] },

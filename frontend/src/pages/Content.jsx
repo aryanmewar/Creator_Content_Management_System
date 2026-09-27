@@ -151,10 +151,10 @@ const Content = () => {
 
   const isContentOverdue = (c) => {
     return (
-      c.isOverdue ||
-      (c.dueDate &&
-        c.status === "ASSIGNED" &&
-        new Date(c.dueDate).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0))
+      ["ASSIGNED", "DRAFT"].includes(c.status) &&
+      (c.isOverdue ||
+        (c.dueDate &&
+          new Date(c.dueDate).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0)))
     );
   };
 
