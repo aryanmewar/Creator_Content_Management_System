@@ -96,6 +96,10 @@ const contentSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isCheckedByContributor: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

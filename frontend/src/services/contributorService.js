@@ -15,4 +15,9 @@ export const contributorService = {
     const { data } = await api.get("/contributor/report");
     return data.data;
   },
+
+  markAsChecked: async (id) => {
+    const { data } = await api.patch(`/contributor/content/${id}/check`);
+    return data.data;
+  },
 };

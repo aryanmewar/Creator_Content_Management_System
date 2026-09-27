@@ -27,3 +27,12 @@ export const getReport = async (req, res, next) => {
     next(error);
   }
 };
+
+export const markContentAsChecked = async (req, res, next) => {
+  try {
+    const data = await contributorService.markContentAsChecked(req.user._id, req.params.id);
+    return sendSuccess(res, { data, message: "Content marked as checked" });
+  } catch (error) {
+    next(error);
+  }
+};

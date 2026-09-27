@@ -2,6 +2,7 @@ import Content from "./content.model.js";
 import Assignment from "../assignments/assignment.model.js";
 import Publication from "../publications/publication.model.js";
 import User from "../auth/auth.model.js";
+import Instructor from "../instructors/instructor.model.js";
 import OverdueRecord from "../reports/overdueRecord.model.js";
 import { logActivity } from "../activityLog/activityLog.service.js";
 import * as notificationService from "../notifications/notification.service.js";
@@ -309,6 +310,12 @@ export const updateContentStatus = async (
 
   // ── Enforce transition rules ──────────────────────────────────────────────
   const oldStatus = content.status; // Capture BEFORE mutation (fixes activity log)
+  
+  // If moving back to ASSIGNED from DRAFT (e.g., admin assigns it), clear isCheckedByContributor
+  if (newStatus === CONTENT_STATUSES.ASSIGNED && oldStatus !== CONTENT_STATUSES.ASSIGNED) {
+    content.isCheckedByContributor = false;
+  }
+
   const transitionError = validateTransition(oldStatus, newStatus);
   if (transitionError) {
     const err = new Error(transitionError);
@@ -394,13 +401,32 @@ export const updateContentStatus = async (
     if (
       newStatus === CONTENT_STATUSES.APPROVED ||
       newStatus === CONTENT_STATUSES.REJECTED ||
-      newStatus === CONTENT_STATUSES.PUBLISHED
+      newStatus === CONTENT_STATUSES.PUBLISHED ||
+      newStatus === CONTENT_STATUSES.ASSIGNED
     ) {
+      const msg = newStatus === CONTENT_STATUSES.ASSIGNED 
+        ? `You have been assigned new content: "${content.title}".`
+        : `Your content "${content.title}" is now ${newStatus}. ${feedback ? "Feedback: " + feedback : ""}`;
+
       await notificationService.createNotification({
         userId: assignment.instructorId.userId,
-        title: "Content Status Updated",
-        message: `Your content "${content.title}" is now ${newStatus}. ${feedback ? "Feedback: " + feedback : ""}`,
+        title: newStatus === CONTENT_STATUSES.ASSIGNED ? "New Assignment" : "Content Status Updated",
+        message: msg,
         type: newStatus === CONTENT_STATUSES.REJECTED ? "WARNING" : "SUCCESS",
+        link: "/contributor",
+      });
+    }
+  }
+
+  // Fallback: Notify contributor directly if no assignment document was found, but status is ASSIGNED
+  if ((!assignment || !assignment.instructorId) && newStatus === CONTENT_STATUSES.ASSIGNED && content.contributors?.length > 0) {
+    const instructor = await Instructor.findById(content.contributors[0]);
+    if (instructor && instructor.userId) {
+      await notificationService.createNotification({
+        userId: instructor.userId,
+        title: "New Assignment",
+        message: `You have been assigned new content: "${content.title}".`,
+        type: "SUCCESS",
         link: "/contributor",
       });
     }

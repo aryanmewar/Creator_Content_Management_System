@@ -24,7 +24,7 @@ const getInstructorForUser = async (userId) => {
 export const getDashboard = async (userId) => {
   const instructor = await getInstructorForUser(userId);
 
-  const [totalAssigned, inProgress, pendingReview, published, overdue] =
+  const [totalAssigned, assigned, inProgress, pendingReview, published, overdue] =
     await Promise.all([
       Content.countDocuments({
         contributors: instructor._id,
@@ -32,7 +32,11 @@ export const getDashboard = async (userId) => {
       }),
       Content.countDocuments({
         contributors: instructor._id,
-        status: { $in: ["ASSIGNED", "IN_PROGRESS", "REJECTED"] },
+        status: "ASSIGNED",
+      }),
+      Content.countDocuments({
+        contributors: instructor._id,
+        status: { $in: ["IN_PROGRESS", "REJECTED"] },
       }),
       Content.countDocuments({
         contributors: instructor._id,
@@ -120,6 +124,7 @@ export const getDashboard = async (userId) => {
 
   return {
     totalAssigned,
+    assigned,
     inProgress,
     pendingReview,
     published,
@@ -149,6 +154,7 @@ export const getAssignments = async (userId) => {
       contentType: Array.isArray(c.contentType)
         ? c.contentType.join(", ")
         : c.contentType,
+      referenceLink: c.referenceLink,
       status: c.status,
     },
     dueDate: c.dueDate,
@@ -159,6 +165,8 @@ export const getAssignments = async (userId) => {
     )
       ? c.updatedAt
       : null,
+    isCheckedByContributor: c.isCheckedByContributor,
+    createdAt: c.createdAt,
   }));
 };
 
@@ -225,4 +233,42 @@ export const getReport = async (userId) => {
     },
     history: assignments,
   };
+};
+
+/**
+ * PATCH /api/contributor/content/:id/check
+ * Mark assigned content as checked by contributor
+ */
+export const markContentAsChecked = async (userId, contentId) => {
+  const instructor = await getInstructorForUser(userId);
+
+  const content = await Content.findOne({
+    _id: contentId,
+    contributors: instructor._id,
+  });
+
+  if (!content) {
+    const err = new Error("Content not found or not assigned to you.");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  content.isCheckedByContributor = true;
+  await content.save();
+
+  // Notify admins
+  // Find all ADMINs
+  const { default: User } = await import("../auth/auth.model.js");
+  const { createNotification } = await import("../notifications/notification.service.js");
+  const admins = await User.find({ role: "ADMIN" });
+  for (const admin of admins) {
+    await createNotification({
+      userId: admin._id,
+      title: "Content Acknowledged",
+      message: `${instructor.name} has checked the assigned content "${content.title}".`,
+      type: "SUCCESS",
+    });
+  }
+
+  return content;
 };

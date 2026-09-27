@@ -7,6 +7,7 @@ import {
   Trash2,
   ExternalLink,
   Mail,
+  CheckCircle,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import emailjs from "@emailjs/browser";
@@ -17,12 +18,8 @@ import {
   FaFacebook,
   FaPen,
 } from "react-icons/fa";
-import {
-  getStatusColor,
-  getStatusLabel,
-  getAllowedTransitions,
-} from "@/utils/statusUtils.js";
-import { formatDate, formatTime12Hour, getRealDate } from "@/utils/dateUtils.js";
+import { getStatusColor, getStatusLabel, getAllowedTransitions } from "@/utils/statusUtils.js";
+import { formatDate, formatTime12Hour, getRealDate, getDeadlineState } from "@/utils/dateUtils.js";
 
 import {
   Card,
@@ -236,8 +233,7 @@ const ContentCard = ({
 
   const isOverdue =
     ["ASSIGNED", "DRAFT"].includes(status) &&
-    (content.isOverdue ||
-      (dueDate && new Date(dueDate).setHours(0, 0, 0, 0) < getRealDate().setHours(0, 0, 0, 0)));
+    getDeadlineState(dueDate, status) === "OVERDUE";
 
   return (
     <Card className="mb-4 hover:border-slate-300 transition-colors shadow-sm">
@@ -245,10 +241,15 @@ const ContentCard = ({
         <div className="flex justify-between items-start gap-2 w-full">
           <div className="flex flex-wrap items-center gap-2 md:gap-3 flex-1 min-w-0">
             <CardTitle
-              className="text-lg hover:text-primary cursor-pointer transition-colors"
+              className="text-lg hover:text-primary cursor-pointer transition-colors flex items-center gap-2"
               onClick={onViewDetails}
             >
               {title}
+              {content.isCheckedByContributor && status === "ASSIGNED" && (
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded flex items-center gap-1 font-medium shadow-sm">
+                  <CheckCircle className="w-3 h-3" /> Acknowledged
+                </span>
+              )}
             </CardTitle>
             {isOverdue && (
               <Badge
