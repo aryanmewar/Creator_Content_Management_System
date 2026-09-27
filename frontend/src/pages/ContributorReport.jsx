@@ -3,7 +3,7 @@ import StatsCard from "../components/dashboard/StatsCard.jsx";
 import Loader from "../components/common/Loader.jsx";
 import Select from "../components/common/Select.jsx";
 import { generateMonthOptions, getRealDate } from "../utils/dateUtils.js";
-import { Award, AlertTriangle, Activity, TrendingUp, Calendar } from "lucide-react";
+import { Award, AlertTriangle, Activity, TrendingUp, Calendar, CheckCircle } from "lucide-react";
 import {
   PieChart,
   Pie,
@@ -40,6 +40,24 @@ const ContributorReport = () => {
     };
     loadReport();
   }, []);
+
+  const handleMarkChecked = async (id) => {
+    try {
+      await contributorService.markAsChecked(id);
+      // Update local state in report history
+      setReport((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          history: prev.history.map((item) =>
+            item._id === id ? { ...item, isCheckedByContributor: true } : item
+          ),
+        };
+      });
+    } catch (err) {
+      alert("Failed to mark content as checked: " + (err.response?.data?.message || err.message));
+    }
+  };
 
   const STATUS_COLORS = {
     ASSIGNED: "#3b82f6",
@@ -269,6 +287,7 @@ const ContributorReport = () => {
                     <thead>
                       <tr className="border-b border-slate-200 text-slate-500">
                         <th className="py-3 px-4 font-semibold">Title</th>
+                        <th className="py-3 px-4 font-semibold">Type</th>
                         <th className="py-3 px-4 font-semibold">
                           Target Shoot Date
                         </th>
@@ -277,6 +296,7 @@ const ContributorReport = () => {
                         </th>
                         <th className="py-3 px-4 font-semibold">Submitted At</th>
                         <th className="py-3 px-4 font-semibold">Status</th>
+                        <th className="py-3 px-4 font-semibold text-right">Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -287,6 +307,9 @@ const ContributorReport = () => {
                         >
                           <td className="py-3 px-4 font-medium text-slate-800">
                             {item.contentId?.title || "Unknown Title"}
+                          </td>
+                          <td className="py-3 px-4 text-slate-600">
+                            {item.contentId?.contentType || "N/A"}
                           </td>
                           <td className="py-3 px-4 text-slate-600">
                             {item.dueDate
@@ -316,6 +339,20 @@ const ContributorReport = () => {
                             >
                               {item.status.replace("_", " ")}
                             </span>
+                          </td>
+                          <td className="py-3 px-4 text-right">
+                            {item.status === "ASSIGNED" && !item.isCheckedByContributor ? (
+                              <button
+                                onClick={() => handleMarkChecked(item._id)}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                              >
+                                Mark Checked
+                              </button>
+                            ) : item.status === "ASSIGNED" && item.isCheckedByContributor ? (
+                              <span className="text-green-600 text-xs font-medium flex items-center justify-end gap-1">
+                                <CheckCircle className="w-3.5 h-3.5" /> Checked
+                              </span>
+                            ) : null}
                           </td>
                         </tr>
                       ))}
@@ -349,6 +386,25 @@ const ContributorReport = () => {
                       </div>
                       
                       <div className="space-y-2 text-sm text-slate-600">
+                        {item.status === "ASSIGNED" && !item.isCheckedByContributor ? (
+                          <div className="mb-3">
+                            <button
+                              onClick={() => handleMarkChecked(item._id)}
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors w-full"
+                            >
+                              Mark Checked
+                            </button>
+                          </div>
+                        ) : item.status === "ASSIGNED" && item.isCheckedByContributor ? (
+                          <div className="mb-3 text-green-600 text-xs font-medium flex items-center gap-1">
+                            <CheckCircle className="w-3.5 h-3.5" /> Checked
+                          </div>
+                        ) : null}
+                        
+                        <div className="flex justify-between">
+                          <span className="font-medium text-slate-500">Type:</span>
+                          <span>{item.contentId?.contentType || "N/A"}</span>
+                        </div>
                         <div className="flex justify-between">
                           <span className="font-medium text-slate-500">Target Shoot Date:</span>
                           <span>
