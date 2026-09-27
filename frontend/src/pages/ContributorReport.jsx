@@ -4,6 +4,7 @@ import Loader from "../components/common/Loader.jsx";
 import Select from "../components/common/Select.jsx";
 import { generateMonthOptions, getRealDate } from "../utils/dateUtils.js";
 import { Award, AlertTriangle, Activity, TrendingUp, Calendar, CheckCircle } from "lucide-react";
+import { FaYoutube, FaInstagram, FaLinkedin, FaFacebook } from "react-icons/fa";
 import {
   PieChart,
   Pie,
@@ -16,6 +17,8 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
+  AreaChart,
+  Area,
 } from "recharts";
 import { contributorService } from "../services/contributorService.js";
 
@@ -41,24 +44,6 @@ const ContributorReport = () => {
     loadReport();
   }, []);
 
-  const handleMarkChecked = async (id) => {
-    try {
-      await contributorService.markAsChecked(id);
-      // Update local state in report history
-      setReport((prev) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          history: prev.history.map((item) =>
-            item._id === id ? { ...item, isCheckedByContributor: true } : item
-          ),
-        };
-      });
-    } catch (err) {
-      alert("Failed to mark content as checked: " + (err.response?.data?.message || err.message));
-    }
-  };
-
   const STATUS_COLORS = {
     ASSIGNED: "#3b82f6",
     IN_PROGRESS: "#eab308",
@@ -70,6 +55,7 @@ const ContributorReport = () => {
 
   let pieData = [];
   let barData = [];
+  let typeData = [];
 
   const { filteredHistory, filteredMetrics } = useMemo(() => {
     if (!report) return { filteredHistory: [], filteredMetrics: null };
@@ -142,6 +128,18 @@ const ContributorReport = () => {
       name: month,
       Assignments: monthCounts[month],
     }));
+
+    // Group by content type
+    const typeCounts = filteredHistory.reduce((acc, item) => {
+      const t = item.contentId?.contentType || "Unknown";
+      acc[t] = (acc[t] || 0) + 1;
+      return acc;
+    }, {});
+
+    typeData = Object.keys(typeCounts).map((type) => ({
+      name: type,
+      value: typeCounts[type],
+    }));
   }
 
   if (isLoading) {
@@ -198,83 +196,156 @@ const ContributorReport = () => {
           </div>
 
           {pieData.length > 0 && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-              <div className="card p-6">
-                <h3 className="section-title mb-6">Status Distribution</h3>
-                <div className="h-[300px] w-full">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+              {/* Chart 1: Status Distribution (Improved Pie/Donut Chart) */}
+              <div className="card p-6 border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                <h3 className="section-title mb-6 flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                  Status Distribution
+                </h3>
+                <div className="h-[280px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <PieChart
-                      margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
-                    >
+                    <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                      <defs>
+                        {pieData.map((entry, index) => (
+                          <linearGradient key={`grad-${index}`} id={`colorUv-${index}`} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={STATUS_COLORS[entry.status] || "#94a3b8"} stopOpacity={1}/>
+                            <stop offset="95%" stopColor={STATUS_COLORS[entry.status] || "#94a3b8"} stopOpacity={0.7}/>
+                          </linearGradient>
+                        ))}
+                      </defs>
                       <Pie
                         data={pieData}
                         cx="50%"
                         cy="50%"
-                        innerRadius={50}
-                        outerRadius={70}
-                        paddingAngle={5}
+                        innerRadius={65}
+                        outerRadius={90}
+                        paddingAngle={8}
+                        cornerRadius={6}
                         dataKey="value"
+                        stroke="none"
                       >
                         {pieData.map((entry, index) => (
                           <Cell
                             key={`cell-${index}`}
-                            fill={STATUS_COLORS[entry.status] || "#94a3b8"}
+                            fill={`url(#colorUv-${index})`}
+                            style={{ filter: `drop-shadow(0px 4px 6px ${STATUS_COLORS[entry.status]}40)` }}
                           />
                         ))}
                       </Pie>
-                      <Tooltip />
+                      <Tooltip 
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                        itemStyle={{ fontWeight: 600 }}
+                      />
                       <Legend
-                        wrapperStyle={{ fontSize: "12px", paddingTop: "10px" }}
+                        wrapperStyle={{ fontSize: "12px", paddingTop: "20px", fontWeight: 500 }}
+                        iconType="circle"
                       />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
               </div>
 
-              <div className="card p-6">
-                <h3 className="section-title mb-6">Assignments by Month</h3>
-                <div className="h-[300px] w-full">
-                  <div className="w-full overflow-x-auto no-scrollbar h-full">
-                    <div className="min-w-[400px] h-full">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart
-                          data={barData}
-                          margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
-                        >
-                          <CartesianGrid
-                            strokeDasharray="3 3"
-                            vertical={false}
-                            stroke="#e2e8f0"
-                          />
-                          <XAxis
-                            dataKey="name"
-                            axisLine={false}
-                            tickLine={false}
-                            tick={{ fill: "#64748b" }}
-                          />
-                          <YAxis
-                            allowDecimals={false}
-                            axisLine={false}
-                            tickLine={false}
-                            tick={{ fill: "#64748b" }}
-                          />
-                          <Tooltip cursor={{ fill: "#f1f5f9" }} />
-                          <Bar
-                            dataKey="Assignments"
-                            fill="#6366f1"
-                            radius={[4, 4, 0, 0]}
-                          />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
+              {/* Chart 2: Assignments Over Time (Area Chart) */}
+              <div className="card p-6 border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                <h3 className="section-title mb-6 flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-indigo-500"></div>
+                  Productivity Trend
+                </h3>
+                <div className="h-[280px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart
+                      data={barData}
+                      margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                    >
+                      <defs>
+                        <linearGradient id="colorAssignments" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#6366f1" stopOpacity={0.4}/>
+                          <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                      <XAxis 
+                        dataKey="name" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fill: "#94a3b8", fontSize: 12 }} 
+                        dy={10}
+                      />
+                      <YAxis 
+                        allowDecimals={false} 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fill: "#94a3b8", fontSize: 12 }} 
+                      />
+                      <Tooltip 
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="Assignments" 
+                        stroke="#6366f1" 
+                        strokeWidth={3}
+                        fillOpacity={1} 
+                        fill="url(#colorAssignments)" 
+                        activeDot={{ r: 6, strokeWidth: 0, fill: "#4f46e5" }}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Chart 3: Content Types (Bar Chart) */}
+              <div className="card p-6 border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                <h3 className="section-title mb-6 flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-rose-500"></div>
+                  Content Format
+                </h3>
+                <div className="h-[280px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={typeData}
+                      margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                      layout="vertical"
+                    >
+                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                      <XAxis 
+                        type="number"
+                        allowDecimals={false} 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fill: "#94a3b8", fontSize: 12 }} 
+                      />
+                      <YAxis 
+                        dataKey="name"
+                        type="category"
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fill: "#64748b", fontSize: 12, fontWeight: 500 }} 
+                        width={80}
+                      />
+                      <Tooltip 
+                        cursor={{ fill: "#f8fafc" }}
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                      />
+                      <Bar 
+                        dataKey="value" 
+                        radius={[0, 6, 6, 0]}
+                        barSize={24}
+                      >
+                        {typeData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={["#f43f5e", "#8b5cf6", "#10b981", "#f59e0b", "#0ea5e9"][index % 5]} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
               </div>
             </div>
           )}
 
           <div className="card p-6">
-            <h3 className="section-title mb-4">Historical Assignments</h3>
+            <h3 className="section-title mb-4">Assigned Content</h3>
             {filteredHistory.length === 0 ? (
               <p className="text-sm text-slate-500 text-center py-8">
                 No assignment history found.
@@ -295,8 +366,8 @@ const ContributorReport = () => {
                           Shoot Completion
                         </th>
                         <th className="py-3 px-4 font-semibold">Submitted At</th>
+                        <th className="py-3 px-4 font-semibold">Platforms</th>
                         <th className="py-3 px-4 font-semibold">Status</th>
-                        <th className="py-3 px-4 font-semibold text-right">Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -327,6 +398,33 @@ const ContributorReport = () => {
                               : "-"}
                           </td>
                           <td className="py-3 px-4">
+                            <div className="flex gap-2 items-center text-slate-400">
+                              {item.publishedLinks?.youtube ? (
+                                <a href={item.publishedLinks.youtube} target="_blank" rel="noreferrer" className="text-red-500 hover:text-red-600 transition-colors" title="YouTube">
+                                  <FaYoutube className="w-4 h-4" />
+                                </a>
+                              ) : null}
+                              {item.publishedLinks?.instagram ? (
+                                <a href={item.publishedLinks.instagram} target="_blank" rel="noreferrer" className="text-pink-500 hover:text-pink-600 transition-colors" title="Instagram">
+                                  <FaInstagram className="w-4 h-4" />
+                                </a>
+                              ) : null}
+                              {item.publishedLinks?.facebook ? (
+                                <a href={item.publishedLinks.facebook} target="_blank" rel="noreferrer" className="text-blue-600 hover:text-blue-700 transition-colors" title="Facebook">
+                                  <FaFacebook className="w-4 h-4" />
+                                </a>
+                              ) : null}
+                              {item.publishedLinks?.linkedin ? (
+                                <a href={item.publishedLinks.linkedin} target="_blank" rel="noreferrer" className="text-blue-500 hover:text-blue-600 transition-colors" title="LinkedIn">
+                                  <FaLinkedin className="w-4 h-4" />
+                                </a>
+                              ) : null}
+                              {!item.publishedLinks?.youtube && !item.publishedLinks?.instagram && !item.publishedLinks?.facebook && !item.publishedLinks?.linkedin && (
+                                <span className="text-xs">-</span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
                             <span
                               className={`px-2.5 py-1 text-xs font-medium rounded-full ${
                                 item.status === "PUBLISHED" ||
@@ -339,20 +437,6 @@ const ContributorReport = () => {
                             >
                               {item.status.replace("_", " ")}
                             </span>
-                          </td>
-                          <td className="py-3 px-4 text-right">
-                            {item.status === "ASSIGNED" && !item.isCheckedByContributor ? (
-                              <button
-                                onClick={() => handleMarkChecked(item._id)}
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-                              >
-                                Mark Checked
-                              </button>
-                            ) : item.status === "ASSIGNED" && item.isCheckedByContributor ? (
-                              <span className="text-green-600 text-xs font-medium flex items-center justify-end gap-1">
-                                <CheckCircle className="w-3.5 h-3.5" /> Checked
-                              </span>
-                            ) : null}
                           </td>
                         </tr>
                       ))}
@@ -386,24 +470,37 @@ const ContributorReport = () => {
                       </div>
                       
                       <div className="space-y-2 text-sm text-slate-600">
-                        {item.status === "ASSIGNED" && !item.isCheckedByContributor ? (
-                          <div className="mb-3">
-                            <button
-                              onClick={() => handleMarkChecked(item._id)}
-                              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors w-full"
-                            >
-                              Mark Checked
-                            </button>
-                          </div>
-                        ) : item.status === "ASSIGNED" && item.isCheckedByContributor ? (
-                          <div className="mb-3 text-green-600 text-xs font-medium flex items-center gap-1">
-                            <CheckCircle className="w-3.5 h-3.5" /> Checked
-                          </div>
-                        ) : null}
-                        
                         <div className="flex justify-between">
                           <span className="font-medium text-slate-500">Type:</span>
                           <span>{item.contentId?.contentType || "N/A"}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="font-medium text-slate-500">Platforms:</span>
+                          <div className="flex gap-2 items-center text-slate-400">
+                            {item.publishedLinks?.youtube ? (
+                              <a href={item.publishedLinks.youtube} target="_blank" rel="noreferrer" className="text-red-500 hover:text-red-600 transition-colors" title="YouTube">
+                                <FaYoutube className="w-4 h-4" />
+                              </a>
+                            ) : null}
+                            {item.publishedLinks?.instagram ? (
+                              <a href={item.publishedLinks.instagram} target="_blank" rel="noreferrer" className="text-pink-500 hover:text-pink-600 transition-colors" title="Instagram">
+                                <FaInstagram className="w-4 h-4" />
+                              </a>
+                            ) : null}
+                            {item.publishedLinks?.facebook ? (
+                              <a href={item.publishedLinks.facebook} target="_blank" rel="noreferrer" className="text-blue-600 hover:text-blue-700 transition-colors" title="Facebook">
+                                <FaFacebook className="w-4 h-4" />
+                              </a>
+                            ) : null}
+                            {item.publishedLinks?.linkedin ? (
+                              <a href={item.publishedLinks.linkedin} target="_blank" rel="noreferrer" className="text-blue-500 hover:text-blue-600 transition-colors" title="LinkedIn">
+                                <FaLinkedin className="w-4 h-4" />
+                              </a>
+                            ) : null}
+                            {!item.publishedLinks?.youtube && !item.publishedLinks?.instagram && !item.publishedLinks?.facebook && !item.publishedLinks?.linkedin && (
+                              <span className="text-xs">-</span>
+                            )}
+                          </div>
                         </div>
                         <div className="flex justify-between">
                           <span className="font-medium text-slate-500">Target Shoot Date:</span>

@@ -198,6 +198,7 @@ export const getReport = async (userId) => {
     dueDate: c.dueDate,
     deadline: c.completionDate,
     status: c.status,
+    publishedLinks: c.publishedLinks,
     isOverdue: c.isOverdue || overdueContentIds.has(c._id.toString()),
     submittedAt: ["SUBMITTED", "APPROVED", "SCHEDULED", "PUBLISHED"].includes(
       c.status,
