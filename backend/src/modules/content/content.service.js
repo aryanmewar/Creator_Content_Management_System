@@ -6,6 +6,8 @@ import Instructor from "../instructors/instructor.model.js";
 import OverdueRecord from "../reports/overdueRecord.model.js";
 import { logActivity } from "../activityLog/activityLog.service.js";
 import * as notificationService from "../notifications/notification.service.js";
+import Notification from "../notifications/notification.model.js";
+import ActivityLog from "../activityLog/activityLog.model.js";
 import {
   validateTransition,
   CONTENT_STATUSES,
@@ -271,18 +273,25 @@ export const deleteContent = async (id, userId) => {
     throw err;
   }
 
-  // Also remove associated assignments and publications
+  // Escape special regex characters in the title just in case
+  const escapedTitle = content.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  // Also remove associated assignments, publications, activity logs, and notifications
   await Assignment.deleteMany({ contentId: id });
   await Publication.deleteMany({ contentId: id });
+  
+  // Remove prior activity logs for this specific content
+  await ActivityLog.deleteMany({ entityType: "Content", entityId: id });
+
+  // Remove notifications containing the title of the deleted content
+  await Notification.deleteMany({
+    message: { $regex: escapedTitle, $options: "i" }
+  });
+
   await Content.findByIdAndDelete(id);
 
-  await logActivity({
-    userId,
-    action: "CONTENT_DELETED",
-    entityType: "Content",
-    entityId: id,
-    metadata: { title: content.title },
-  });
+  // Note: We deliberately do NOT log a CONTENT_DELETED activity here, 
+  // as the user requested that NO trace of the content should be left behind.
 
   return true;
 };

@@ -166,6 +166,8 @@ export const getAssignments = async (userId) => {
       ? c.updatedAt
       : null,
     isCheckedByContributor: c.isCheckedByContributor,
+    isOverdueAcknowledged: c.isOverdueAcknowledged,
+    isOverdue: c.isOverdue || (c.dueDate && new Date(c.dueDate).setHours(0,0,0,0) < new Date().setHours(0,0,0,0)),
     createdAt: c.createdAt,
   }));
 };
@@ -268,6 +270,43 @@ export const markContentAsChecked = async (userId, contentId) => {
       title: "Content Acknowledged",
       message: `${instructor.name} has checked the assigned content "${content.title}".`,
       type: "SUCCESS",
+    });
+  }
+
+  return content;
+};
+
+/**
+ * PATCH /api/contributor/content/:id/acknowledge-overdue
+ * Mark overdue content as acknowledged by contributor
+ */
+export const markOverdueAsAcknowledged = async (userId, contentId) => {
+  const instructor = await getInstructorForUser(userId);
+
+  const content = await Content.findOne({
+    _id: contentId,
+    contributors: instructor._id,
+  });
+
+  if (!content) {
+    const err = new Error("Content not found or not assigned to you.");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  content.isOverdueAcknowledged = true;
+  await content.save();
+
+  // Notify admins
+  const { default: User } = await import("../auth/auth.model.js");
+  const { createNotification } = await import("../notifications/notification.service.js");
+  const admins = await User.find({ role: "ADMIN" });
+  for (const admin of admins) {
+    await createNotification({
+      userId: admin._id,
+      title: "Overdue Acknowledged",
+      message: `${instructor.name} has acknowledged the overdue status for content "${content.title}".`,
+      type: "INFO",
     });
   }
 

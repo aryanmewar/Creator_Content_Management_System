@@ -36,3 +36,12 @@ export const markContentAsChecked = async (req, res, next) => {
     next(error);
   }
 };
+
+export const markOverdueAsAcknowledged = async (req, res, next) => {
+  try {
+    const data = await contributorService.markOverdueAsAcknowledged(req.user._id, req.params.id);
+    return sendSuccess(res, { data, message: "Overdue status acknowledged" });
+  } catch (error) {
+    next(error);
+  }
+};

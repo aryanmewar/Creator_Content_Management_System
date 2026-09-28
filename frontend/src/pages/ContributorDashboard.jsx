@@ -4,6 +4,7 @@ import Loader from "../components/common/Loader.jsx";
 import { Target, Clock, CheckCircle, AlertCircle, Calendar, ExternalLink } from "lucide-react";
 import TodayDeadlines from "../components/dashboard/TodayDeadlines.jsx";
 import TodaySchedule from "../components/dashboard/TodaySchedule.jsx";
+import OverdueContent from "../components/dashboard/OverdueContent.jsx";
 import { contributorService } from "../services/contributorService.js";
 
 const ContributorDashboard = () => {
@@ -14,6 +15,10 @@ const ContributorDashboard = () => {
 
   const unacknowledgedAssignments = assignments.filter(
     (a) => a.status === "ASSIGNED" && !a.isCheckedByContributor
+  );
+
+  const unacknowledgedOverdue = assignments.filter(
+    (a) => a.isOverdue && !a.isOverdueAcknowledged && ["ASSIGNED", "DRAFT"].includes(a.status)
   );
 
   useEffect(() => {
@@ -56,6 +61,19 @@ const ContributorDashboard = () => {
     }
   };
 
+  const handleMarkOverdueAcknowledged = async (id) => {
+    try {
+      await contributorService.markOverdueAsAcknowledged(id);
+      setAssignments((prev) =>
+        prev.map((item) =>
+          item._id === id ? { ...item, isOverdueAcknowledged: true } : item
+        )
+      );
+    } catch (err) {
+      alert("Failed to acknowledge overdue content: " + (err.response?.data?.message || err.message));
+    }
+  };
+
   if (isLoading)
     return (
       <>
@@ -75,6 +93,13 @@ const ContributorDashboard = () => {
       {stats && (
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
           <div className="xl:col-span-2 space-y-6">
+            {unacknowledgedOverdue.length > 0 && (
+              <OverdueContent 
+                items={unacknowledgedOverdue} 
+                onAcknowledge={handleMarkOverdueAcknowledged} 
+              />
+            )}
+
             {unacknowledgedAssignments.length > 0 && (
               <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-fuchsia-500 p-[1px] shadow-lg shadow-indigo-500/20 mb-6 group/container">
                 <div className="relative bg-white/95 backdrop-blur-xl rounded-[15px] p-6">

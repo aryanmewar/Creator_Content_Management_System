@@ -148,6 +148,9 @@ const AssignContent = () => {
   // Filter content to ONLY show items that have additional contributors
   // Sort them by date priority (earliest first / ascending)
   const getSortDate = (c) => {
+    if (c.status === "PUBLISHED" && c.publishedDate) return new Date(c.publishedDate).getTime();
+    if (c.status === "SCHEDULED" && c.scheduledDate) return new Date(c.scheduledDate).getTime();
+    if (c.status === "COMPLETED" && c.completionDate) return new Date(c.completionDate).getTime();
     return new Date(
       c.dueDate ||
         c.completionDate ||

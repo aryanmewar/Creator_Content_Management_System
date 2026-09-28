@@ -20,4 +20,9 @@ export const contributorService = {
     const { data } = await api.patch(`/contributor/content/${id}/check`);
     return data.data;
   },
+
+  markOverdueAsAcknowledged: async (id) => {
+    const { data } = await api.patch(`/contributor/content/${id}/acknowledge-overdue`);
+    return data.data;
+  },
 };

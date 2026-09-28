@@ -11,6 +11,7 @@ import Button from "../components/common/Button.jsx";
 const schema = z.object({
   email: z.string().email("Enter a valid email"),
   password: z.string().min(1, "Password is required"),
+  remember: z.boolean().optional(),
 });
 
 const slides = [
@@ -44,6 +45,7 @@ const Login = () => {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(schema),
@@ -56,10 +58,30 @@ const Login = () => {
     return () => clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("rememberedEmail");
+    const savedPassword = localStorage.getItem("rememberedPassword");
+    
+    if (savedEmail && savedPassword) {
+      setValue("email", savedEmail);
+      setValue("password", savedPassword);
+      setValue("remember", true);
+    }
+  }, [setValue]);
+
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
       await login(data);
+      
+      if (data.remember) {
+        localStorage.setItem("rememberedEmail", data.email);
+        localStorage.setItem("rememberedPassword", data.password);
+      } else {
+        localStorage.removeItem("rememberedEmail");
+        localStorage.removeItem("rememberedPassword");
+      }
+      
       toast.success("Welcome back!");
       navigate("/");
     } catch (error) {
@@ -289,7 +311,18 @@ const Login = () => {
                 )}
               </div>
 
-              <div className="flex justify-end pt-1 pb-6">
+              <div className="flex items-center justify-between pt-1 pb-6">
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="remember"
+                    className="w-4 h-4 text-[#2D4396] bg-slate-50 border-slate-200 rounded focus:ring-[#2D4396]/20 focus:ring-2 cursor-pointer"
+                    {...register("remember")}
+                  />
+                  <label htmlFor="remember" className="ml-2 text-xs font-medium text-slate-600 cursor-pointer select-none">
+                    Remember me
+                  </label>
+                </div>
                 <a
                   href="#"
                   className="text-xs font-semibold text-[#2D4396] hover:text-indigo-800 transition-colors"

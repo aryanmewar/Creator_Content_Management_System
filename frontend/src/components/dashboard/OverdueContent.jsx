@@ -3,7 +3,7 @@ import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { getDeadlineLabel } from "../../utils/dateUtils.js";
 import { getInitials } from "../../utils/formatUtils.js";
 
-const OverdueContent = ({ items = [] }) => {
+const OverdueContent = ({ items = [], onAcknowledge }) => {
   if (!items.length) {
     return (
       <div className="card p-6">
@@ -49,9 +49,18 @@ const OverdueContent = ({ items = [] }) => {
                 {assignment.contentId?.title || "Untitled"}
               </p>
               <p className="text-xs text-red-500 font-medium">
-                {getDeadlineLabel(assignment.deadline)}
+                {getDeadlineLabel(assignment.deadline || assignment.dueDate)}
               </p>
             </div>
+            
+            {onAcknowledge && (
+              <button
+                onClick={() => onAcknowledge(assignment._id)}
+                className="shrink-0 px-3 py-1.5 text-xs font-semibold rounded-md bg-red-100 text-red-700 hover:bg-red-500 hover:text-white transition-colors"
+              >
+                Acknowledge
+              </button>
+            )}
           </div>
         ))}
       </div>

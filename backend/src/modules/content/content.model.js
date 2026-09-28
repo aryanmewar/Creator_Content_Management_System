@@ -100,6 +100,10 @@ const contentSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isOverdueAcknowledged: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
