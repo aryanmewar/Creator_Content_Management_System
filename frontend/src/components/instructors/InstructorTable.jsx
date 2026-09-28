@@ -7,11 +7,11 @@ const InstructorTable = ({ instructors, onEdit, onToggleStatus, onDelete }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="w-full rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden overflow-x-auto">
+    <div className="w-full rounded-xl border border-slate-200 bg-white shadow-sm">
       <table className="w-full text-left text-sm text-slate-700">
-        <thead className="text-[11px] uppercase tracking-wider text-slate-500 bg-slate-50 border-b border-slate-200">
+        <thead className="text-[11px] uppercase tracking-wider text-slate-500 bg-slate-50 border-b border-slate-200 rounded-t-xl">
           <tr>
-            <th scope="col" className="px-4 py-4 font-medium w-12 text-center">
+            <th scope="col" className="px-4 py-4 font-medium w-12 text-center rounded-tl-xl">
               #
             </th>
             <th scope="col" className="px-4 py-4 font-medium">
@@ -33,7 +33,7 @@ const InstructorTable = ({ instructors, onEdit, onToggleStatus, onDelete }) => {
             >
               Last Active
             </th>
-            <th scope="col" className="px-4 py-4 font-medium text-right">
+            <th scope="col" className="px-4 py-4 font-medium text-right rounded-tr-xl">
               Actions
             </th>
           </tr>
@@ -56,7 +56,7 @@ const InstructorTable = ({ instructors, onEdit, onToggleStatus, onDelete }) => {
                 onClick={() => navigate(`/instructors/${_id}`)}
                 className="hover:bg-slate-50/50 transition-colors group cursor-pointer"
               >
-                <td className="px-4 py-4 text-center font-medium text-slate-500">
+                <td className={`px-4 py-4 text-center font-medium text-slate-500 ${index === instructors.length - 1 ? "rounded-bl-xl" : ""}`}>
                   {index + 1}
                 </td>
                 <td className="px-4 py-4">
@@ -120,7 +120,7 @@ const InstructorTable = ({ instructors, onEdit, onToggleStatus, onDelete }) => {
                       : "Never"}
                   </span>
                 </td>
-                <td className="px-4 py-4 text-right relative">
+                <td className={`px-4 py-4 text-right relative ${index === instructors.length - 1 ? "rounded-br-xl" : ""}`}>
                   <div
                     className="relative group/menu inline-block"
                     onClick={(e) => e.stopPropagation()}

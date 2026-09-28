@@ -45,14 +45,19 @@ export const initScheduleMonitor = () => {
 
         // If the current time has passed the scheduled time
         if (now >= exactScheduledTime) {
-          // Send notification only to the creator/admin
-          await createNotification({
-            userId: content.createdBy,
-            title: "Content Schedule Time Reached",
-            message: `The scheduled time for the content "${content.title}" has arrived. Please verify if it has been published and update its status.`,
-            type: "INFO",
-            link: `/content`,
-          });
+          // Send notification to ALL admins
+          const { default: User } = await import("../modules/auth/auth.model.js");
+          const admins = await User.find({ role: "ADMIN" });
+          
+          for (const admin of admins) {
+            await createNotification({
+              userId: admin._id,
+              title: "Content Schedule Time Reached",
+              message: `The scheduled time for the content "${content.title}" has arrived. Please verify if it has been published and update its status.`,
+              type: "INFO",
+              link: `/content`,
+            });
+          }
 
           // Mark as notified
           content.scheduleNotificationSent = true;
