@@ -85,8 +85,9 @@ const Login = () => {
       toast.success("Welcome back!");
       navigate("/");
     } catch (error) {
+      console.error("Login Error:", error);
       toast.error(
-        error.response?.data?.message || "Login failed. Please try again.",
+        error.response?.data?.message || error.message || "Login failed. Please try again.",
       );
     } finally {
       setIsLoading(false);

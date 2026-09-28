@@ -1,5 +1,5 @@
 import React from "react";
-import { Calendar, CheckCircle2, Video } from "lucide-react";
+import { Calendar, CheckCircle2, Video, ExternalLink } from "lucide-react";
 import { getDeadlineLabel } from "../../utils/dateUtils.js";
 
 const UpcomingShoots = ({ shoots = [] }) => {
@@ -56,6 +56,22 @@ const UpcomingShoots = ({ shoots = [] }) => {
                   <Calendar className="w-3 h-3" />
                   {shoot.dueDate ? new Date(shoot.dueDate).toLocaleDateString() : "No Date"}
                 </p>
+                {shoot.contentId?.referenceLink ? (
+                  <a
+                    href={shoot.contentId.referenceLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs text-blue-600 hover:underline flex items-center gap-1 font-medium ml-2"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    Reference Link
+                  </a>
+                ) : (
+                  <span className="text-xs text-slate-400 flex items-center gap-1 font-medium ml-2">
+                    <ExternalLink className="w-3 h-3 opacity-50" />
+                    No Reference Link
+                  </span>
+                )}
               </div>
             </div>
           </div>

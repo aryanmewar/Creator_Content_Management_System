@@ -1,5 +1,5 @@
 import React from "react";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, ExternalLink } from "lucide-react";
 import { getDeadlineLabel } from "../../utils/dateUtils.js";
 import { getInitials } from "../../utils/formatUtils.js";
 
@@ -48,9 +48,33 @@ const OverdueContent = ({ items = [], onAcknowledge }) => {
               <p className="text-sm font-semibold text-slate-800 truncate">
                 {assignment.contentId?.title || "Untitled"}
               </p>
-              <p className="text-xs text-red-500 font-medium">
-                {getDeadlineLabel(assignment.deadline || assignment.dueDate)}
-              </p>
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-xs text-red-500 font-medium">
+                  {getDeadlineLabel(assignment.deadline || assignment.dueDate)}
+                </p>
+                {assignment.contentId?.referenceLink ? (
+                  <>
+                    <span className="text-slate-300 text-xs">•</span>
+                    <a
+                      href={assignment.contentId.referenceLink}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs text-blue-600 hover:underline flex items-center gap-1 font-medium"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      Reference Link
+                    </a>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-slate-300 text-xs">•</span>
+                    <span className="text-xs text-slate-400 flex items-center gap-1 font-medium">
+                      <ExternalLink className="w-3 h-3 opacity-50" />
+                      No Reference Link
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
             
             {onAcknowledge && (

@@ -73,7 +73,7 @@ export const getDeadlines = async () => {
     deadline: { $gte: start, $lte: end },
     status: "ASSIGNED",
   })
-    .populate("contentId", "title contentType status")
+    .populate("contentId", "title contentType status referenceLink")
     .populate("instructorId", "name email profileImage")
     .sort({ deadline: 1 })
     .limit(20);
@@ -99,6 +99,7 @@ export const getDeadlines = async () => {
       title: c.title,
       contentType: c.contentType,
       status: c.status,
+      referenceLink: c.referenceLink,
     },
     instructorId:
       c.contributors && c.contributors.length > 0
@@ -122,7 +123,7 @@ export const getUpcoming = async () => {
     deadline: { $gt: today },
     status: { $nin: ["PUBLISHED", "APPROVED", "SCHEDULED"] },
   })
-    .populate("contentId", "title contentType status")
+    .populate("contentId", "title contentType status referenceLink")
     .populate("instructorId", "name email profileImage")
     .sort({ deadline: 1 })
     .limit(20);
@@ -143,7 +144,7 @@ export const getOverdue = async () => {
     deadline: { $lt: today },
     status: { $in: ["DRAFT", "ASSIGNED"] },
   })
-    .populate("contentId", "title contentType status")
+    .populate("contentId", "title contentType status referenceLink")
     .populate("instructorId", "name email profileImage")
     .sort({ deadline: 1 })
     .limit(20);
@@ -168,6 +169,7 @@ export const getOverdue = async () => {
       title: c.title,
       contentType: c.contentType,
       status: c.status,
+      referenceLink: c.referenceLink,
     },
     instructorId:
       c.contributors && c.contributors.length > 0
