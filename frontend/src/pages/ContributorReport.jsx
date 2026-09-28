@@ -75,19 +75,20 @@ const ContributorReport = () => {
 
     const total = filtered.length;
     const published = filtered.filter((a) => a.status === "PUBLISHED").length;
-    const overdue = filtered.filter(
-      (a) =>
-        a.dueDate &&
+    const isCurrentlyOverdue = (a) => {
+      return a.dueDate &&
         new Date(a.dueDate).setHours(0, 0, 0, 0) < new Date(getRealDate()).setHours(0, 0, 0, 0) &&
-        ["ASSIGNED", "DRAFT"].includes(a.status),
-    ).length;
+        ["ASSIGNED", "DRAFT"].includes(a.status);
+    };
 
-    const completed = filtered.filter((a) =>
-      ["SUBMITTED", "PUBLISHED", "APPROVED", "SCHEDULED"].includes(a.status),
+    const overdue = filtered.filter(isCurrentlyOverdue).length;
+
+    const measurable = filtered.filter((a) =>
+      ["SUBMITTED", "PUBLISHED", "APPROVED", "SCHEDULED"].includes(a.status) || a.isOverdue || isCurrentlyOverdue(a)
     );
-    const onTime = completed.filter((a) => !a.isOverdue).length;
+    const onTime = measurable.filter((a) => !a.isOverdue && !isCurrentlyOverdue(a)).length;
     const onTimeRate =
-      completed.length > 0 ? (onTime / completed.length) * 100 : 0;
+      measurable.length > 0 ? (onTime / measurable.length) * 100 : 0;
 
     return {
       filteredHistory: filtered,

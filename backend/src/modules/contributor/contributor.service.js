@@ -219,13 +219,13 @@ export const getReport = async (userId) => {
       ["ASSIGNED", "DRAFT"].includes(a.status),
   ).length;
 
-  // Calculate on-time rate
-  const completed = assignments.filter((a) =>
-    ["SUBMITTED", "PUBLISHED", "APPROVED", "SCHEDULED"].includes(a.status),
+  // Calculate on-time rate: include all completed tasks AND all currently overdue tasks
+  const measurable = assignments.filter((a) =>
+    ["SUBMITTED", "PUBLISHED", "APPROVED", "SCHEDULED"].includes(a.status) || a.isOverdue
   );
-  const onTime = completed.filter((a) => !a.isOverdue).length;
+  const onTime = measurable.filter((a) => !a.isOverdue).length;
   const onTimeRate =
-    completed.length > 0 ? (onTime / completed.length) * 100 : 0;
+    measurable.length > 0 ? (onTime / measurable.length) * 100 : 0;
 
   return {
     metrics: {
