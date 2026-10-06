@@ -168,6 +168,22 @@ export const getContentById = async (id) => {
  * Create new content (starts as DRAFT).
  */
 export const createContent = async (data, userId) => {
+  if (data.title) {
+    const trimmedTitle = data.title.trim();
+    const escapedTitle = trimmedTitle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const duplicate = await Content.findOne({
+      title: { $regex: `^${escapedTitle}$`, $options: "i" },
+    });
+    if (duplicate) {
+      const err = new Error(
+        `A content with the title "${trimmedTitle}" already exists. Duplicate content names are not allowed.`
+      );
+      err.statusCode = 409;
+      err.code = "DUPLICATE_TITLE";
+      throw err;
+    }
+  }
+
   const content = await Content.create({
     ...data,
     createdBy: userId,
@@ -217,6 +233,23 @@ export const updateContent = async (id, data, userId) => {
     err.statusCode = 404;
     err.code = "NOT_FOUND";
     throw err;
+  }
+
+  if (allowedFields.title) {
+    const trimmedTitle = allowedFields.title.trim();
+    const escapedTitle = trimmedTitle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const duplicate = await Content.findOne({
+      _id: { $ne: id },
+      title: { $regex: `^${escapedTitle}$`, $options: "i" },
+    });
+    if (duplicate) {
+      const err = new Error(
+        `A content with the title "${trimmedTitle}" already exists. Duplicate content names are not allowed.`
+      );
+      err.statusCode = 409;
+      err.code = "DUPLICATE_TITLE";
+      throw err;
+    }
   }
 
   if (allowedFields.dueDate !== undefined) {

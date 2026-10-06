@@ -112,6 +112,12 @@ const contentSchema = new mongoose.Schema(
   },
 );
 
+// Unique case-insensitive index on content title
+contentSchema.index(
+  { title: 1 },
+  { unique: true, collation: { locale: "en", strength: 2 } }
+);
+
 // Text index for full-text search
 contentSchema.index({ title: "text", notes: "text" });
 contentSchema.index({ status: 1, contentType: 1 });
