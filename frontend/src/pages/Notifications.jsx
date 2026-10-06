@@ -13,6 +13,8 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
 
+import useAuth from "../hooks/useAuth.js";
+
 const getIcon = (type) => {
   switch (type) {
     case "SUCCESS":
@@ -29,6 +31,7 @@ const getIcon = (type) => {
 
 const Notifications = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const {
     notifications,
     markAsRead,
@@ -139,7 +142,19 @@ const Notifications = () => {
                         {notif.message}
                       </p>
 
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 flex-wrap">
+                        {["ADMIN", "CONTENT_MANAGER"].includes(user?.role) && notif.link && (
+                          <button
+                            onClick={() => {
+                              if (isUnread) markAsRead(notif._id);
+                              navigate(notif.link);
+                            }}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 font-semibold text-xs rounded-full border border-blue-200/80 shadow-sm transition-all hover:scale-105 active:scale-95"
+                          >
+                            <Info className="w-4 h-4 text-blue-600" />
+                            View Details
+                          </button>
+                        )}
                         {isUnread && (
                           <button
                             onClick={() => markAsRead(notif._id)}
@@ -148,15 +163,6 @@ const Notifications = () => {
                             <CheckCircle className="w-3.5 h-3.5" />
                             Mark as read
                           </button>
-                        )}
-                        {notif.link && (
-                          <a
-                            href={notif.link}
-                            className="text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
-                          >
-                            <Info className="w-3.5 h-3.5" />
-                            View Details
-                          </a>
                         )}
                       </div>
                     </div>

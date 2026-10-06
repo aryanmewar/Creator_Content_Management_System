@@ -55,7 +55,7 @@ export const initScheduleMonitor = () => {
               title: "⏰ Scheduled Content Posting Time Reached!",
               message: `The scheduled posting time for "${content.title}" has arrived. Please check if the content has been posted, then update its status to PUBLISHED.`,
               type: "WARNING",
-              link: `/content`,
+              link: `/content/${content._id}`,
             });
           }
 

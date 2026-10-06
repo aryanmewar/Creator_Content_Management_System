@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
+import { Info } from "lucide-react";
 import { notificationService } from "../services/notificationService.js";
 import useAuth from "../hooks/useAuth.js";
 
@@ -35,21 +36,33 @@ export const NotificationProvider = ({ children }) => {
             if (n.title.includes("Schedule") || n.title.includes("Posting Time") || n.title.includes("⏰")) {
               toast(
                 (t) => (
-                  <div className="flex flex-col gap-1 max-w-sm">
+                  <div className="flex flex-col gap-2 max-w-sm">
                     <span className="font-bold text-amber-900 text-sm flex items-center gap-1.5">
                       {n.title}
                     </span>
                     <span className="text-xs text-amber-800 leading-snug">{n.message}</span>
+                    {["ADMIN", "CONTENT_MANAGER"].includes(user?.role) && n.link && (
+                      <button
+                        onClick={() => {
+                          toast.dismiss(t.id);
+                          window.location.href = n.link;
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 font-semibold text-xs rounded-full border border-blue-200/80 shadow-sm transition-all hover:scale-105 active:scale-95 self-start mt-1"
+                      >
+                        <Info className="w-3.5 h-3.5 text-blue-600" />
+                        View Details
+                      </button>
+                    )}
                   </div>
                 ),
                 {
-                  duration: 10000,
+                  duration: 12000,
                   style: {
                     borderRadius: "16px",
                     background: "#FFFBEB",
                     color: "#92400E",
                     border: "1px solid #FCD34D",
-                    padding: "12px 16px",
+                    padding: "14px 16px",
                     boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)",
                   },
                 }
