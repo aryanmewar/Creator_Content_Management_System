@@ -354,9 +354,14 @@ export const updateContentStatus = async (
 
   if (scheduledDate !== undefined) {
     content.scheduledDate = scheduledDate;
+    content.scheduleNotificationSent = false;
   }
   if (scheduledTime !== undefined) {
     content.scheduledTime = scheduledTime;
+    content.scheduleNotificationSent = false;
+  }
+  if (newStatus === CONTENT_STATUSES.SCHEDULED) {
+    content.scheduleNotificationSent = false;
   }
   if (publishedLinks !== undefined) {
     content.publishedLinks = publishedLinks;

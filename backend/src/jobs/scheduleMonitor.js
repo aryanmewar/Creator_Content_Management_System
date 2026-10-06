@@ -3,8 +3,8 @@ import Content from "../modules/content/content.model.js";
 import { createNotification } from "../modules/notifications/notification.service.js";
 
 export const initScheduleMonitor = () => {
-  // Run every minute
-  cron.schedule("* * * * *", async () => {
+  // Check every 10 seconds for real-time notifications
+  cron.schedule("*/10 * * * * *", async () => {
     try {
       const now = new Date();
 
@@ -45,16 +45,16 @@ export const initScheduleMonitor = () => {
 
         // If the current time has passed the scheduled time
         if (now >= exactScheduledTime) {
-          // Send notification to ALL admins
+          // Send real-time notification to ALL admins
           const { default: User } = await import("../modules/auth/auth.model.js");
           const admins = await User.find({ role: "ADMIN" });
           
           for (const admin of admins) {
             await createNotification({
               userId: admin._id,
-              title: "Content Schedule Time Reached",
-              message: `The scheduled time for the content "${content.title}" has arrived. Please verify if it has been published and update its status.`,
-              type: "INFO",
+              title: "⏰ Scheduled Content Posting Time Reached!",
+              message: `The scheduled posting time for "${content.title}" has arrived. Please check if the content has been posted, then update its status to PUBLISHED.`,
+              type: "WARNING",
               link: `/content`,
             });
           }
@@ -69,5 +69,5 @@ export const initScheduleMonitor = () => {
     }
   });
 
-  console.log("⏰ Schedule monitor cron job initialized");
+  console.log("⏰ Real-time schedule monitor cron job initialized (runs every 10s)");
 };

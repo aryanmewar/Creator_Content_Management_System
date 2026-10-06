@@ -116,79 +116,131 @@ const Sidebar = ({
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 min-h-0 px-3 py-4 space-y-1.5 overflow-y-auto">
+        <nav
+          className={`flex-1 min-h-0 px-3 py-4 space-y-1.5 ${
+            isVisualCollapsed ? "overflow-visible" : "overflow-y-auto"
+          }`}
+        >
           {navItems.map(({ to, icon: Icon, label }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={to === "/"}
-              onClick={handleNavClick}
-              className={({ isActive }) =>
-                `flex items-center h-10 w-full rounded-md transition-all duration-500 ease-out ${
-                  isVisualCollapsed
-                    ? "justify-center px-0"
-                    : "justify-start px-3"
-                } ${
-                  isActive
-                    ? "bg-white/15 text-white"
-                    : "text-slate-400 hover:text-white hover:bg-white/10"
-                }`
-              }
-              title={isVisualCollapsed ? label : undefined}
-            >
-              <Icon
-                className={`w-5 h-5 shrink-0 transition-all duration-500 ease-out ${isVisualCollapsed ? "" : "mr-3"}`}
-              />
-              <span
-                className={`overflow-hidden whitespace-nowrap transition-all duration-500 ease-out ${isVisualCollapsed ? "max-w-0 opacity-0" : "max-w-[200px] opacity-100"}`}
+            <div key={to} className="relative group flex items-center">
+              <NavLink
+                to={to}
+                end={to === "/"}
+                onClick={handleNavClick}
+                className={({ isActive }) =>
+                  `flex items-center h-10 w-full rounded-md transition-all duration-300 ease-out ${
+                    isVisualCollapsed
+                      ? "justify-center px-0"
+                      : "justify-start px-3"
+                  } ${
+                    isActive
+                      ? "bg-white/15 text-white"
+                      : "text-slate-400 hover:text-white hover:bg-white/10"
+                  }`
+                }
               >
-                {label}
-              </span>
-            </NavLink>
+                <Icon
+                  className={`w-5 h-5 shrink-0 transition-all duration-300 ease-out ${
+                    isVisualCollapsed ? "" : "mr-3"
+                  }`}
+                />
+                <span
+                  className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-out ${
+                    isVisualCollapsed
+                      ? "max-w-0 opacity-0"
+                      : "max-w-[200px] opacity-100"
+                  }`}
+                >
+                  {label}
+                </span>
+              </NavLink>
+
+              {/* Pill Tooltip on Hover */}
+              {isVisualCollapsed && (
+                <div className="absolute left-full ml-3.5 px-3 py-1.5 bg-[#2D4396] text-white text-xs font-semibold rounded-full shadow-2xl border border-indigo-400/40 whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-1.5 pointer-events-none transition-all duration-200 z-50 flex items-center">
+                  <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-[#2D4396] border-l border-b border-indigo-400/40 rotate-45"></div>
+                  <span className="relative z-10">{label}</span>
+                </div>
+              )}
+            </div>
           ))}
         </nav>
 
         {/* User section */}
         <div className="px-3 py-4 border-t border-white/10 shrink-0">
           {/* User info */}
-          <div
-            className={`flex items-center h-10 mb-2 relative ${isVisualCollapsed ? "justify-center" : "px-3"}`}
-          >
+          <div className="relative group flex items-center">
             <div
-              className={`w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 transition-all duration-500 ease-out ${isVisualCollapsed ? "" : "absolute left-3"}`}
-              title={user?.name}
+              className={`flex items-center h-10 mb-2 relative w-full ${
+                isVisualCollapsed ? "justify-center" : "px-3"
+              }`}
             >
-              <span className="text-white text-xs font-semibold">
-                {getInitials(user?.name || "U")}
-              </span>
+              <div
+                className={`w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 transition-all duration-300 ease-out ${
+                  isVisualCollapsed ? "" : "absolute left-3"
+                }`}
+              >
+                <span className="text-white text-xs font-semibold">
+                  {getInitials(user?.name || "U")}
+                </span>
+              </div>
+              <div
+                className={`min-w-0 overflow-hidden whitespace-nowrap transition-all duration-300 ease-out ${
+                  isVisualCollapsed
+                    ? "max-w-0 opacity-0"
+                    : "ml-11 max-w-[150px] opacity-100"
+                }`}
+              >
+                <p className="text-white text-sm font-medium truncate">
+                  {user?.name || "User"}
+                </p>
+                <p className="text-slate-400 text-[10px] uppercase tracking-wider truncate">
+                  {user?.role?.replace("_", " ")}
+                </p>
+              </div>
             </div>
-            <div
-              className={`min-w-0 overflow-hidden whitespace-nowrap transition-all duration-500 ease-out ${isVisualCollapsed ? "max-w-0 opacity-0" : "ml-11 max-w-[150px] opacity-100"}`}
-            >
-              <p className="text-white text-sm font-medium truncate">
-                {user?.name || "User"}
-              </p>
-              <p className="text-slate-400 text-[10px] uppercase tracking-wider truncate">
-                {user?.role?.replace("_", " ")}
-              </p>
-            </div>
+
+            {/* User Pill Tooltip */}
+            {isVisualCollapsed && (
+              <div className="absolute left-full ml-3.5 bottom-2 px-3 py-1.5 bg-slate-800 text-white text-xs font-semibold rounded-full shadow-2xl border border-slate-600/50 whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-1.5 pointer-events-none transition-all duration-200 z-50 flex items-center">
+                <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-slate-800 border-l border-b border-slate-600/50 rotate-45"></div>
+                <span className="relative z-10">{user?.name || "Profile"}</span>
+              </div>
+            )}
           </div>
 
           {/* Logout */}
-          <button
-            onClick={handleLogout}
-            className={`flex items-center h-10 w-full rounded-md text-slate-400 hover:text-white hover:bg-white/10 transition-all duration-500 ease-out ${isVisualCollapsed ? "justify-center px-0" : "justify-start px-3"}`}
-            title={isVisualCollapsed ? "Logout" : undefined}
-          >
-            <LogOut
-              className={`w-5 h-5 shrink-0 transition-all duration-500 ease-out ${isVisualCollapsed ? "" : "mr-3"}`}
-            />
-            <span
-              className={`overflow-hidden whitespace-nowrap transition-all duration-500 ease-out ${isVisualCollapsed ? "max-w-0 opacity-0" : "max-w-[150px] opacity-100"}`}
+          <div className="relative group flex items-center">
+            <button
+              onClick={handleLogout}
+              className={`flex items-center h-10 w-full rounded-md text-slate-400 hover:text-white hover:bg-white/10 transition-all duration-300 ease-out ${
+                isVisualCollapsed ? "justify-center px-0" : "justify-start px-3"
+              }`}
             >
-              Logout
-            </span>
-          </button>
+              <LogOut
+                className={`w-5 h-5 shrink-0 transition-all duration-300 ease-out ${
+                  isVisualCollapsed ? "" : "mr-3"
+                }`}
+              />
+              <span
+                className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-out ${
+                  isVisualCollapsed
+                    ? "max-w-0 opacity-0"
+                    : "max-w-[150px] opacity-100"
+                }`}
+              >
+                Logout
+              </span>
+            </button>
+
+            {/* Logout Pill Tooltip */}
+            {isVisualCollapsed && (
+              <div className="absolute left-full ml-3.5 px-3 py-1.5 bg-rose-600 text-white text-xs font-semibold rounded-full shadow-2xl border border-rose-400/40 whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:translate-x-1.5 pointer-events-none transition-all duration-200 z-50 flex items-center">
+                <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-rose-600 border-l border-b border-rose-400/40 rotate-45"></div>
+                <span className="relative z-10">Logout</span>
+              </div>
+            )}
+          </div>
         </div>
       </aside>
     </>
