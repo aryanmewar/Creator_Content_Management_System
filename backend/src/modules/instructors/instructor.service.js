@@ -35,7 +35,8 @@ export const getInstructors = async ({
     .populate("createdBy", "name email")
     .sort({ createdAt: -1 })
     .skip(skip)
-    .limit(parseInt(limit));
+    .limit(parseInt(limit))
+    .lean();
 
   // Attach content stats for each instructor
   const enriched = await Promise.all(instructors.map(enrichInstructorStats));
@@ -55,13 +56,17 @@ export const getInstructors = async ({
  * Attach content count stats to an instructor.
  */
 const enrichInstructorStats = async (instructor) => {
-  const user = await User.findOne({ email: instructor.email });
+  const user = await User.findOne({ email: instructor.email })
+    .select("_id lastLoginAt role")
+    .lean();
   const query = { $or: [{ contributors: instructor._id }] };
   if (user) {
     query.$or.push({ createdBy: user._id, contributors: { $size: 0 } });
   }
 
-  const contentItems = await Content.find(query);
+  const contentItems = await Content.find(query)
+    .select("status isOverdue dueDate")
+    .lean();
   const today = getStartOfToday();
 
   let total = 0,
@@ -87,8 +92,10 @@ const enrichInstructorStats = async (instructor) => {
     pending++;
   }
 
+  const instObj = typeof instructor.toObject === "function" ? instructor.toObject() : instructor;
+
   return {
-    ...instructor.toObject(),
+    ...instObj,
     lastLoginAt: user ? user.lastLoginAt : null,
     role: user ? user.role : USER_ROLES.CONTRIBUTOR,
     stats: { total, completed, pending, overdue },

@@ -2,7 +2,6 @@ import React, { useEffect, useState, useMemo } from "react";
 import { TrendingUp, Award, Target, Download } from "lucide-react";
 import Select from "../components/common/Select.jsx";
 import { generateMonthOptions } from "../utils/dateUtils.js";
-import ExcelJS from "exceljs";
 import {
   BarChart,
   Bar,
@@ -259,6 +258,7 @@ const Reports = () => {
   const downloadExcel = async () => {
     if (deliveredContent.length === 0) return;
 
+    const ExcelJS = (await import("exceljs")).default;
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet("Delivered Content");
 

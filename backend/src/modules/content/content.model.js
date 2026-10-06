@@ -121,6 +121,10 @@ contentSchema.index(
 // Text index for full-text search
 contentSchema.index({ title: "text", notes: "text" });
 contentSchema.index({ status: 1, contentType: 1 });
+contentSchema.index({ status: 1, createdAt: -1 });
+contentSchema.index({ dueDate: 1, status: 1 });
+contentSchema.index({ scheduledDate: 1, status: 1 });
+contentSchema.index({ isOverdue: 1, status: 1 });
 contentSchema.index({ contributors: 1 });
 contentSchema.index({ createdBy: 1 });
 contentSchema.index({ publishedDate: -1, updatedAt: -1 });

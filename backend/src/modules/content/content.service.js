@@ -79,7 +79,8 @@ export const getContent = async ({
       .populate("createdBy", "name email")
       .sort(sort)
       .skip(skip)
-      .limit(parseInt(limit)),
+      .limit(parseInt(limit))
+      .lean(),
     Content.aggregate([
       { $match: countQuery },
       { $group: { _id: "$status", count: { $sum: 1 } } },
@@ -93,7 +94,9 @@ export const getContent = async ({
   const assignments = await Assignment.find(
     { contentId: { $in: contentIds } },
     { contentId: 1, deadline: 1, priority: 1, createdAt: 1 },
-  ).sort({ createdAt: -1 });
+  )
+    .sort({ createdAt: -1 })
+    .lean();
 
   // Build a map: contentId → most recent assignment
   const assignmentMap = {};

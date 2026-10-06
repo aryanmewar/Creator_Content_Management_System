@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import cookieParser from "cookie-parser";
+import compression from "compression";
 import env from "./config/env.js";
 
 // Route imports
@@ -75,6 +76,7 @@ const limiter = rateLimit({
 
 
 app.use(limiter);
+app.use(compression());
 
 // ─── Body Parsing ────────────────────────────────────────────────────────────
 app.use(express.json({ limit: "10mb" }));

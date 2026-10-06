@@ -25,10 +25,14 @@ export const getSummary = async () => {
   const today = getStartOfToday();
   const { start: todayStart, end: todayEnd } = getTodayRange();
 
-  // 1. Exact count of all content by status
-  const [totalContent, statusCountsAggr] = await Promise.all([
-    Content.countDocuments(),
+  // 1. Exact count of all content by status (sum of Owners Content + Contributors Content)
+  const [ownerStatusCounts, contribStatusCounts] = await Promise.all([
     Content.aggregate([
+      { $match: { isOwnerContent: true } },
+      { $group: { _id: "$status", count: { $sum: 1 } } },
+    ]),
+    Content.aggregate([
+      { $match: { "contributors.0": { $exists: true } } },
       { $group: { _id: "$status", count: { $sum: 1 } } },
     ]),
   ]);
@@ -44,8 +48,13 @@ export const getSummary = async () => {
     PUBLISHED: 0,
     REJECTED: 0,
   };
-  statusCountsAggr.forEach(({ _id, count }) => {
-    if (_id) statusCounts[_id] = count;
+
+  let totalContent = 0;
+  [...ownerStatusCounts, ...contribStatusCounts].forEach(({ _id, count }) => {
+    if (_id && statusCounts[_id] !== undefined) {
+      statusCounts[_id] += count;
+    }
+    totalContent += count;
   });
 
   // 2. Due today: count unique contents with deadline today and not completed
@@ -56,14 +65,14 @@ export const getSummary = async () => {
         status: { $nin: COMPLETED_STATUSES },
       },
       { _id: 1 }
-    ),
+    ).lean(),
     Assignment.find(
       {
         deadline: { $gte: todayStart, $lte: todayEnd },
         status: { $nin: COMPLETED_STATUSES },
       },
       { contentId: 1 }
-    ),
+    ).lean(),
   ]);
 
   const dueTodayIds = new Set([
@@ -85,14 +94,14 @@ export const getSummary = async () => {
         ],
       },
       { _id: 1 }
-    ),
+    ).lean(),
     Assignment.find(
       {
         deadline: { $lt: today },
         status: { $nin: COMPLETED_STATUSES },
       },
       { contentId: 1 }
-    ),
+    ).lean(),
   ]);
 
   const overdueIds = new Set([
@@ -146,7 +155,8 @@ export const getDeadlines = async () => {
       .populate("contentId", "title contentType status referenceLink")
       .populate("instructorId", "name email profileImage")
       .sort({ deadline: 1 })
-      .limit(30),
+      .limit(30)
+      .lean(),
     Content.find({
       dueDate: { $gte: start, $lte: end },
       status: { $nin: COMPLETED_STATUSES },
@@ -154,13 +164,14 @@ export const getDeadlines = async () => {
       .populate("createdBy", "name email profileImage")
       .populate("contributors", "name email profileImage")
       .sort({ dueDate: 1 })
-      .limit(30),
+      .limit(30)
+      .lean(),
   ]);
 
   const mappedAssignments = assignments
     .filter((a) => a.contentId)
     .map((a) => ({
-      ...a.toObject(),
+      ...a,
       deadlineState: "DUE_TODAY",
     }));
 
@@ -220,10 +231,11 @@ export const getUpcoming = async () => {
     .populate("contentId", "title contentType status referenceLink")
     .populate("instructorId", "name email profileImage")
     .sort({ deadline: 1 })
-    .limit(20);
+    .limit(20)
+    .lean();
 
   return assignments.map((a) => ({
-    ...a.toObject(),
+    ...a,
     deadlineState: "UPCOMING",
   }));
 };
@@ -243,7 +255,8 @@ export const getOverdue = async () => {
       .populate("contentId", "title contentType status referenceLink")
       .populate("instructorId", "name email profileImage")
       .sort({ deadline: 1 })
-      .limit(30),
+      .limit(30)
+      .lean(),
     Content.find({
       $or: [
         { isOverdue: true, status: { $nin: COMPLETED_STATUSES } },
@@ -256,13 +269,14 @@ export const getOverdue = async () => {
       .populate("createdBy", "name email profileImage")
       .populate("contributors", "name email profileImage")
       .sort({ dueDate: 1 })
-      .limit(30),
+      .limit(30)
+      .lean(),
   ]);
 
   const mappedAssignments = assignments
     .filter((a) => a.contentId)
     .map((a) => ({
-      ...a.toObject(),
+      ...a,
       deadlineState: "OVERDUE",
     }));
 
@@ -325,7 +339,8 @@ export const getRecent = async () => {
     .populate("createdBy", "name email profileImage")
     .populate("contributors", "name email profileImage")
     .sort({ publishedDate: -1 })
-    .limit(10);
+    .limit(10)
+    .lean();
 
   const publications = [];
   publishedContent.forEach((c) => {
@@ -398,7 +413,8 @@ export const getOverdueHistory = async (query = {}) => {
   const records = await OverdueRecord.find(filter)
     .populate("instructorId", "name email designation profileImage")
     .populate("contentId", "title status contentType dueDate isOverdue")
-    .sort({ recordedAt: -1, monthYear: -1 });
+    .sort({ recordedAt: -1, monthYear: -1 })
+    .lean();
 
   return records;
 };

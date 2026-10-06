@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -101,6 +100,8 @@
 
   .card-hover {
     @apply card transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-1;
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
 
   /* ── Form Elements ───────────────────────────────────── */

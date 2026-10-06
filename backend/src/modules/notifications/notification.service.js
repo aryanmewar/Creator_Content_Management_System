@@ -23,7 +23,7 @@ export const createNotification = async ({
  * Get notifications for a user, sorted by latest first.
  */
 export const getUserNotifications = async (userId) => {
-  return await Notification.find({ userId }).sort({ createdAt: -1 });
+  return await Notification.find({ userId }).sort({ createdAt: -1 }).lean();
 };
 
 /**
