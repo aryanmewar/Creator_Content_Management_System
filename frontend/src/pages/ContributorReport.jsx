@@ -3,7 +3,7 @@ import StatsCard from "../components/dashboard/StatsCard.jsx";
 import Loader from "../components/common/Loader.jsx";
 import Select from "../components/common/Select.jsx";
 import { generateMonthOptions, getRealDate } from "../utils/dateUtils.js";
-import { Award, AlertTriangle, Activity, TrendingUp, Calendar, CheckCircle } from "lucide-react";
+import { Award, AlertTriangle, Activity, TrendingUp, Calendar } from "lucide-react";
 import { FaYoutube, FaInstagram, FaLinkedin, FaFacebook } from "react-icons/fa";
 import {
   PieChart,

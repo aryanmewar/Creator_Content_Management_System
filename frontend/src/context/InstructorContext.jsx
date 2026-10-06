@@ -1,12 +1,13 @@
 import React, {
   createContext,
-  useContext,
   useReducer,
   useCallback,
 } from "react";
 import { instructorService } from "../services/instructorService.js";
 
 const InstructorContext = createContext(null);
+export default InstructorContext;
+export { useInstructorContext } from "../hooks/useInstructorContext.js";
 
 const initialState = {
   instructors: [],
@@ -96,11 +97,3 @@ export const InstructorProvider = ({ children }) => {
   );
 };
 
-export const useInstructorContext = () => {
-  const ctx = useContext(InstructorContext);
-  if (!ctx)
-    throw new Error(
-      "useInstructorContext must be used within InstructorProvider",
-    );
-  return ctx;
-};

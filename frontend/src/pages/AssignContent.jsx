@@ -8,13 +8,14 @@ import ConfirmDialog from "../components/common/ConfirmDialog.jsx";
 import { Button } from "@/components/ui/button";
 import Loader from "../components/common/Loader.jsx";
 import EmptyState from "../components/common/EmptyState.jsx";
-import { useContentContext } from "../context/ContentContext.jsx";
+import { useContentContext } from "../hooks/useContentContext.js";
 import { contentService } from "../services/contentService.js";
 import { instructorService } from "../services/instructorService.js";
 import { useNavigate } from "react-router-dom";
 
 const STATUS_TABS = [
   "All",
+  "DRAFT",
   "ASSIGNED",
   "IN_PROGRESS",
   "COMPLETED",

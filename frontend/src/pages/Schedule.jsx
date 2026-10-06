@@ -59,9 +59,17 @@ const Schedule = () => {
       const realSchedules = res.data || [];
       const scheduledContentList = contentRes.data || [];
 
+      // Deduplicate schedules by content ID to guarantee 100% exact counts
+      const existingSchedContentIds = new Set(
+        realSchedules
+          .map((s) => (s.contentId?._id || s.contentId)?.toString())
+          .filter(Boolean),
+      );
+
       const mappedContents = scheduledContentList
         .filter((c) => {
-          if (!c.scheduledDate) return false;
+          if (!c.scheduledDate || existingSchedContentIds.has(c._id.toString()))
+            return false;
           const d = new Date(c.scheduledDate);
           return (
             d.getMonth() === date.getMonth() &&

@@ -1,12 +1,13 @@
 import React, {
   createContext,
-  useContext,
   useReducer,
   useCallback,
 } from "react";
 import { contentService } from "../services/contentService.js";
 
 const ContentContext = createContext(null);
+export default ContentContext;
+export { useContentContext } from "../hooks/useContentContext.js";
 
 const initialState = {
   contents: [],
@@ -186,9 +187,3 @@ export const ContentProvider = ({ children }) => {
   );
 };
 
-export const useContentContext = () => {
-  const ctx = useContext(ContentContext);
-  if (!ctx)
-    throw new Error("useContentContext must be used within ContentProvider");
-  return ctx;
-};

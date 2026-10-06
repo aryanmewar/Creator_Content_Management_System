@@ -1,6 +1,5 @@
 import React, {
   createContext,
-  useContext,
   useReducer,
   useEffect,
   useCallback,
@@ -8,7 +7,8 @@ import React, {
 import { authService } from "../services/authService.js";
 
 const AuthContext = createContext(null);
-
+export default AuthContext;
+export { useAuth, useAuth as useAuthContext } from "../hooks/useAuth.js";
 const initialState = {
   user: null,
   isLoading: true,
@@ -81,8 +81,3 @@ export const AuthProvider = ({ children }) => {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-export const useAuthContext = () => {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuthContext must be used within AuthProvider");
-  return ctx;
-};

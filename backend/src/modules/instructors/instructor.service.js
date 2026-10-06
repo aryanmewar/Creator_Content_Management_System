@@ -77,7 +77,9 @@ const enrichInstructorStats = async (instructor) => {
     }
     if (
       c.isOverdue ||
-      (c.status === "ASSIGNED" && c.dueDate && new Date(c.dueDate) < today)
+      (!["PUBLISHED", "APPROVED", "SCHEDULED", "COMPLETED", "SUBMITTED"].includes(c.status) &&
+        c.dueDate &&
+        new Date(c.dueDate) < today)
     ) {
       overdue++;
       continue;

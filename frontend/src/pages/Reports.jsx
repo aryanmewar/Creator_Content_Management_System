@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { TrendingUp, Award, Target, Download, Calendar } from "lucide-react";
+import { TrendingUp, Award, Target, Download } from "lucide-react";
 import Select from "../components/common/Select.jsx";
 import { generateMonthOptions } from "../utils/dateUtils.js";
 import ExcelJS from "exceljs";
@@ -178,35 +178,30 @@ const Reports = () => {
       ([name, count]) => ({ name, count }),
     );
 
-    // 3. Status Distribution
-    const computedStatusData = [
-      {
-        name: "Draft",
-        value: Math.max(
-          0,
-          computedSummary.totalContent -
-            computedSummary.scheduled -
-            computedSummary.published -
-            computedSummary.pendingReview,
-        ),
-        color: "#94a3b8",
-      },
-      {
-        name: "In Progress",
-        value: computedSummary.pendingReview,
-        color: "#f59e0b",
-      },
-      {
-        name: "Scheduled",
-        value: computedSummary.scheduled,
-        color: "#38bdf8",
-      },
-      {
-        name: "Published",
-        value: computedSummary.published,
-        color: "#4ade80",
-      },
-    ].filter((d) => d.value > 0);
+    // 3. Status Distribution - Exact count from filtered content
+    const statusColorMap = {
+      DRAFT: "#94a3b8",
+      ASSIGNED: "#60a5fa",
+      IN_PROGRESS: "#f59e0b",
+      SUBMITTED: "#a78bfa",
+      APPROVED: "#34d399",
+      SCHEDULED: "#38bdf8",
+      PUBLISHED: "#4ade80",
+      REJECTED: "#f87171",
+    };
+    const statusCountsMap = {};
+    filteredContent.forEach((c) => {
+      const st = c.status || "DRAFT";
+      statusCountsMap[st] = (statusCountsMap[st] || 0) + 1;
+    });
+
+    const computedStatusData = Object.entries(statusCountsMap)
+      .map(([status, count]) => ({
+        name: status.replace("_", " "),
+        value: count,
+        color: statusColorMap[status] || "#94a3b8",
+      }))
+      .filter((d) => d.value > 0);
 
     // 4. Instructor Performance
     let computedInstructorPerf = [];

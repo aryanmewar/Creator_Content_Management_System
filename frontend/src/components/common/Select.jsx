@@ -14,7 +14,7 @@ const Select = forwardRef(
       onChange,
       ...props
     },
-    ref,
+    _ref,
   ) => {
     const [isOpen, setIsOpen] = useState(false);
     const wrapperRef = useRef(null);

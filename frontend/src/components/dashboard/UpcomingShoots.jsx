@@ -1,6 +1,5 @@
 import React from "react";
 import { Calendar, CheckCircle2, Video, ExternalLink } from "lucide-react";
-import { getDeadlineLabel } from "../../utils/dateUtils.js";
 
 const UpcomingShoots = ({ shoots = [] }) => {
   if (!shoots.length) {

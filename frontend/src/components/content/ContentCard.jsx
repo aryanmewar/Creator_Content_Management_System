@@ -18,7 +18,7 @@ import {
   FaFacebook,
   FaPen,
 } from "react-icons/fa";
-import { getStatusColor, getStatusLabel, getAllowedTransitions } from "@/utils/statusUtils.js";
+import { getStatusColor, getStatusLabel } from "@/utils/statusUtils.js";
 import { formatDate, formatTime12Hour, getRealDate, getDeadlineState } from "@/utils/dateUtils.js";
 
 import {

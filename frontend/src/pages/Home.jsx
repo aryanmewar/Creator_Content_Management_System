@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   BarChart3,
   Activity,
+  Layers,
 } from "lucide-react";
 import { dashboardService } from "../services/dashboardService.js";
 import { scheduleService } from "../services/scheduleService.js";
@@ -67,8 +68,20 @@ const Home = () => {
 
         const realSchedules = schedRes.data || [];
         const scheduledContentList = contentRes.data || [];
+
+        // Deduplicate schedules by content ID to guarantee 100% exact counts
+        const existingSchedContentIds = new Set(
+          realSchedules
+            .map((s) => (s.contentId?._id || s.contentId)?.toString())
+            .filter(Boolean),
+        );
+
         const mappedContents = scheduledContentList
-          .filter((c) => c.scheduledDate)
+          .filter(
+            (c) =>
+              c.scheduledDate &&
+              !existingSchedContentIds.has(c._id.toString()),
+          )
           .map((c) => {
             let cType = Array.isArray(c.contentType)
               ? c.contentType[0]
@@ -101,32 +114,48 @@ const Home = () => {
     loadDashboard();
   }, []);
 
-  // Build pie chart data from summary
-  const pieData = summary
+  // Build pie chart data from exact status counts
+  const pieData = summary?.statusCounts
     ? [
         {
-          name: "Draft",
-          value:
-            summary.totalContent -
-            summary.scheduled -
-            summary.published -
-            summary.pendingReview,
-          color: STATUS_COLORS.DRAFT,
+          name: "Published",
+          value: summary.statusCounts.PUBLISHED || 0,
+          color: STATUS_COLORS.PUBLISHED,
+        },
+        {
+          name: "Assigned",
+          value: summary.statusCounts.ASSIGNED || 0,
+          color: STATUS_COLORS.ASSIGNED,
+        },
+        {
+          name: "Approved",
+          value: summary.statusCounts.APPROVED || 0,
+          color: STATUS_COLORS.APPROVED,
         },
         {
           name: "In Progress",
-          value: summary.pendingReview,
+          value: summary.statusCounts.IN_PROGRESS || 0,
           color: STATUS_COLORS.IN_PROGRESS,
         },
         {
           name: "Scheduled",
-          value: summary.scheduled,
+          value: summary.statusCounts.SCHEDULED || 0,
           color: STATUS_COLORS.SCHEDULED,
         },
         {
-          name: "Published",
-          value: summary.published,
-          color: STATUS_COLORS.PUBLISHED,
+          name: "Pending Review",
+          value: summary.statusCounts.SUBMITTED || 0,
+          color: STATUS_COLORS.SUBMITTED,
+        },
+        {
+          name: "Draft",
+          value: summary.statusCounts.DRAFT || 0,
+          color: STATUS_COLORS.DRAFT,
+        },
+        {
+          name: "Rejected",
+          value: summary.statusCounts.REJECTED || 0,
+          color: STATUS_COLORS.REJECTED,
         },
       ].filter((d) => d.value > 0)
     : [];
@@ -141,12 +170,18 @@ const Home = () => {
   return (
     <>
       {/* Stats Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
         <StatsCard
           title="Total Content"
           value={summary?.totalContent}
           icon={FileText}
           color="primary"
+        />
+        <StatsCard
+          title="In Pipeline"
+          value={summary?.inPipeline}
+          icon={Layers}
+          color="purple"
         />
         <StatsCard
           title="Scheduled"

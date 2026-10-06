@@ -1,15 +1,12 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from "react";
+import React, { createContext, useState, useEffect, useRef, useCallback } from "react";
 import toast from "react-hot-toast";
 import { Info } from "lucide-react";
 import { notificationService } from "../services/notificationService.js";
 import useAuth from "../hooks/useAuth.js";
 
 const NotificationContext = createContext();
-
-export const useNotification = () => {
-  return useContext(NotificationContext);
-};
-
+export default NotificationContext;
+export { useNotification } from "../hooks/useNotification.js";
 export const NotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -17,13 +14,13 @@ export const NotificationProvider = ({ children }) => {
   const seenIdsRef = useRef(new Set());
   const isInitialLoadRef = useRef(true);
 
-  const loadNotifications = async () => {
+  const loadNotifications = useCallback(async () => {
     if (!user) return;
     try {
       const data = await notificationService.getNotifications();
       const freshList = data || [];
 
-      setNotifications((prev) => {
+      setNotifications((_prev) => {
         // Find newly arrived unread notifications
         const newlyArrived = freshList.filter(
           (n) => !n.isRead && !seenIdsRef.current.has(n._id)
@@ -84,7 +81,7 @@ export const NotificationProvider = ({ children }) => {
     } catch (error) {
       console.error("Failed to load notifications", error);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     isInitialLoadRef.current = true;
@@ -97,7 +94,7 @@ export const NotificationProvider = ({ children }) => {
       }
     }, 10000);
     return () => clearInterval(interval);
-  }, [user]);
+  }, [user, loadNotifications]);
 
   const markAsRead = async (id) => {
     try {

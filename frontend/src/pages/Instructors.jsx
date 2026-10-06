@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Plus, Users, ShieldCheck, XCircle, FileText } from "lucide-react";
+import { Plus, Users, ShieldCheck, XCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import InstructorTable from "../components/instructors/InstructorTable.jsx";
 import InstructorCard from "../components/instructors/InstructorCard.jsx";
@@ -8,7 +8,7 @@ import ConfirmDialog from "../components/common/ConfirmDialog.jsx";
 import { Button } from "@/components/ui/button";
 import Loader from "../components/common/Loader.jsx";
 import EmptyState from "../components/common/EmptyState.jsx";
-import { useInstructorContext } from "../context/InstructorContext.jsx";
+import { useInstructorContext } from "../hooks/useInstructorContext.js";
 import { instructorService } from "../services/instructorService.js";
 import { authService } from "../services/authService.js";
 import useDebounce from "../hooks/useDebounce.js";

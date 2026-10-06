@@ -1,5 +1,5 @@
 import React from "react";
-import { Clock, ChevronRight, PartyPopper, ExternalLink } from "lucide-react";
+import { Clock, PartyPopper, ExternalLink } from "lucide-react";
 import { getInitials } from "../../utils/formatUtils.js";
 
 const TodayDeadlines = ({ deadlines = [] }) => {

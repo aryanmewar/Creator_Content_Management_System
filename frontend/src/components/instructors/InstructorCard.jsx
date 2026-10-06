@@ -1,11 +1,11 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Mail, PowerOff, Edit, Eye, Trash2 } from "lucide-react";
+import { Mail, PowerOff, Edit, Trash2 } from "lucide-react";
 import { getInitials } from "../../utils/formatUtils.js";
 
 const InstructorCard = ({ instructor, onEdit, onToggleStatus, onDelete }) => {
   const navigate = useNavigate();
-  const { _id, name, email, designation, profileImage, isActive, stats } =
+  const { _id, name, email, designation, profileImage, isActive } =
     instructor;
 
   return (

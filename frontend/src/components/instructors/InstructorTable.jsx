@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { MoreHorizontal, Edit2, PowerOff, Eye, Trash2 } from "lucide-react";
+import { MoreHorizontal, Edit2, PowerOff, Trash2 } from "lucide-react";
 import { getInitials, timeAgo } from "../../utils/formatUtils.js";
 
 const InstructorTable = ({ instructors, onEdit, onToggleStatus, onDelete }) => {
@@ -47,7 +47,6 @@ const InstructorTable = ({ instructors, onEdit, onToggleStatus, onDelete }) => {
               designation,
               profileImage,
               isActive,
-              stats,
             } = instructor;
 
             return (

@@ -66,7 +66,8 @@ const ContributorDashboard = () => {
     }
   };
 
-  const handleMarkOverdueAcknowledged = async (id) => {
+  // eslint-disable-next-line -- kept for future use: acknowledge button can be added to UI
+  const _handleMarkOverdueAcknowledged = async (id) => {
     try {
       await contributorService.markOverdueAsAcknowledged(id);
       setAssignments((prev) =>

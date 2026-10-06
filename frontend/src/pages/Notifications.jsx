@@ -1,5 +1,5 @@
 import React from "react";
-import { useNotification } from "../context/NotificationContext.jsx";
+import { useNotification } from "../hooks/useNotification.js";
 import {
   Bell,
   Trash2,

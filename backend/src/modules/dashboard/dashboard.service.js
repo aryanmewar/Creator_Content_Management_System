@@ -1,12 +1,21 @@
 import Content from "../content/content.model.js";
 import Assignment from "../assignments/assignment.model.js";
 import Instructor from "../instructors/instructor.model.js";
+import User from "../auth/auth.model.js";
 import Publication from "../publications/publication.model.js";
 import Schedule from "../schedules/schedule.model.js";
 import OverdueRecord from "../reports/overdueRecord.model.js";
 import { getStartOfToday, getTodayRange } from "../../utils/dateUtils.js";
 import { CONTENT_STATUSES } from "../../utils/statusUtils.js";
 import { getDeadlineState } from "../../utils/dateUtils.js";
+
+const COMPLETED_STATUSES = [
+  "SUBMITTED",
+  "APPROVED",
+  "SCHEDULED",
+  "PUBLISHED",
+  "COMPLETED",
+];
 
 /**
  * GET /api/dashboard/summary
@@ -16,81 +25,144 @@ export const getSummary = async () => {
   const today = getStartOfToday();
   const { start: todayStart, end: todayEnd } = getTodayRange();
 
-  const [
-    totalContent,
-    scheduled,
-    published,
-    pendingReview,
-    dueTodayAssignments,
-    dueTodayContent,
-    overdueAssignments,
-    overdueContent,
-  ] = await Promise.all([
+  // 1. Exact count of all content by status
+  const [totalContent, statusCountsAggr] = await Promise.all([
     Content.countDocuments(),
-    Content.countDocuments({ status: CONTENT_STATUSES.SCHEDULED }),
-    Content.countDocuments({ status: CONTENT_STATUSES.PUBLISHED }),
-    Content.countDocuments({ status: CONTENT_STATUSES.SUBMITTED }),
-    // Due today: deadline is today AND content not complete
-    Assignment.countDocuments({
-      deadline: { $gte: todayStart, $lte: todayEnd },
-      status: "ASSIGNED",
-    }),
-    Content.countDocuments({
-      dueDate: { $gte: todayStart, $lte: todayEnd },
-      status: "ASSIGNED",
-    }),
-    // Overdue: deadline < today AND status not moved past ASSIGNED
-    Assignment.countDocuments({
-      deadline: { $lt: today },
-      status: { $in: ["ASSIGNED", "DRAFT"] },
-    }),
-    Content.countDocuments({
-      $or: [
-        { isOverdue: true },
-        { dueDate: { $lt: today }, status: "ASSIGNED" },
-      ],
-    }),
+    Content.aggregate([
+      { $group: { _id: "$status", count: { $sum: 1 } } },
+    ]),
   ]);
+
+  const statusCounts = {
+    DRAFT: 0,
+    ASSIGNED: 0,
+    IN_PROGRESS: 0,
+    COMPLETED: 0,
+    SUBMITTED: 0,
+    APPROVED: 0,
+    SCHEDULED: 0,
+    PUBLISHED: 0,
+    REJECTED: 0,
+  };
+  statusCountsAggr.forEach(({ _id, count }) => {
+    if (_id) statusCounts[_id] = count;
+  });
+
+  // 2. Due today: count unique contents with deadline today and not completed
+  const [dueContentDocs, dueAsgnDocs] = await Promise.all([
+    Content.find(
+      {
+        dueDate: { $gte: todayStart, $lte: todayEnd },
+        status: { $nin: COMPLETED_STATUSES },
+      },
+      { _id: 1 }
+    ),
+    Assignment.find(
+      {
+        deadline: { $gte: todayStart, $lte: todayEnd },
+        status: { $nin: COMPLETED_STATUSES },
+      },
+      { contentId: 1 }
+    ),
+  ]);
+
+  const dueTodayIds = new Set([
+    ...dueContentDocs.map((d) => d._id.toString()),
+    ...dueAsgnDocs.map((d) => d.contentId?.toString()).filter(Boolean),
+  ]);
+  const dueToday = dueTodayIds.size;
+
+  // 3. Overdue: count unique contents with deadline in past or isOverdue flag, not completed
+  const [overdueContentDocs, overdueAsgnDocs] = await Promise.all([
+    Content.find(
+      {
+        $or: [
+          { isOverdue: true, status: { $nin: COMPLETED_STATUSES } },
+          {
+            dueDate: { $lt: today },
+            status: { $nin: COMPLETED_STATUSES },
+          },
+        ],
+      },
+      { _id: 1 }
+    ),
+    Assignment.find(
+      {
+        deadline: { $lt: today },
+        status: { $nin: COMPLETED_STATUSES },
+      },
+      { contentId: 1 }
+    ),
+  ]);
+
+  const overdueIds = new Set([
+    ...overdueContentDocs.map((d) => d._id.toString()),
+    ...overdueAsgnDocs.map((d) => d.contentId?.toString()).filter(Boolean),
+  ]);
+  const overdue = overdueIds.size;
+
+  const scheduled = statusCounts.SCHEDULED || 0;
+  const published = statusCounts.PUBLISHED || 0;
+  const inPipeline =
+    (statusCounts.DRAFT || 0) +
+    (statusCounts.ASSIGNED || 0) +
+    (statusCounts.IN_PROGRESS || 0) +
+    (statusCounts.COMPLETED || 0) +
+    (statusCounts.SUBMITTED || 0) +
+    (statusCounts.APPROVED || 0) +
+    (statusCounts.REJECTED || 0);
 
   return {
     totalContent,
+    statusCounts,
+    inPipeline,
+    draft: statusCounts.DRAFT || 0,
+    assigned: statusCounts.ASSIGNED || 0,
+    inProgress: statusCounts.IN_PROGRESS || 0,
+    completed: statusCounts.COMPLETED || 0,
+    pendingReview: statusCounts.SUBMITTED || 0,
+    approved: statusCounts.APPROVED || 0,
     scheduled,
     published,
-    pendingReview,
-    dueToday: dueTodayAssignments + dueTodayContent,
-    overdue: overdueAssignments + overdueContent,
+    rejected: statusCounts.REJECTED || 0,
+    dueToday,
+    overdue,
   };
 };
 
 /**
  * GET /api/dashboard/deadlines
  * Returns today's deadline assignments with content + instructor info.
+ * Guaranteed deduplicated by contentId.
  */
 export const getDeadlines = async () => {
   const { start, end } = getTodayRange();
 
-  const assignments = await Assignment.find({
-    deadline: { $gte: start, $lte: end },
-    status: "ASSIGNED",
-  })
-    .populate("contentId", "title contentType status referenceLink")
-    .populate("instructorId", "name email profileImage")
-    .sort({ deadline: 1 })
-    .limit(20);
+  const [assignments, contents] = await Promise.all([
+    Assignment.find({
+      deadline: { $gte: start, $lte: end },
+      status: { $nin: COMPLETED_STATUSES },
+    })
+      .populate("contentId", "title contentType status referenceLink")
+      .populate("instructorId", "name email profileImage")
+      .sort({ deadline: 1 })
+      .limit(30),
+    Content.find({
+      dueDate: { $gte: start, $lte: end },
+      status: { $nin: COMPLETED_STATUSES },
+    })
+      .populate("createdBy", "name email profileImage")
+      .populate("contributors", "name email profileImage")
+      .sort({ dueDate: 1 })
+      .limit(30),
+  ]);
 
-  const mappedAssignments = assignments.map((a) => ({
-    ...a.toObject(),
-    deadlineState: "DUE_TODAY",
-  }));
-
-  const contents = await Content.find({
-    dueDate: { $gte: start, $lte: end },
-    status: "ASSIGNED",
-  })
-    .populate("createdBy", "name email profileImage")
-    .populate("contributors", "name email profileImage")
-    .sort({ dueDate: 1 })
-    .limit(20);
+  const mappedAssignments = assignments
+    .filter((a) => a.contentId)
+    .map((a) => ({
+      ...a.toObject(),
+      deadlineState: "DUE_TODAY",
+    }));
 
   const mappedContents = contents.map((c) => ({
     _id: `content-due-${c._id}`,
@@ -110,7 +182,29 @@ export const getDeadlines = async () => {
     isShootDate: true,
   }));
 
-  return [...mappedAssignments, ...mappedContents];
+  // Deduplicate by content ID
+  const seen = new Set();
+  const unique = [];
+
+  for (const item of mappedAssignments) {
+    const cid = (item.contentId?._id || item.contentId)?.toString();
+    if (cid && !seen.has(cid)) {
+      seen.add(cid);
+      unique.push(item);
+    }
+  }
+
+  for (const item of mappedContents) {
+    const cid = (item.contentId?._id || item.contentId)?.toString();
+    if (cid && !seen.has(cid)) {
+      seen.add(cid);
+      unique.push(item);
+    }
+  }
+
+  return unique
+    .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
+    .slice(0, 20);
 };
 
 /**
@@ -121,7 +215,7 @@ export const getUpcoming = async () => {
   const today = getStartOfToday();
   const assignments = await Assignment.find({
     deadline: { $gt: today },
-    status: { $nin: ["PUBLISHED", "APPROVED", "SCHEDULED"] },
+    status: { $nin: COMPLETED_STATUSES },
   })
     .populate("contentId", "title contentType status referenceLink")
     .populate("instructorId", "name email profileImage")
@@ -136,31 +230,41 @@ export const getUpcoming = async () => {
 
 /**
  * GET /api/dashboard/overdue
- * Returns overdue assignments.
+ * Returns overdue assignments, guaranteed deduplicated by contentId.
  */
 export const getOverdue = async () => {
   const today = getStartOfToday();
-  const assignments = await Assignment.find({
-    deadline: { $lt: today },
-    status: { $in: ["DRAFT", "ASSIGNED"] },
-  })
-    .populate("contentId", "title contentType status referenceLink")
-    .populate("instructorId", "name email profileImage")
-    .sort({ deadline: 1 })
-    .limit(20);
 
-  const mappedAssignments = assignments.map((a) => ({
-    ...a.toObject(),
-    deadlineState: "OVERDUE",
-  }));
+  const [assignments, contents] = await Promise.all([
+    Assignment.find({
+      deadline: { $lt: today },
+      status: { $nin: COMPLETED_STATUSES },
+    })
+      .populate("contentId", "title contentType status referenceLink")
+      .populate("instructorId", "name email profileImage")
+      .sort({ deadline: 1 })
+      .limit(30),
+    Content.find({
+      $or: [
+        { isOverdue: true, status: { $nin: COMPLETED_STATUSES } },
+        {
+          dueDate: { $lt: today },
+          status: { $nin: COMPLETED_STATUSES },
+        },
+      ],
+    })
+      .populate("createdBy", "name email profileImage")
+      .populate("contributors", "name email profileImage")
+      .sort({ dueDate: 1 })
+      .limit(30),
+  ]);
 
-  const contents = await Content.find({
-    $or: [{ isOverdue: true }, { dueDate: { $lt: today }, status: "ASSIGNED" }],
-  })
-    .populate("createdBy", "name email profileImage")
-    .populate("contributors", "name email profileImage")
-    .sort({ dueDate: 1 })
-    .limit(20);
+  const mappedAssignments = assignments
+    .filter((a) => a.contentId)
+    .map((a) => ({
+      ...a.toObject(),
+      deadlineState: "OVERDUE",
+    }));
 
   const mappedContents = contents.map((c) => ({
     _id: `content-overdue-${c._id}`,
@@ -180,10 +284,31 @@ export const getOverdue = async () => {
     isShootDate: true,
   }));
 
-  return [...mappedAssignments, ...mappedContents]
+  // Deduplicate by content ID
+  const seen = new Set();
+  const unique = [];
+
+  for (const item of mappedAssignments) {
+    const cid = (item.contentId?._id || item.contentId)?.toString();
+    if (cid && !seen.has(cid)) {
+      seen.add(cid);
+      unique.push(item);
+    }
+  }
+
+  for (const item of mappedContents) {
+    const cid = (item.contentId?._id || item.contentId)?.toString();
+    if (cid && !seen.has(cid)) {
+      seen.add(cid);
+      unique.push(item);
+    }
+  }
+
+  return unique
     .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
     .slice(0, 20);
 };
+
 
 /**
  * GET /api/dashboard/recent
