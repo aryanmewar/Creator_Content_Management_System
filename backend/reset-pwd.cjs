@@ -7,9 +7,9 @@ require('dotenv').config();
 mongoose.connect(process.env.MONGODB_URI, { family: 4, serverSelectionTimeoutMS: 5000 })
   .then(async () => {
     const db = mongoose.connection.db;
-    const hash = await bcrypt.hash('password123', 10);
+    const hash = await bcrypt.hash('Admin@1234', 12);
     await db.collection('users').updateOne({ email: 'aryansharma@ricr.in' }, { $set: { passwordHash: hash } });
-    console.log('Password updated');
+    console.log('Admin password successfully reset to Admin@1234');
     process.exit(0);
   })
   .catch(e => {

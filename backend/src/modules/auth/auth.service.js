@@ -30,7 +30,7 @@ export const registerUser = async ({ name, email, password, role }) => {
 /**
  * Login a user with email + password.
  */
-export const loginUser = async ({ email, password }) => {
+export const loginUser = async ({ email, password, remember }) => {
   // Explicitly select passwordHash since it's hidden by default
   const user = await User.findOne({ email }).select("+passwordHash");
 
@@ -61,12 +61,14 @@ export const loginUser = async ({ email, password }) => {
   user.lastLoginAt = new Date();
   await user.save();
 
-  const token = generateToken({ id: user._id, role: user.role });
+  // If remember is true, set long-lived 365 days token, otherwise default 30 days
+  const expiresIn = remember ? "365d" : "30d";
+  const token = generateToken({ id: user._id, role: user.role }, expiresIn);
 
   // Remove passwordHash from response
   const userObj = user.toJSON();
 
-  return { user: userObj, token };
+  return { user: userObj, token, remember };
 };
 
 /**

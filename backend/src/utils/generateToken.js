@@ -4,8 +4,10 @@ import env from "../config/env.js";
 /**
  * Generate a signed JWT token for the given payload.
  */
-export const generateToken = (payload) => {
-  return jwt.sign(payload, env.JWT_SECRET, { expiresIn: env.JWT_EXPIRES_IN });
+export const generateToken = (payload, expiresIn) => {
+  return jwt.sign(payload, env.JWT_SECRET, {
+    expiresIn: expiresIn || env.JWT_EXPIRES_IN || "30d",
+  });
 };
 
 /**

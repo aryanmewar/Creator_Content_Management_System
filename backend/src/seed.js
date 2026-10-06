@@ -18,7 +18,13 @@ const seed = async () => {
 
   const existing = await User.findOne({ email: "aryansharma@ricr.in" });
   if (existing) {
-    console.log("ℹ️  Admin user already exists. Skipping seed.");
+    if (process.argv.includes("--reset") || process.argv.includes("--force")) {
+      existing.passwordHash = "Admin@1234"; // Pre-save hook will hash it
+      await existing.save();
+      console.log("🔄 Admin user password reset to Admin@1234");
+      process.exit(0);
+    }
+    console.log("ℹ️  Admin user already exists. Skipping seed. (Use --reset to force reset password)");
     process.exit(0);
   }
 

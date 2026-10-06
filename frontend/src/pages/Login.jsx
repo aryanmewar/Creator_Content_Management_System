@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Eye, EyeOff, Mail, Lock, Zap } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, Zap, ShieldAlert, Copy } from "lucide-react";
 import toast from "react-hot-toast";
 import useAuth from "../hooks/useAuth.js";
 import Button from "../components/common/Button.jsx";
+import Modal from "../components/common/Modal.jsx";
 
 const schema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -41,6 +42,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [showForgotModal, setShowForgotModal] = useState(false);
 
   const {
     register,
@@ -324,12 +326,13 @@ const Login = () => {
                     Remember me
                   </label>
                 </div>
-                <a
-                  href="#"
-                  className="text-xs font-semibold text-[#2D4396] hover:text-indigo-800 transition-colors"
+                <button
+                  type="button"
+                  onClick={() => setShowForgotModal(true)}
+                  className="text-xs font-semibold text-[#2D4396] hover:text-indigo-800 transition-colors focus:outline-none"
                 >
                   Forgot password?
-                </a>
+                </button>
               </div>
 
               <Button
@@ -349,6 +352,52 @@ const Login = () => {
           </div>
         </div>
       </div>
+
+      {/* Forgot Password Notice Modal */}
+      <Modal
+        isOpen={showForgotModal}
+        onClose={() => setShowForgotModal(false)}
+        title="Reset Password Notice"
+        size="sm"
+        footer={
+          <Button
+            type="button"
+            onClick={() => setShowForgotModal(false)}
+            className="w-full bg-[#2D4396] hover:bg-indigo-800 text-white py-2.5 rounded-xl text-sm font-medium"
+          >
+            Understand & Close
+          </Button>
+        }
+      >
+        <div className="flex flex-col items-center text-center p-2">
+          <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mb-4 shadow-sm">
+            <ShieldAlert className="w-7 h-7 text-amber-600" />
+          </div>
+          <h3 className="text-base font-semibold text-slate-800 mb-2">
+            Contact Administrator
+          </h3>
+          <p className="text-sm text-slate-600 leading-relaxed mb-4">
+            Password changes are strictly managed by security policies. Please contact your system administrator to reset or change your password.
+          </p>
+          <div className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center justify-between text-xs text-slate-700">
+            <div className="flex items-center gap-2 overflow-hidden">
+              <Mail className="w-4 h-4 text-[#2D4396] shrink-0" />
+              <span className="truncate font-medium text-slate-800">aryansharma@ricr.in</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                navigator.clipboard.writeText("aryansharma@ricr.in");
+                toast.success("Admin email copied to clipboard!");
+              }}
+              className="p-1.5 hover:bg-slate-200 rounded-lg transition-colors text-slate-500 hover:text-[#2D4396] shrink-0"
+              title="Copy Admin Email"
+            >
+              <Copy className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

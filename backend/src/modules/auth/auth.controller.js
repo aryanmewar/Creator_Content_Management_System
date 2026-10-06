@@ -29,14 +29,18 @@ export const register = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
-    const { user, token } = await authService.loginUser({ email, password });
-    // Set JWT as HttpOnly cookie — inaccessible to JS (XSS-safe)
+    const { email, password, remember } = req.body;
+    const { user, token } = await authService.loginUser({ email, password, remember });
+    // Set cookie maxAge based on remember (365 days if remember is true, else 30 days)
+    const maxAge = remember
+      ? 365 * 24 * 60 * 60 * 1000
+      : 30 * 24 * 60 * 60 * 1000;
+
     res.cookie("cms_token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge,
     });
     return sendSuccess(res, {
       message: "Login successful.",
