@@ -25,9 +25,8 @@ const FutureProjects = () => {
   });
   const [editId, setEditId] = useState(null);
 
-  const fetchLinks = async () => {
+  const fetchLinks = useCallback(async () => {
     try {
-      setIsLoading(true);
       const data = await savedLinkService.getSavedLinks();
       setLinks(data);
     } catch (error) {
@@ -36,11 +35,11 @@ const FutureProjects = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchLinks();
-  }, []);
+  }, [fetchLinks]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

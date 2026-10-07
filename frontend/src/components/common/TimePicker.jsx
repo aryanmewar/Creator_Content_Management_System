@@ -1,25 +1,36 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+
+const parseTimeValue = (val) => {
+  if (!val) return { hour: "12", minute: "00", ampm: "PM" };
+  const [h, m] = val.split(":");
+  let hourNum = parseInt(h, 10);
+  const isPm = hourNum >= 12;
+
+  if (hourNum === 0) hourNum = 12;
+  else if (hourNum > 12) hourNum -= 12;
+
+  return {
+    hour: hourNum.toString().padStart(2, "0"),
+    minute: m || "00",
+    ampm: isPm ? "PM" : "AM",
+  };
+};
 
 const TimePicker = ({ value, onChange }) => {
   // value is expected to be in "HH:MM" 24-hour format
-  const [hour, setHour] = useState("12");
-  const [minute, setMinute] = useState("00");
-  const [ampm, setAmpm] = useState("PM");
+  const initial = parseTimeValue(value);
+  const [hour, setHour] = useState(initial.hour);
+  const [minute, setMinute] = useState(initial.minute);
+  const [ampm, setAmpm] = useState(initial.ampm);
+  const [prevValue, setPrevValue] = useState(value);
 
-  useEffect(() => {
-    if (value) {
-      const [h, m] = value.split(":");
-      let hourNum = parseInt(h, 10);
-      const isPm = hourNum >= 12;
-
-      if (hourNum === 0) hourNum = 12;
-      else if (hourNum > 12) hourNum -= 12;
-
-      setHour(hourNum.toString().padStart(2, "0"));
-      setMinute(m);
-      setAmpm(isPm ? "PM" : "AM");
-    }
-  }, [value]);
+  if (value !== prevValue) {
+    setPrevValue(value);
+    const p = parseTimeValue(value);
+    setHour(p.hour);
+    setMinute(p.minute);
+    setAmpm(p.ampm);
+  }
 
   const updateTime = (h, m, ap) => {
     let hr24 = parseInt(h || "0", 10);

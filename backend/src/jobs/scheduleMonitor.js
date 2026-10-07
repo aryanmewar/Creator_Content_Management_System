@@ -1,5 +1,6 @@
 import cron from "node-cron";
 import Content from "../modules/content/content.model.js";
+import User from "../modules/auth/auth.model.js";
 import { createNotification } from "../modules/notifications/notification.service.js";
 
 export const initScheduleMonitor = () => {
@@ -46,7 +47,6 @@ export const initScheduleMonitor = () => {
         // If the current time has passed the scheduled time
         if (now >= exactScheduledTime) {
           // Send real-time notification to ALL admins
-          const { default: User } = await import("../modules/auth/auth.model.js");
           const admins = await User.find({ role: "ADMIN" });
           
           for (const admin of admins) {

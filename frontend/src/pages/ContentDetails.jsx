@@ -7,6 +7,7 @@ import Button from "../components/common/Button.jsx";
 import Modal from "../components/common/Modal.jsx";
 import Select from "../components/common/Select.jsx";
 import Input from "../components/common/Input.jsx";
+import DatePicker from "../components/common/DatePicker.jsx";
 import { contentService } from "../services/contentService.js";
 import { publicationService } from "../services/publicationService.js";
 import {
@@ -302,15 +303,18 @@ const ContentDetails = () => {
               setPubForm((f) => ({ ...f, postUrl: e.target.value }))
             }
           />
-          <Input
-            label="Published Date"
-            type="date"
-            required
-            value={pubForm.publishedAt}
-            onChange={(e) =>
-              setPubForm((f) => ({ ...f, publishedAt: e.target.value }))
-            }
-          />
+          <div className="space-y-1">
+            <label className="form-label block mb-1">
+              Published Date <span className="text-red-500 ml-0.5">*</span>
+            </label>
+            <DatePicker
+              value={pubForm.publishedAt}
+              onChange={(e) =>
+                setPubForm((f) => ({ ...f, publishedAt: e.target.value }))
+              }
+              placeholder="Select published date..."
+            />
+          </div>
         </div>
       </Modal>
     </>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import toast from "react-hot-toast";
 import {
@@ -28,6 +28,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import Select from "../components/common/Select.jsx";
+import DatePicker from "../components/common/DatePicker.jsx";
 import { Badge } from "@/components/ui/badge";
 
 const Schedule = () => {
@@ -44,8 +45,7 @@ const Schedule = () => {
   });
   const [formLoading, setFormLoading] = useState(false);
 
-  const loadSchedules = async (date) => {
-    setIsLoading(true);
+  const loadSchedules = useCallback(async (date) => {
     try {
       const [res, contentRes] = await Promise.all([
         scheduleService.getSchedules({
@@ -104,14 +104,14 @@ const Schedule = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadSchedules(currentDate);
     contentService.getContent({ status: "APPROVED", limit: 100 }).then((r) => {
       setApprovedContent(r.data || []);
     });
-  }, [currentDate]);
+  }, [currentDate, loadSchedules]);
 
   const handleSchedule = async () => {
     setFormLoading(true);
@@ -339,12 +339,12 @@ const Schedule = () => {
                 <label className="text-sm font-semibold">
                   Date <span className="text-destructive">*</span>
                 </label>
-                <Input
-                  type="date"
+                <DatePicker
                   value={form.scheduledDate}
                   onChange={(e) =>
                     setForm((f) => ({ ...f, scheduledDate: e.target.value }))
                   }
+                  placeholder="Select date..."
                 />
               </div>
               <div className="space-y-1.5">

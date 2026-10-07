@@ -32,6 +32,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Select from "@/components/common/Select.jsx";
 import TimePicker from "@/components/common/TimePicker.jsx";
+import DatePicker from "@/components/common/DatePicker.jsx";
 import { Input } from "@/components/ui/input";
 
 const ALLOWED_DROPDOWN_STATUSES = [
@@ -114,8 +115,11 @@ const ContentCard = ({
       const newHours = now.getHours().toString().padStart(2, "0");
       const newMins = now.getMinutes().toString().padStart(2, "0");
       
-      setScheduledDate(newDate);
-      setScheduledTime(`${newHours}:${newMins}`);
+      const timer = setTimeout(() => {
+        setScheduledDate((prev) => prev || newDate);
+        setScheduledTime((prev) => prev || `${newHours}:${newMins}`);
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [showDateForm, scheduledDate, scheduledTime]);
 
@@ -516,13 +520,12 @@ const ContentCard = ({
             <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
               Set Scheduled Date
             </label>
-            <Input
-              type="date"
-              className="h-9 py-1 px-3 text-sm bg-white"
-              style={{ minHeight: "36px", height: "36px" }}
+            <DatePicker
               min={getRealDate().toISOString().split("T")[0]}
               value={scheduledDate}
               onChange={(e) => setScheduledDate(e.target.value)}
+              placeholder="Select schedule date..."
+              className="[&>div]:h-9 [&>div]:min-h-[36px]"
             />
           </div>
           <div className="w-full sm:w-auto shrink-0 flex flex-col justify-end">
@@ -551,11 +554,11 @@ const ContentCard = ({
               <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
                 Published Date (Optional)
               </label>
-              <Input
-                type="date"
-                className="h-9 bg-white"
+              <DatePicker
                 value={publishedDate}
                 onChange={(e) => setPublishedDate(e.target.value)}
+                placeholder="Select published date..."
+                className="[&>div]:h-9 [&>div]:min-h-[36px]"
               />
             </div>
           </div>

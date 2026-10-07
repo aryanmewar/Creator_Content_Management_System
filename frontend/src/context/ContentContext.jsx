@@ -7,7 +7,6 @@ import { contentService } from "../services/contentService.js";
 
 const ContentContext = createContext(null);
 export default ContentContext;
-export { useContentContext } from "../hooks/useContentContext.js";
 
 const initialState = {
   contents: [],

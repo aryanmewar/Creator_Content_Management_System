@@ -6,7 +6,7 @@ import useAuth from "../hooks/useAuth.js";
 
 const NotificationContext = createContext();
 export default NotificationContext;
-export { useNotification } from "../hooks/useNotification.js";
+
 export const NotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);

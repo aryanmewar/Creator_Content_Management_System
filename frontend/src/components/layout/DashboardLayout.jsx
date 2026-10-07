@@ -11,7 +11,9 @@ const DashboardLayout = ({ children }) => {
   });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const isMobileMenuOpenRef = useRef(isMobileMenuOpen);
-  isMobileMenuOpenRef.current = isMobileMenuOpen;
+  useEffect(() => {
+    isMobileMenuOpenRef.current = isMobileMenuOpen;
+  }, [isMobileMenuOpen]);
 
   useEffect(() => {
     localStorage.setItem("sidebarCollapsed", JSON.stringify(isCollapsed));

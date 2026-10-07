@@ -8,7 +8,7 @@ import { authService } from "../services/authService.js";
 
 const AuthContext = createContext(null);
 export default AuthContext;
-export { useAuth, useAuth as useAuthContext } from "../hooks/useAuth.js";
+
 const initialState = {
   user: null,
   isLoading: true,

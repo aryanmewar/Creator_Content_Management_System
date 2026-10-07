@@ -3,6 +3,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import MultiSelect from "../common/MultiSelect.jsx";
+import DatePicker from "../common/DatePicker.jsx";
 import {
   Dialog,
   DialogContent,
@@ -279,10 +280,17 @@ const ContentForm = ({
                 {!hideDueDate && (
                   <div className="space-y-1.5">
                     <label className={labelClasses}>Target Shoot Date</label>
-                    <input
-                      type="date"
-                      {...register("dueDate")}
-                      className={`${inputClasses} ${errors.dueDate ? "border-rose-400 ring-2 ring-rose-200" : ""}`}
+                    <Controller
+                      name="dueDate"
+                      control={control}
+                      render={({ field }) => (
+                        <DatePicker
+                          value={field.value}
+                          onChange={field.onChange}
+                          error={!!errors.dueDate}
+                          placeholder="Select shoot date..."
+                        />
+                      )}
                     />
                     {errors.dueDate && (
                       <p className="text-xs font-medium text-rose-500 px-1">
@@ -296,10 +304,17 @@ const ContentForm = ({
                   className={`space-y-1.5 ${hideDueDate ? "col-span-2" : ""}`}
                 >
                   <label className={labelClasses}>Shoot Completion</label>
-                  <input
-                    type="date"
-                    {...register("completionDate")}
-                    className={`${inputClasses} ${errors.completionDate ? "border-rose-400 ring-2 ring-rose-200" : ""}`}
+                  <Controller
+                    name="completionDate"
+                    control={control}
+                    render={({ field }) => (
+                      <DatePicker
+                        value={field.value}
+                        onChange={field.onChange}
+                        error={!!errors.completionDate}
+                        placeholder="Select completion date..."
+                      />
+                    )}
                   />
                   {errors.completionDate && (
                     <p className="text-xs font-medium text-rose-500 px-1">

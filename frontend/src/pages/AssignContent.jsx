@@ -65,15 +65,7 @@ const AssignContent = () => {
             dateTo,
           };
     fetchContent(params);
-  }, [
-    activeTab,
-    filters.search,
-    filters.contentType,
-    filters.instructor,
-    filters.month,
-    filters.page,
-    fetchContent,
-  ]);
+  }, [activeTab, filters, fetchContent]);
 
   useEffect(() => {
     instructorService

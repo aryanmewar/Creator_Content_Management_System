@@ -7,7 +7,6 @@ import { instructorService } from "../services/instructorService.js";
 
 const InstructorContext = createContext(null);
 export default InstructorContext;
-export { useInstructorContext } from "../hooks/useInstructorContext.js";
 
 const initialState = {
   instructors: [],
