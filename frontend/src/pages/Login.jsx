@@ -68,12 +68,12 @@ const Login = () => {
   }, []);
 
   useEffect(() => {
-    // Clean up any previously stored plaintext password for XSS security
-    localStorage.removeItem("rememberedPassword");
-
     const savedEmail = localStorage.getItem("rememberedEmail");
-    if (savedEmail) {
+    const savedPassword = localStorage.getItem("rememberedPassword");
+    
+    if (savedEmail && savedPassword) {
       setValue("email", savedEmail);
+      setValue("password", savedPassword);
       setValue("remember", true);
     }
   }, [setValue]);
@@ -86,10 +86,11 @@ const Login = () => {
       
       if (data.remember) {
         localStorage.setItem("rememberedEmail", data.email);
+        localStorage.setItem("rememberedPassword", data.password);
       } else {
         localStorage.removeItem("rememberedEmail");
+        localStorage.removeItem("rememberedPassword");
       }
-      localStorage.removeItem("rememberedPassword");
       
       toast.success("Welcome back!");
       const target = userRole === "CONTRIBUTOR" ? "/my-dashboard" : "/";

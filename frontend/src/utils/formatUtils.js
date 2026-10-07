@@ -62,20 +62,3 @@ export const timeAgo = (dateInput) => {
   const years = Math.floor(days / 365);
   return `${years}y ago`;
 };
-
-/**
- * Sanitize a URL to prevent Cross-Site Scripting (XSS).
- * Blocks javascript:, data:, vbscript: protocols and returns safe fallback.
- */
-export const sanitizeUrl = (url, fallback = "#") => {
-  if (!url || typeof url !== "string") return fallback;
-  const trimmed = url.trim();
-  // Strip control characters & spaces when testing for protocol
-  // eslint-disable-next-line no-control-regex
-  const sanitizedProtocol = trimmed.replace(/[\u0000-\u001F\u007F\s]+/g, "");
-  if (/^(javascript|data|vbscript):/i.test(sanitizedProtocol)) {
-    return fallback;
-  }
-  return trimmed;
-};
-

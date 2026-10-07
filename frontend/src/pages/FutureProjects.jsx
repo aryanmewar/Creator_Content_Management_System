@@ -12,7 +12,6 @@ import savedLinkService from "../services/savedLinkService";
 import Loader from "../components/common/Loader";
 import EmptyState from "../components/common/EmptyState";
 import Button from "../components/common/Button";
-import { sanitizeUrl } from "../utils/formatUtils";
 
 const FutureProjects = () => {
   const [links, setLinks] = useState([]);
@@ -272,9 +271,9 @@ const FutureProjects = () => {
                         <Copy className="w-3.5 h-3.5" />
                       </button>
                       <a
-                        href={sanitizeUrl(linkObj.link)}
+                        href={linkObj.link}
                         target="_blank"
-                        rel="noopener noreferrer"
+                        rel="noreferrer"
                         className="p-1.5 text-slate-500 hover:text-blue-500 hover:bg-white rounded-md transition-colors shadow-sm bg-white"
                         title="Open Link"
                       >
@@ -338,9 +337,9 @@ const FutureProjects = () => {
                             <Copy className="w-4 h-4" />
                           </button>
                           <a
-                            href={sanitizeUrl(linkObj.link)}
+                            href={linkObj.link}
                             target="_blank"
-                            rel="noopener noreferrer"
+                            rel="noreferrer"
                             className="p-1.5 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-md transition-colors"
                             title="Open Link"
                           >

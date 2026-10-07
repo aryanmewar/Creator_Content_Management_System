@@ -18,7 +18,6 @@ import {
 } from "../utils/statusUtils.js";
 import { formatDate } from "../utils/dateUtils.js";
 import { PLATFORMS } from "../utils/constants.js";
-import { sanitizeUrl } from "../utils/formatUtils.js";
 
 const ContentDetails = () => {
   const { id } = useParams();
@@ -130,7 +129,7 @@ const ContentDetails = () => {
 
             {content.referenceLink && (
               <a
-                href={sanitizeUrl(content.referenceLink)}
+                href={content.referenceLink}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700 mb-4"
@@ -202,7 +201,7 @@ const ContentDetails = () => {
                       </p>
                     </div>
                     <a
-                      href={sanitizeUrl(pub.postUrl)}
+                      href={pub.postUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs text-primary-600 hover:underline flex items-center gap-1"

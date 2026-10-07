@@ -1,7 +1,7 @@
 import React from "react";
 import { AlertCircle, CheckCircle2, ExternalLink } from "lucide-react";
 import { getDeadlineLabel } from "../../utils/dateUtils.js";
-import { getInitials, sanitizeUrl } from "../../utils/formatUtils.js";
+import { getInitials } from "../../utils/formatUtils.js";
 
 const OverdueContent = ({ items = [], onAcknowledge }) => {
   if (!items.length) {
@@ -56,9 +56,9 @@ const OverdueContent = ({ items = [], onAcknowledge }) => {
                   <>
                     <span className="text-slate-300 text-xs">•</span>
                     <a
-                      href={sanitizeUrl(assignment.contentId.referenceLink)}
+                      href={assignment.contentId.referenceLink}
                       target="_blank"
-                      rel="noopener noreferrer"
+                      rel="noreferrer"
                       className="text-xs text-blue-600 hover:underline flex items-center gap-1 font-medium"
                     >
                       <ExternalLink className="w-3 h-3" />

@@ -21,7 +21,6 @@ import {
   Area,
 } from "recharts";
 import { contributorService } from "../services/contributorService.js";
-import { sanitizeUrl } from "../utils/formatUtils.js";
 
 const ContributorReport = () => {
   const [report, setReport] = useState(null);
@@ -402,22 +401,22 @@ const ContributorReport = () => {
                           <td className="py-3 px-4">
                             <div className="flex gap-2 items-center text-slate-400">
                               {item.publishedLinks?.youtube ? (
-                                <a href={sanitizeUrl(item.publishedLinks.youtube)} target="_blank" rel="noopener noreferrer" className="text-red-500 hover:text-red-600 transition-colors" title="YouTube">
+                                <a href={item.publishedLinks.youtube} target="_blank" rel="noreferrer" className="text-red-500 hover:text-red-600 transition-colors" title="YouTube">
                                   <FaYoutube className="w-4 h-4" />
                                 </a>
                               ) : null}
                               {item.publishedLinks?.instagram ? (
-                                <a href={sanitizeUrl(item.publishedLinks.instagram)} target="_blank" rel="noopener noreferrer" className="text-pink-500 hover:text-pink-600 transition-colors" title="Instagram">
+                                <a href={item.publishedLinks.instagram} target="_blank" rel="noreferrer" className="text-pink-500 hover:text-pink-600 transition-colors" title="Instagram">
                                   <FaInstagram className="w-4 h-4" />
                                 </a>
                               ) : null}
                               {item.publishedLinks?.facebook ? (
-                                <a href={sanitizeUrl(item.publishedLinks.facebook)} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 transition-colors" title="Facebook">
+                                <a href={item.publishedLinks.facebook} target="_blank" rel="noreferrer" className="text-blue-600 hover:text-blue-700 transition-colors" title="Facebook">
                                   <FaFacebook className="w-4 h-4" />
                                 </a>
                               ) : null}
                               {item.publishedLinks?.linkedin ? (
-                                <a href={sanitizeUrl(item.publishedLinks.linkedin)} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-600 transition-colors" title="LinkedIn">
+                                <a href={item.publishedLinks.linkedin} target="_blank" rel="noreferrer" className="text-blue-500 hover:text-blue-600 transition-colors" title="LinkedIn">
                                   <FaLinkedin className="w-4 h-4" />
                                 </a>
                               ) : null}
@@ -480,22 +479,22 @@ const ContributorReport = () => {
                           <span className="font-medium text-slate-500">Platforms:</span>
                           <div className="flex gap-2 items-center text-slate-400">
                             {item.publishedLinks?.youtube ? (
-                              <a href={sanitizeUrl(item.publishedLinks.youtube)} target="_blank" rel="noopener noreferrer" className="text-red-500 hover:text-red-600 transition-colors" title="YouTube">
+                              <a href={item.publishedLinks.youtube} target="_blank" rel="noreferrer" className="text-red-500 hover:text-red-600 transition-colors" title="YouTube">
                                 <FaYoutube className="w-4 h-4" />
                               </a>
                             ) : null}
                             {item.publishedLinks?.instagram ? (
-                              <a href={sanitizeUrl(item.publishedLinks.instagram)} target="_blank" rel="noopener noreferrer" className="text-pink-500 hover:text-pink-600 transition-colors" title="Instagram">
+                              <a href={item.publishedLinks.instagram} target="_blank" rel="noreferrer" className="text-pink-500 hover:text-pink-600 transition-colors" title="Instagram">
                                 <FaInstagram className="w-4 h-4" />
                               </a>
                             ) : null}
                             {item.publishedLinks?.facebook ? (
-                              <a href={sanitizeUrl(item.publishedLinks.facebook)} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 transition-colors" title="Facebook">
+                              <a href={item.publishedLinks.facebook} target="_blank" rel="noreferrer" className="text-blue-600 hover:text-blue-700 transition-colors" title="Facebook">
                                 <FaFacebook className="w-4 h-4" />
                               </a>
                             ) : null}
                             {item.publishedLinks?.linkedin ? (
-                              <a href={sanitizeUrl(item.publishedLinks.linkedin)} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-600 transition-colors" title="LinkedIn">
+                              <a href={item.publishedLinks.linkedin} target="_blank" rel="noreferrer" className="text-blue-500 hover:text-blue-600 transition-colors" title="LinkedIn">
                                 <FaLinkedin className="w-4 h-4" />
                               </a>
                             ) : null}
