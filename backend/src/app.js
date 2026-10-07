@@ -23,11 +23,30 @@ import notificationRoutes from "./modules/notifications/notification.routes.js";
 import errorHandler, { notFoundHandler } from "./middleware/errorMiddleware.js";
 import authorize from "./middleware/roleMiddleware.js";
 import protect from "./middleware/authMiddleware.js";
+import xssClean from "./middleware/xssMiddleware.js";
+import csrfProtect from "./middleware/csrfMiddleware.js";
 
 const app = express();
 
 // ─── Security Middleware ─────────────────────────────────────────────────────
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:", "blob:", "https://res.cloudinary.com"],
+        connectSrc: ["'self'"],
+        fontSrc: ["'self'", "https:", "data:"],
+        objectSrc: ["'none'"],
+        mediaSrc: ["'self'"],
+        frameSrc: ["'none'"],
+      },
+    },
+    crossOriginEmbedderPolicy: false,
+  }),
+);
 
 // Restrict CORS to configured origin only
 const allowedOrigins = env.CLIENT_URL
@@ -56,7 +75,7 @@ app.use(
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-CSRF-Token", "X-XSRF-TOKEN"],
   }),
 );
 
@@ -82,6 +101,8 @@ app.use(compression());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());
+app.use(xssClean);
+app.use(csrfProtect);
 
 // ─── Health Check ─────────────────────────────────────────────────────────────
 app.get("/", (req, res) => {

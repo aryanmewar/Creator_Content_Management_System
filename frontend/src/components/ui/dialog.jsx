@@ -22,11 +22,31 @@ const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
 const DialogContent = React.forwardRef(
-  ({ className, children, ...props }, ref) => (
+  ({ className, children, onPointerDownOutside, onInteractOutside, ...props }, ref) => (
     <DialogPortal>
       <DialogOverlay />
       <DialogPrimitive.Content
         ref={ref}
+        onPointerDownOutside={(e) => {
+          if (
+            e.target?.closest?.("[data-datepicker-portal]") ||
+            e.target?.closest?.("[data-radix-popper-content-wrapper]")
+          ) {
+            e.preventDefault();
+            return;
+          }
+          onPointerDownOutside?.(e);
+        }}
+        onInteractOutside={(e) => {
+          if (
+            e.target?.closest?.("[data-datepicker-portal]") ||
+            e.target?.closest?.("[data-radix-popper-content-wrapper]")
+          ) {
+            e.preventDefault();
+            return;
+          }
+          onInteractOutside?.(e);
+        }}
         className={cn(
           "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg",
           className,

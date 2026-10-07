@@ -161,7 +161,7 @@ const ContentForm = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-3xl w-[95vw] sm:w-full max-h-[90vh] overflow-y-auto p-5 sm:p-8 bg-white shadow-2xl rounded-2xl sm:rounded-[32px] border border-slate-100">
+      <DialogContent className="sm:max-w-3xl w-[95vw] sm:w-full max-h-[90vh] overflow-y-auto overflow-x-hidden p-5 sm:p-8 bg-white shadow-2xl rounded-2xl sm:rounded-[32px] border border-slate-100">
         <DialogHeader className="mb-6">
           <DialogTitle className="text-2xl font-bold text-slate-800 tracking-tight">
             {content ? "Edit Content" : "Add New Content"}
@@ -289,7 +289,7 @@ const ContentForm = ({
                           value={field.value}
                           onChange={(e) => field.onChange(e?.target?.value ?? e)}
                           error={!!errors.dueDate}
-                          placeholder="Select shoot date..."
+                          placeholder="Shoot date"
                         />
                       )}
                     />
@@ -314,7 +314,7 @@ const ContentForm = ({
                         value={field.value}
                         onChange={(e) => field.onChange(e?.target?.value ?? e)}
                         error={!!errors.completionDate}
-                        placeholder="Select completion date..."
+                        placeholder="Completion date"
                       />
                     )}
                   />

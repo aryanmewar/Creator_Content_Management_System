@@ -1,5 +1,6 @@
 import * as authService from "./auth.service.js";
 import { sendSuccess, sendError } from "../../utils/response.js";
+import { generateCsrfToken, setCsrfCookies } from "../../middleware/csrfMiddleware.js";
 
 export const register = async (req, res, next) => {
   try {
@@ -17,6 +18,10 @@ export const register = async (req, res, next) => {
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
+
+    // Refresh CSRF token for the authenticated session
+    const csrfToken = generateCsrfToken();
+    setCsrfCookies(res, csrfToken);
     return sendSuccess(res, {
       message: "Account created successfully.",
       data: { user, token },
@@ -42,6 +47,10 @@ export const login = async (req, res, next) => {
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge,
     });
+
+    // Refresh CSRF token for the authenticated session
+    const csrfToken = generateCsrfToken();
+    setCsrfCookies(res, csrfToken);
     return sendSuccess(res, {
       message: "Login successful.",
       data: { user, token },
@@ -62,11 +71,24 @@ export const getMe = async (req, res, next) => {
 
 export const logout = async (req, res, next) => {
   try {
-    // Clear the HttpOnly cookie server-side
+    // Clear the HttpOnly cookie and CSRF cookies server-side
+    const isProd = process.env.NODE_ENV === "production";
     res.clearCookie("cms_token", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
+    });
+    res.clearCookie("XSRF-TOKEN", {
+      httpOnly: false,
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
+      path: "/",
+    });
+    res.clearCookie("_csrf", {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
+      path: "/",
     });
     return sendSuccess(res, { message: "Logged out successfully." });
   } catch (error) {
@@ -145,5 +167,13 @@ export const exportBackup = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+export const getCsrfToken = (req, res) => {
+  const token = req.csrfToken ? req.csrfToken() : generateCsrfToken();
+  return sendSuccess(res, {
+    message: "CSRF token retrieved successfully.",
+    data: { csrfToken: token },
+  });
 };
 

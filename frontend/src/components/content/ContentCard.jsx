@@ -20,6 +20,7 @@ import {
 } from "react-icons/fa";
 import { getStatusColor, getStatusLabel } from "@/utils/statusUtils.js";
 import { formatDate, formatTime12Hour, getRealDate, getDeadlineState } from "@/utils/dateUtils.js";
+import { sanitizeUrl } from "@/utils/formatUtils.js";
 
 import {
   Card,
@@ -328,7 +329,7 @@ const ContentCard = ({
             <div className="flex items-center gap-1.5">
               <ExternalLink className="w-4 h-4 opacity-70 text-blue-500" />
               <a
-                href={content.referenceLink}
+                href={sanitizeUrl(content.referenceLink)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-medium text-blue-600 hover:text-blue-800 hover:underline"
@@ -410,9 +411,9 @@ const ContentCard = ({
                 <div className="flex items-center gap-3">
                   {content.publishedLinks?.youtube && (
                     <a
-                      href={content.publishedLinks.youtube}
+                      href={sanitizeUrl(content.publishedLinks.youtube)}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                       className="text-red-500 hover:text-red-600"
                     >
                       <FaYoutube className="w-4 h-4" />
@@ -420,9 +421,9 @@ const ContentCard = ({
                   )}
                   {content.publishedLinks?.instagram && (
                     <a
-                      href={content.publishedLinks.instagram}
+                      href={sanitizeUrl(content.publishedLinks.instagram)}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                       className="text-pink-600 hover:text-pink-700"
                     >
                       <FaInstagram className="w-4 h-4" />
@@ -430,9 +431,9 @@ const ContentCard = ({
                   )}
                   {content.publishedLinks?.linkedin && (
                     <a
-                      href={content.publishedLinks.linkedin}
+                      href={sanitizeUrl(content.publishedLinks.linkedin)}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                       className="text-blue-600 hover:text-blue-700"
                     >
                       <FaLinkedin className="w-4 h-4" />
@@ -440,9 +441,9 @@ const ContentCard = ({
                   )}
                   {content.publishedLinks?.facebook && (
                     <a
-                      href={content.publishedLinks.facebook}
+                      href={sanitizeUrl(content.publishedLinks.facebook)}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                       className="text-blue-800 hover:text-blue-900"
                     >
                       <FaFacebook className="w-4 h-4" />

@@ -45,4 +45,9 @@ export const authService = {
     const res = await api.get("/auth/export-backup");
     return res.data;
   },
+
+  getCsrfToken: async () => {
+    const { data } = await api.get("/auth/csrf-token");
+    return data;
+  },
 };

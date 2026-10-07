@@ -16,6 +16,7 @@ router.post(
   validate(registerSchema),
   authController.register,
 );
+router.get("/csrf-token", authController.getCsrfToken);
 router.post("/login", validate(loginSchema), authController.login);
 router.get("/me", protect, authController.getMe);
 router.post("/logout", protect, authController.logout);

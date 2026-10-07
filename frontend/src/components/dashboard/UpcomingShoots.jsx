@@ -1,5 +1,6 @@
 import React from "react";
 import { Calendar, CheckCircle2, Video, ExternalLink } from "lucide-react";
+import { sanitizeUrl } from "../../utils/formatUtils.js";
 
 const UpcomingShoots = ({ shoots = [] }) => {
   if (!shoots.length) {
@@ -57,9 +58,9 @@ const UpcomingShoots = ({ shoots = [] }) => {
                 </p>
                 {shoot.contentId?.referenceLink ? (
                   <a
-                    href={shoot.contentId.referenceLink}
+                    href={sanitizeUrl(shoot.contentId.referenceLink)}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className="text-xs text-blue-600 hover:underline flex items-center gap-1 font-medium ml-2"
                   >
                     <ExternalLink className="w-3 h-3" />

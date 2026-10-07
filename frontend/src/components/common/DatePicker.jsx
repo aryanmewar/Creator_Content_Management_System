@@ -5,6 +5,7 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
+import { createPortal } from "react-dom";
 import {
   format,
   startOfWeek,
@@ -93,46 +94,117 @@ const DatePicker = ({
     }
   }
 
-  // Positioning calculations (dropUp if near screen bottom, alignRight if near screen right)
-  const [placement, setPlacement] = useState({
+  // Positioning calculations for Portal popup (fixed position relative to viewport)
+  const [coords, setCoords] = useState({
+    top: 0,
+    left: 0,
     dropUp: false,
-    alignRight: false,
   });
 
   const updatePlacement = useCallback(() => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
-    const dropdownHeight = 365;
-    const dropdownWidth = 305;
+    const dropdownHeight = dropdownRef.current?.offsetHeight || 370;
+    const dropdownWidth = dropdownRef.current?.offsetWidth || 308;
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
 
-    const roomBelow = window.innerHeight - rect.bottom;
-    const roomAbove = rect.top;
-    const dropUp = roomBelow < dropdownHeight && roomAbove > dropdownHeight;
-    const alignRight = rect.left + dropdownWidth > window.innerWidth - 16;
+    const spaceBelow = viewportHeight - rect.bottom - 8;
+    const spaceAbove = rect.top - 8;
 
-    setPlacement({ dropUp, alignRight });
+    // Prefer dropping up if insufficient room below AND more room above than below
+    const dropUp = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+
+    let top = 0;
+    if (dropUp) {
+      top = rect.top - dropdownHeight - 6;
+      if (top < 8) top = 8;
+    } else {
+      top = rect.bottom + 6;
+      if (top + dropdownHeight > viewportHeight - 8) {
+        top = Math.max(8, viewportHeight - dropdownHeight - 8);
+      }
+    }
+
+    let left = rect.left;
+    if (left + dropdownWidth > viewportWidth - 12) {
+      left = rect.right - dropdownWidth;
+    }
+    left = Math.max(8, Math.min(left, viewportWidth - dropdownWidth - 8));
+
+    setCoords({
+      top: Math.round(top),
+      left: Math.round(left),
+      dropUp,
+    });
   }, []);
 
+  // Update placement on open, scroll, or resize
   useEffect(() => {
     if (!isOpen) return;
+
     updatePlacement();
+
+    const handleScrollOrResize = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        // If trigger has scrolled completely off-screen, close the dropdown
+        if (rect.bottom < 5 || rect.top > window.innerHeight - 5) {
+          setIsOpen(false);
+          return;
+        }
+      }
+      updatePlacement();
+    };
+
+    window.addEventListener("scroll", handleScrollOrResize, true);
+    window.addEventListener("resize", handleScrollOrResize);
+
+    return () => {
+      window.removeEventListener("scroll", handleScrollOrResize, true);
+      window.removeEventListener("resize", handleScrollOrResize);
+    };
   }, [isOpen, updatePlacement]);
 
-  // Click outside listener to close popup
+  // Recalculate accurately once dropdown DOM is mounted
+  useEffect(() => {
+    if (isOpen) {
+      const raf = requestAnimationFrame(() => {
+        updatePlacement();
+      });
+      return () => cancelAnimationFrame(raf);
+    }
+  }, [isOpen, updatePlacement]);
+
+  // Click outside and escape key listeners to close popup
   useEffect(() => {
     if (!isOpen) return;
 
     const handleClickOutside = (e) => {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
         setIsOpen(false);
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("touchstart", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("touchstart", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen]);
 
@@ -213,7 +285,7 @@ const DatePicker = ({
   return (
     <div
       ref={containerRef}
-      className={`relative inline-block w-full ${isOpen ? "z-50" : "z-0"} ${className}`}
+      className={`relative inline-block w-full ${className}`}
       style={style}
     >
       {/* Trigger Button */}
@@ -229,7 +301,7 @@ const DatePicker = ({
             if (!disabled) setIsOpen((prev) => !prev);
           }
         }}
-        className={`w-full min-h-[44px] h-[44px] px-3.5 bg-slate-50 border rounded-xl flex items-center justify-between cursor-pointer transition-all duration-200 select-none group text-sm ${
+        className={`w-full min-h-[44px] h-[44px] px-3 bg-slate-50 border rounded-xl flex items-center justify-between cursor-pointer transition-all duration-200 select-none group text-xs sm:text-sm ${
           error
             ? "border-rose-400 ring-2 ring-rose-200 bg-rose-50/20"
             : isOpen
@@ -237,7 +309,7 @@ const DatePicker = ({
               : "border-slate-200 hover:border-slate-300 hover:bg-white"
         } ${disabled ? "opacity-50 cursor-not-allowed pointer-events-none" : ""}`}
       >
-        <div className="flex items-center gap-2.5 truncate">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
           <CalendarIcon
             className={`w-4 h-4 shrink-0 transition-colors ${
               selectedDate
@@ -250,11 +322,11 @@ const DatePicker = ({
               selectedDate ? "text-slate-800" : "text-slate-400"
             }`}
           >
-            {selectedDate ? format(selectedDate, "dd MMM, yyyy") : placeholder}
+            {selectedDate ? format(selectedDate, "dd MMM yyyy") : placeholder}
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5 shrink-0 ml-2">
+        <div className="flex items-center gap-1 shrink-0 ml-1">
           {allowClear && selectedDate && !disabled && (
             <button
               type="button"
@@ -268,126 +340,130 @@ const DatePicker = ({
         </div>
       </div>
 
-      {/* Calendar Popup Dropdown */}
-      {isOpen && (
-        <div
-          ref={dropdownRef}
-          className={`absolute z-50 bg-white border border-slate-200 shadow-[0_25px_60px_-15px_rgba(15,23,42,0.35),0_0_0_1px_rgba(15,23,42,0.08)] rounded-2xl p-4 w-[305px] max-w-[calc(100vw-32px)] animate-in fade-in zoom-in-95 duration-150 select-none ${
-            placement.dropUp ? "bottom-full mb-2" : "top-full mt-2"
-          } ${
-            placement.alignRight ? "right-0" : "left-0"
-          }`}
-        >
-          {/* Real-Time Live Status Bar */}
-          <div className="mb-3 pb-2.5 border-b border-slate-100 flex items-center justify-between px-1 text-xs text-slate-500">
-            <span className="flex items-center gap-1.5 font-medium text-slate-600">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+      {/* Calendar Popup Dropdown rendered into Portal to escape modal overflow clipping */}
+      {isOpen &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            ref={dropdownRef}
+            data-datepicker-portal="true"
+            className="fixed z-[99999] bg-white border border-slate-200/90 shadow-[0_20px_50px_rgba(15,23,42,0.25),0_0_0_1px_rgba(15,23,42,0.06)] rounded-2xl p-4 w-[308px] max-w-[calc(100vw-24px)] animate-in fade-in zoom-in-95 duration-150 select-none backdrop-blur-sm"
+            style={{
+              top: `${coords.top}px`,
+              left: `${coords.left}px`,
+            }}
+          >
+            {/* Real-Time Live Status Bar */}
+            <div className="mb-2.5 pb-2 border-b border-slate-100 flex items-center justify-between px-1 text-xs text-slate-500">
+              <span className="flex items-center gap-1.5 font-medium text-slate-600">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                Real Time:
               </span>
-              Real Time:
-            </span>
-            <span className="font-semibold text-[#2D4396] tabular-nums flex items-center gap-1 bg-indigo-50/80 px-2.5 py-0.5 rounded-full border border-indigo-100/80 text-[11px]">
-              <Clock className="w-3 h-3 text-[#2D4396]" />
-              {format(currentLiveTime, "hh:mm:ss a")}
-            </span>
-          </div>
+              <span className="font-semibold text-[#2D4396] tabular-nums flex items-center gap-1 bg-indigo-50/80 px-2 py-0.5 rounded-full border border-indigo-100/80 text-[11px]">
+                <Clock className="w-3 h-3 text-[#2D4396]" />
+                {format(currentLiveTime, "hh:mm:ss a")}
+              </span>
+            </div>
 
-          {/* Header Month / Year & Nav */}
-          <div className="flex items-center justify-between mb-3 px-1">
-            <h4 className="text-sm font-bold text-slate-800 tracking-wide">
-              {format(viewDate, "MMMM yyyy")}
-            </h4>
-            <div className="flex items-center gap-1">
+            {/* Header Month / Year & Nav */}
+            <div className="flex items-center justify-between mb-2 px-1">
+              <h4 className="text-sm font-bold text-slate-800 tracking-tight">
+                {format(viewDate, "MMMM yyyy")}
+              </h4>
+              <div className="flex items-center gap-0.5">
+                <button
+                  type="button"
+                  onClick={handlePrevMonth}
+                  className="p-1 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+                  title="Previous month"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNextMonth}
+                  className="p-1 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+                  title="Next month"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Weekday Labels Header */}
+            <div className="grid grid-cols-7 gap-1 mb-1 text-center">
+              {weekDayLabels.map((day) => (
+                <span
+                  key={day}
+                  className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider py-0.5"
+                >
+                  {day}
+                </span>
+              ))}
+            </div>
+
+            {/* Dates Grid */}
+            <div className="grid grid-cols-7 gap-1 text-center">
+              {calendarDays.map((date) => {
+                const isCurrentMonth = isSameMonth(date, viewDate);
+                const isSelected =
+                  selectedDate && isSameDay(date, selectedDate);
+                const isCurrentDay = isToday(date);
+                const disabledDay = isDateDisabled(date);
+
+                return (
+                  <button
+                    key={date.toISOString()}
+                    type="button"
+                    disabled={disabledDay}
+                    onClick={() => handleSelectDate(date)}
+                    className={`h-8 w-8 mx-auto flex items-center justify-center text-xs font-medium rounded-xl transition-all relative ${
+                      disabledDay
+                        ? "opacity-25 cursor-not-allowed text-slate-400"
+                        : isSelected
+                          ? "bg-[#2D4396] text-white font-bold shadow-md shadow-indigo-600/30 scale-105"
+                          : isCurrentMonth
+                            ? isCurrentDay
+                              ? "text-[#2D4396] font-bold bg-indigo-50/80 hover:bg-[#2D4396] hover:text-white"
+                              : "text-slate-700 hover:bg-indigo-50/70 hover:text-[#2D4396]"
+                            : "text-slate-300 hover:bg-slate-50 hover:text-slate-500"
+                    }`}
+                  >
+                    {format(date, "d")}
+                    {isCurrentDay && !isSelected && (
+                      <span className="absolute bottom-1 w-1 h-1 rounded-full bg-[#2D4396]" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Footer Actions (Today / Clear) */}
+            <div className="mt-2.5 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs px-1">
               <button
                 type="button"
-                onClick={handlePrevMonth}
-                className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
-                title="Previous month"
+                onClick={handleClear}
+                className="text-slate-500 hover:text-rose-600 font-semibold transition-colors py-1 px-2 rounded-lg hover:bg-slate-50"
               >
-                <ChevronLeft className="w-4 h-4" />
+                Clear
               </button>
               <button
                 type="button"
-                onClick={handleNextMonth}
-                className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
-                title="Next month"
+                onClick={handleTodayClick}
+                className="text-[#2D4396] hover:text-indigo-800 font-semibold transition-colors bg-indigo-50/80 hover:bg-indigo-100/80 py-1.5 px-3 rounded-xl flex items-center gap-1"
               >
-                <ChevronRight className="w-4 h-4" />
+                <span>Today</span>
+                <span className="text-[11px] opacity-75">
+                  ({format(currentLiveTime, "dd MMM")})
+                </span>
               </button>
             </div>
-          </div>
-
-          {/* Weekday Labels Header */}
-          <div className="grid grid-cols-7 gap-1 mb-1 text-center">
-            {weekDayLabels.map((day) => (
-              <span
-                key={day}
-                className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider py-1"
-              >
-                {day}
-              </span>
-            ))}
-          </div>
-
-          {/* Dates Grid */}
-          <div className="grid grid-cols-7 gap-1 text-center">
-            {calendarDays.map((date) => {
-              const isCurrentMonth = isSameMonth(date, viewDate);
-              const isSelected =
-                selectedDate && isSameDay(date, selectedDate);
-              const isCurrentDay = isToday(date);
-              const disabledDay = isDateDisabled(date);
-
-              return (
-                <button
-                  key={date.toISOString()}
-                  type="button"
-                  disabled={disabledDay}
-                  onClick={() => handleSelectDate(date)}
-                  className={`h-8 w-8 mx-auto flex items-center justify-center text-xs font-medium rounded-xl transition-all relative ${
-                    disabledDay
-                      ? "opacity-25 cursor-not-allowed text-slate-400"
-                      : isSelected
-                        ? "bg-[#2D4396] text-white font-bold shadow-md shadow-indigo-600/30 scale-105"
-                        : isCurrentMonth
-                          ? isCurrentDay
-                            ? "text-[#2D4396] font-bold bg-indigo-50/80 hover:bg-[#2D4396] hover:text-white"
-                            : "text-slate-700 hover:bg-indigo-50/70 hover:text-[#2D4396]"
-                          : "text-slate-300 hover:bg-slate-50 hover:text-slate-500"
-                  }`}
-                >
-                  {format(date, "d")}
-                  {isCurrentDay && !isSelected && (
-                    <span className="absolute bottom-1 w-1 h-1 rounded-full bg-[#2D4396]" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Footer Actions (Today / Clear) */}
-          <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs px-1">
-            <button
-              type="button"
-              onClick={handleClear}
-              className="text-slate-500 hover:text-rose-600 font-semibold transition-colors py-1 px-2 rounded-lg hover:bg-slate-50"
-            >
-              Clear
-            </button>
-            <button
-              type="button"
-              onClick={handleTodayClick}
-              className="text-[#2D4396] hover:text-indigo-800 font-semibold transition-colors bg-indigo-50/80 hover:bg-indigo-100/80 py-1.5 px-3 rounded-xl flex items-center gap-1"
-            >
-              <span>Today</span>
-              <span className="text-[11px] opacity-75">
-                ({format(currentLiveTime, "dd MMM")})
-              </span>
-            </button>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 };

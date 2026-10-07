@@ -1,9 +1,18 @@
 import { z } from "zod";
 import { CONTENT_TYPES, CONTENT_STATUSES } from "../../utils/statusUtils.js";
 
+// Strict URL validator that allows only http:// and https:// (blocks javascript:, data:, vbscript: XSS)
+const safeUrl = z
+  .string()
+  .url("Must be a valid URL")
+  .refine(
+    (val) => /^https?:\/\//i.test(val),
+    "URL must start with http:// or https://",
+  );
+
 export const createContentSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters").max(200),
-  referenceLink: z.string().url("Must be a valid URL").optional().nullable(),
+  referenceLink: safeUrl.optional().nullable(),
   contentType: z.array(z.string()).min(1, "Select at least one content type"),
   otherContentType: z.string().max(100).optional().nullable(),
   contributors: z.array(z.string()).optional(),
@@ -29,7 +38,7 @@ export const createContentSchema = z.object({
 
 export const updateContentSchema = z.object({
   title: z.string().min(2).max(200).optional(),
-  referenceLink: z.string().url("Must be a valid URL").optional().nullable(),
+  referenceLink: safeUrl.optional().nullable(),
   contentType: z.array(z.string()).min(1).optional(),
   otherContentType: z.string().max(100).optional().nullable(),
   contributors: z.array(z.string()).optional(),
@@ -59,30 +68,10 @@ export const updateContentSchema = z.object({
     .nullable(),
   publishedLinks: z
     .object({
-      youtube: z
-        .string()
-        .url("Must be a valid URL")
-        .or(z.literal(""))
-        .optional()
-        .nullable(),
-      instagram: z
-        .string()
-        .url("Must be a valid URL")
-        .or(z.literal(""))
-        .optional()
-        .nullable(),
-      linkedin: z
-        .string()
-        .url("Must be a valid URL")
-        .or(z.literal(""))
-        .optional()
-        .nullable(),
-      facebook: z
-        .string()
-        .url("Must be a valid URL")
-        .or(z.literal(""))
-        .optional()
-        .nullable(),
+      youtube: safeUrl.or(z.literal("")).optional().nullable(),
+      instagram: safeUrl.or(z.literal("")).optional().nullable(),
+      linkedin: safeUrl.or(z.literal("")).optional().nullable(),
+      facebook: safeUrl.or(z.literal("")).optional().nullable(),
     })
     .optional()
     .nullable(),
@@ -113,30 +102,10 @@ export const updateStatusSchema = z.object({
     .nullable(),
   publishedLinks: z
     .object({
-      youtube: z
-        .string()
-        .url("Must be a valid URL")
-        .or(z.literal(""))
-        .optional()
-        .nullable(),
-      instagram: z
-        .string()
-        .url("Must be a valid URL")
-        .or(z.literal(""))
-        .optional()
-        .nullable(),
-      linkedin: z
-        .string()
-        .url("Must be a valid URL")
-        .or(z.literal(""))
-        .optional()
-        .nullable(),
-      facebook: z
-        .string()
-        .url("Must be a valid URL")
-        .or(z.literal(""))
-        .optional()
-        .nullable(),
+      youtube: safeUrl.or(z.literal("")).optional().nullable(),
+      instagram: safeUrl.or(z.literal("")).optional().nullable(),
+      linkedin: safeUrl.or(z.literal("")).optional().nullable(),
+      facebook: safeUrl.or(z.literal("")).optional().nullable(),
     })
     .optional()
     .nullable(),
