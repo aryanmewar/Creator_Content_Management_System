@@ -76,9 +76,16 @@ const ContributorReport = () => {
     const total = filtered.length;
     const published = filtered.filter((a) => a.status === "PUBLISHED").length;
     const isCurrentlyOverdue = (a) => {
-      return a.dueDate &&
+      const d1 = a.dueDate;
+      const d2 = a.completionDate || a.deadline;
+      if (d1 && d2 && new Date(d1).setHours(0, 0, 0, 0) === new Date(d2).setHours(0, 0, 0, 0)) {
+        return false;
+      }
+      return (
+        a.dueDate &&
         new Date(a.dueDate).setHours(0, 0, 0, 0) < new Date(getRealDate()).setHours(0, 0, 0, 0) &&
-        ["ASSIGNED", "DRAFT"].includes(a.status);
+        ["ASSIGNED", "DRAFT"].includes(a.status)
+      );
     };
 
     const overdue = filtered.filter(isCurrentlyOverdue).length;

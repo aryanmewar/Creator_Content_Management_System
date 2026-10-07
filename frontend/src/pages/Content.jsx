@@ -154,6 +154,11 @@ const Content = () => {
   };
 
   const isContentOverdue = (c) => {
+    if (c.dueDate && c.completionDate) {
+      const d1 = new Date(c.dueDate).setHours(0, 0, 0, 0);
+      const d2 = new Date(c.completionDate).setHours(0, 0, 0, 0);
+      if (d1 === d2) return false;
+    }
     return (
       ["ASSIGNED", "DRAFT"].includes(c.status) &&
       (c.isOverdue ||

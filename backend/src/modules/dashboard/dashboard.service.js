@@ -93,7 +93,7 @@ export const getSummary = async () => {
           },
         ],
       },
-      { _id: 1 }
+      { _id: 1, dueDate: 1, completionDate: 1 }
     ).lean(),
     Assignment.find(
       {
@@ -101,12 +101,22 @@ export const getSummary = async () => {
         status: { $nin: COMPLETED_STATUSES },
       },
       { contentId: 1 }
-    ).lean(),
+    )
+      .populate("contentId", "dueDate completionDate")
+      .lean(),
   ]);
 
+  const isSameDay = (d1, d2) =>
+    Boolean(d1 && d2 && new Date(d1).setHours(0, 0, 0, 0) === new Date(d2).setHours(0, 0, 0, 0));
+
   const overdueIds = new Set([
-    ...overdueContentDocs.map((d) => d._id.toString()),
-    ...overdueAsgnDocs.map((d) => d.contentId?.toString()).filter(Boolean),
+    ...overdueContentDocs
+      .filter((d) => !isSameDay(d.dueDate, d.completionDate))
+      .map((d) => d._id.toString()),
+    ...overdueAsgnDocs
+      .filter((d) => !isSameDay(d.contentId?.dueDate, d.contentId?.completionDate))
+      .map((d) => (d.contentId?._id || d.contentId)?.toString())
+      .filter(Boolean),
   ]);
   const overdue = overdueIds.size;
 
@@ -252,7 +262,7 @@ export const getOverdue = async () => {
       deadline: { $lt: today },
       status: { $nin: COMPLETED_STATUSES },
     })
-      .populate("contentId", "title contentType status referenceLink")
+      .populate("contentId", "title contentType status referenceLink dueDate completionDate")
       .populate("instructorId", "name email profileImage")
       .sort({ deadline: 1 })
       .limit(30)
@@ -273,16 +283,21 @@ export const getOverdue = async () => {
       .lean(),
   ]);
 
+  const isRecorded = (d1, d2) =>
+    Boolean(d1 && d2 && new Date(d1).setHours(0, 0, 0, 0) === new Date(d2).setHours(0, 0, 0, 0));
+
   const mappedAssignments = assignments
-    .filter((a) => a.contentId)
+    .filter((a) => a.contentId && !isRecorded(a.contentId.dueDate || a.deadline, a.contentId.completionDate))
     .map((a) => ({
       ...a,
       deadlineState: "OVERDUE",
     }));
 
-  const mappedContents = contents.map((c) => ({
-    _id: `content-overdue-${c._id}`,
-    contentId: {
+  const mappedContents = contents
+    .filter((c) => !isRecorded(c.dueDate, c.completionDate))
+    .map((c) => ({
+      _id: `content-overdue-${c._id}`,
+      contentId: {
       _id: c._id,
       title: c.title,
       contentType: c.contentType,

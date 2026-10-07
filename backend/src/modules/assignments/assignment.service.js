@@ -36,7 +36,7 @@ export const getAssignments = async ({
   const enriched = assignments.map((a) => ({
     ...a.toObject(),
     deadlineState: a.contentId
-      ? getDeadlineState(a.deadline, a.contentId.status)
+      ? getDeadlineState(a.deadline, a.contentId.status, a.contentId.completionDate)
       : null,
   }));
 
@@ -70,7 +70,7 @@ export const getAssignmentById = async (id) => {
   return {
     ...assignment.toObject(),
     deadlineState: assignment.contentId
-      ? getDeadlineState(assignment.deadline, assignment.contentId.status)
+      ? getDeadlineState(assignment.deadline, assignment.contentId.status, assignment.contentId.completionDate)
       : null,
   };
 };

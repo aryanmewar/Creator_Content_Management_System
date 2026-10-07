@@ -235,9 +235,17 @@ const ContentCard = ({
     displayText = content.createdBy.name;
   }
 
+  const isShootRecorded = Boolean(
+    dueDate &&
+      completionDate &&
+      new Date(dueDate).setHours(0, 0, 0, 0) ===
+        new Date(completionDate).setHours(0, 0, 0, 0),
+  );
+
   const isOverdue =
+    !isShootRecorded &&
     ["ASSIGNED", "DRAFT"].includes(status) &&
-    getDeadlineState(dueDate, status) === "OVERDUE";
+    getDeadlineState(dueDate, status, completionDate) === "OVERDUE";
 
   return (
     <Card className="mb-4 hover:border-slate-300 transition-colors shadow-sm">

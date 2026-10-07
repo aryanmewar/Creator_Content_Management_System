@@ -194,13 +194,21 @@ const Reports = () => {
       statusCountsMap[st] = (statusCountsMap[st] || 0) + 1;
     });
 
+    const formatStatusLabel = (st) =>
+      st
+        .toLowerCase()
+        .split("_")
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ");
+
     const computedStatusData = Object.entries(statusCountsMap)
       .map(([status, count]) => ({
-        name: status.replace("_", " "),
+        name: formatStatusLabel(status),
         value: count,
         color: statusColorMap[status] || "#94a3b8",
       }))
-      .filter((d) => d.value > 0);
+      .filter((d) => d.value > 0)
+      .sort((a, b) => b.value - a.value);
 
     // 4. Instructor Performance
     let computedInstructorPerf = [];
@@ -397,37 +405,116 @@ const Reports = () => {
               No data available
             </p>
           ) : (
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                <Pie
-                  data={statusData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={50}
-                  outerRadius={70}
-                  dataKey="value"
-                  label={({ name, percent }) =>
-                    `${name} ${(percent * 100).toFixed(0)}%`
-                  }
-                  labelLine={{ stroke: "#cbd5e1", strokeWidth: 1 }}
-                  stroke="none"
-                >
-                  {statusData.map((entry, i) => (
-                    <Cell key={i} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    borderRadius: "8px",
-                    border: "none",
-                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                  }}
-                />
-                <Legend
-                  wrapperStyle={{ fontSize: "12px", paddingTop: "10px" }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+              {/* Left: Donut Chart with Center Total */}
+              <div className="sm:col-span-5 relative flex items-center justify-center">
+                {/* Center Stat in Donut (behind chart & tooltip) */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
+                  <span className="text-2xl font-bold text-slate-800 tracking-tight">
+                    {statusData.reduce((acc, c) => acc + c.value, 0)}
+                  </span>
+                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                    Total
+                  </span>
+                </div>
+
+                <ResponsiveContainer width="100%" height={230} className="relative z-10">
+                  <PieChart>
+                    <Pie
+                      data={statusData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={55}
+                      outerRadius={75}
+                      paddingAngle={2.5}
+                      dataKey="value"
+                      stroke="#ffffff"
+                      strokeWidth={2}
+                    >
+                      {statusData.map((entry, i) => (
+                        <Cell key={i} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      wrapperStyle={{ zIndex: 50, pointerEvents: "none" }}
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload;
+                          const total = statusData.reduce(
+                            (acc, c) => acc + c.value,
+                            0,
+                          );
+                          const percent =
+                            total > 0
+                              ? ((data.value / total) * 100).toFixed(0)
+                              : 0;
+                          return (
+                            <div className="bg-white px-3 py-2 rounded-xl shadow-xl border border-slate-200/90 flex items-center gap-2 text-xs font-semibold whitespace-nowrap">
+                              <span
+                                className="w-2.5 h-2.5 rounded-full shrink-0"
+                                style={{ backgroundColor: data.color }}
+                              />
+                              <span className="text-slate-700">
+                                {data.name}:
+                              </span>
+                              <span className="text-slate-900 font-bold">
+                                {data.value}
+                              </span>
+                              <span className="text-slate-400 font-normal">
+                                ({percent}%)
+                              </span>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Right: Status Breakdown Grid with counts & percentages */}
+              <div className="sm:col-span-7 grid grid-cols-1 gap-2 max-h-[240px] overflow-y-auto pr-1">
+                {statusData.map((item, idx) => {
+                  const total = statusData.reduce(
+                    (acc, c) => acc + c.value,
+                    0,
+                  );
+                  const percent =
+                    total > 0 ? ((item.value / total) * 100).toFixed(0) : 0;
+                  return (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between p-2 rounded-xl bg-slate-50/80 hover:bg-slate-100/80 transition-colors border border-slate-100"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span
+                          className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm"
+                          style={{ backgroundColor: item.color }}
+                        />
+                        <span className="text-xs font-medium text-slate-700 truncate">
+                          {item.name}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                        <span className="text-xs font-bold text-slate-800">
+                          {item.value}
+                        </span>
+                        <span
+                          className="text-[11px] font-semibold px-1.5 py-0.5 rounded-md"
+                          style={{
+                            backgroundColor: `${item.color}15`,
+                            color: item.color,
+                          }}
+                        >
+                          {percent}%
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           )}
         </div>
 

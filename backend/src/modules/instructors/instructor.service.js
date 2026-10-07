@@ -65,7 +65,7 @@ const enrichInstructorStats = async (instructor) => {
   }
 
   const contentItems = await Content.find(query)
-    .select("status isOverdue dueDate")
+    .select("status isOverdue dueDate completionDate")
     .lean();
   const today = getStartOfToday();
 
@@ -80,11 +80,18 @@ const enrichInstructorStats = async (instructor) => {
       completed++;
       continue;
     }
+    const isRecorded =
+      c.dueDate &&
+      c.completionDate &&
+      new Date(c.dueDate).setHours(0, 0, 0, 0) ===
+        new Date(c.completionDate).setHours(0, 0, 0, 0);
+
     if (
-      c.isOverdue ||
-      (!["PUBLISHED", "APPROVED", "SCHEDULED", "COMPLETED", "SUBMITTED"].includes(c.status) &&
-        c.dueDate &&
-        new Date(c.dueDate) < today)
+      !isRecorded &&
+      (c.isOverdue ||
+        (!["PUBLISHED", "APPROVED", "SCHEDULED", "COMPLETED", "SUBMITTED"].includes(c.status) &&
+          c.dueDate &&
+          new Date(c.dueDate) < today))
     ) {
       overdue++;
       continue;

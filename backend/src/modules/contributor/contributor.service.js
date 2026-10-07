@@ -156,6 +156,9 @@ export const getAssignments = async (userId) => {
   const contentDocs = await Content.aggregate(pipeline);
   const contentItems = contentDocs.map((doc) => Content.hydrate(doc));
 
+  const isSameDay = (d1, d2) =>
+    Boolean(d1 && d2 && new Date(d1).setHours(0, 0, 0, 0) === new Date(d2).setHours(0, 0, 0, 0));
+
   return contentItems.map((c) => ({
     _id: c._id,
     contentId: {
@@ -165,6 +168,8 @@ export const getAssignments = async (userId) => {
         : c.contentType,
       referenceLink: c.referenceLink,
       status: c.status,
+      dueDate: c.dueDate,
+      completionDate: c.completionDate,
     },
     dueDate: c.dueDate,
     deadline: c.completionDate,
@@ -176,7 +181,12 @@ export const getAssignments = async (userId) => {
       : null,
     isCheckedByContributor: c.isCheckedByContributor,
     isOverdueAcknowledged: c.isOverdueAcknowledged,
-    isOverdue: c.isOverdue || (c.dueDate && new Date(c.dueDate).setHours(0,0,0,0) < new Date().setHours(0,0,0,0)),
+    isOverdue:
+      !isSameDay(c.dueDate, c.completionDate) &&
+      (c.isOverdue ||
+        (c.dueDate &&
+          new Date(c.dueDate).setHours(0, 0, 0, 0) <
+            new Date().setHours(0, 0, 0, 0))),
     createdAt: c.createdAt,
   }));
 };
@@ -197,6 +207,9 @@ export const getReport = async (userId) => {
   const overdueRecords = await OverdueRecord.find({ instructorId: instructor._id });
   const overdueContentIds = new Set(overdueRecords.map(r => r.contentId.toString()));
 
+  const isSameDayReport = (d1, d2) =>
+    Boolean(d1 && d2 && new Date(d1).setHours(0, 0, 0, 0) === new Date(d2).setHours(0, 0, 0, 0));
+
   const assignments = contentItems.map((c) => ({
     _id: c._id,
     contentId: {
@@ -205,12 +218,16 @@ export const getReport = async (userId) => {
         ? c.contentType.join(", ")
         : c.contentType,
       status: c.status,
+      dueDate: c.dueDate,
+      completionDate: c.completionDate,
     },
     dueDate: c.dueDate,
     deadline: c.completionDate,
     status: c.status,
     publishedLinks: c.publishedLinks,
-    isOverdue: c.isOverdue || overdueContentIds.has(c._id.toString()),
+    isOverdue:
+      !isSameDayReport(c.dueDate, c.completionDate) &&
+      (c.isOverdue || overdueContentIds.has(c._id.toString())),
     submittedAt: ["SUBMITTED", "APPROVED", "SCHEDULED", "PUBLISHED"].includes(
       c.status,
     )
@@ -223,6 +240,7 @@ export const getReport = async (userId) => {
   const published = assignments.filter((a) => a.status === "PUBLISHED").length;
   const overdue = assignments.filter(
     (a) =>
+      !isSameDayReport(a.dueDate, a.deadline) &&
       a.dueDate &&
       a.dueDate < getStartOfToday() &&
       ["ASSIGNED", "DRAFT"].includes(a.status),

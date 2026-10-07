@@ -89,7 +89,7 @@ export const getDeadlineLabel = (date) => {
 /**
  * Calculate deadline state dynamically (mirrors backend logic)
  */
-export const getDeadlineState = (deadline, contentStatus) => {
+export const getDeadlineState = (deadline, contentStatus, completionDate) => {
   const completedStatuses = [
     "IN_PROGRESS",
     "SUBMITTED",
@@ -98,6 +98,14 @@ export const getDeadlineState = (deadline, contentStatus) => {
     "SCHEDULED",
   ];
   if (completedStatuses.includes(contentStatus)) return "COMPLETED";
+
+  // If shoot date and shoot completion date are same day, content is recorded -> not overdue
+  if (deadline && completionDate) {
+    const d1 = new Date(deadline).setHours(0, 0, 0, 0);
+    const d2 = new Date(completionDate).setHours(0, 0, 0, 0);
+    if (d1 === d2) return "COMPLETED";
+  }
+
   if (!deadline) return "UPCOMING";
 
   const now = getRealDate();

@@ -18,12 +18,18 @@ const ContributorDashboard = () => {
     (a) => a.status === "ASSIGNED" && !a.isCheckedByContributor
   );
 
+  const isRecorded = (a) => {
+    const d1 = a.dueDate || a.contentId?.dueDate;
+    const d2 = a.completionDate || a.deadline || a.contentId?.completionDate;
+    return Boolean(d1 && d2 && new Date(d1).setHours(0, 0, 0, 0) === new Date(d2).setHours(0, 0, 0, 0));
+  };
+
   const overdueContent = assignments.filter(
-    (a) => a.isOverdue && ["ASSIGNED", "DRAFT"].includes(a.status)
+    (a) => !isRecorded(a) && a.isOverdue && ["ASSIGNED", "DRAFT"].includes(a.status)
   );
 
   const upcomingShoots = assignments.filter(
-    (a) => ["ASSIGNED", "DRAFT"].includes(a.status) && a.isCheckedByContributor && !a.isOverdue
+    (a) => ["ASSIGNED", "DRAFT"].includes(a.status) && a.isCheckedByContributor && (!a.isOverdue || isRecorded(a))
   );
 
   useEffect(() => {

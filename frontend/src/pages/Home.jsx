@@ -220,41 +220,118 @@ const Home = () => {
           {/* Content Status Chart */}
           {pieData.length > 0 && (
             <div className="card p-6">
-              <h3 className="section-title mb-4 flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-primary-500" />
-                Content Status Overview
-              </h3>
-              <ResponsiveContainer width="100%" height={260}>
-                <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={70}
-                    dataKey="value"
-                    label={({ name, percent }) =>
-                      `${name} ${(percent * 100).toFixed(0)}%`
-                    }
-                    labelLine={{ stroke: "#cbd5e1", strokeWidth: 1 }}
-                    stroke="none"
-                  >
-                    {pieData.map((entry, i) => (
-                      <Cell key={i} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: "8px",
-                      border: "none",
-                      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                    }}
-                  />
-                  <Legend
-                    wrapperStyle={{ fontSize: "12px", paddingTop: "10px" }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="section-title flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5 text-primary-500" />
+                  Content Status Overview
+                </h3>
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">
+                  {summary?.totalContent ?? pieData.reduce((acc, c) => acc + c.value, 0)} Total
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                {/* Left: Donut Chart with Center Total */}
+                <div className="md:col-span-5 relative flex items-center justify-center">
+                  {/* Center Stat in Donut (behind chart & tooltip) */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
+                    <span className="text-2xl font-bold text-slate-800 tracking-tight">
+                      {summary?.totalContent ?? pieData.reduce((acc, c) => acc + c.value, 0)}
+                    </span>
+                    <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                      Contents
+                    </span>
+                  </div>
+
+                  <ResponsiveContainer width="100%" height={220} className="relative z-10">
+                    <PieChart>
+                      <Pie
+                        data={pieData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={62}
+                        outerRadius={85}
+                        paddingAngle={2.5}
+                        dataKey="value"
+                        stroke="#ffffff"
+                        strokeWidth={2}
+                      >
+                        {pieData.map((entry, i) => (
+                          <Cell key={i} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        wrapperStyle={{ zIndex: 50, pointerEvents: "none" }}
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            const data = payload[0];
+                            const total =
+                              summary?.totalContent ||
+                              pieData.reduce((acc, c) => acc + c.value, 0);
+                            const percent =
+                              total > 0
+                                ? ((data.value / total) * 100).toFixed(1)
+                                : 0;
+                            return (
+                              <div className="bg-white px-3 py-2 rounded-xl shadow-xl border border-slate-200/90 flex items-center gap-2 text-xs font-semibold whitespace-nowrap">
+                                <span
+                                  className="w-2.5 h-2.5 rounded-full shrink-0"
+                                  style={{ backgroundColor: data.payload.color }}
+                                />
+                                <span className="text-slate-700">{data.name}:</span>
+                                <span className="text-slate-900 font-bold">{data.value}</span>
+                                <span className="text-slate-400 font-normal">({percent}%)</span>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Right: Status Breakdown Grid with counts & percentages */}
+                <div className="md:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[240px] overflow-y-auto pr-1">
+                  {pieData.map((item, idx) => {
+                    const total =
+                      summary?.totalContent ||
+                      pieData.reduce((acc, c) => acc + c.value, 0);
+                    const percent =
+                      total > 0 ? ((item.value / total) * 100).toFixed(0) : 0;
+                    return (
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80 hover:bg-slate-100/80 transition-colors border border-slate-100"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span
+                            className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm"
+                            style={{ backgroundColor: item.color }}
+                          />
+                          <span className="text-xs font-medium text-slate-700 truncate">
+                            {item.name}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                          <span className="text-xs font-bold text-slate-800">
+                            {item.value}
+                          </span>
+                          <span
+                            className="text-[11px] font-semibold px-1.5 py-0.5 rounded-md"
+                            style={{
+                              backgroundColor: `${item.color}15`,
+                              color: item.color,
+                            }}
+                          >
+                            {percent}%
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           )}
         </div>

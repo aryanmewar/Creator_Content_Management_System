@@ -109,7 +109,7 @@ export const getContent = async ({
     const doc = typeof item.toObject === "function" ? item.toObject() : item;
     const asgn = assignmentMap[doc._id.toString()];
     const deadlineState = asgn
-      ? getDeadlineState(asgn.deadline, doc.status)
+      ? getDeadlineState(asgn.deadline, doc.status, doc.completionDate)
       : null;
     return {
       ...doc,
@@ -157,7 +157,7 @@ export const getContentById = async (id) => {
   ]);
 
   const deadlineState = assignment
-    ? getDeadlineState(assignment.deadline, content.status)
+    ? getDeadlineState(assignment.deadline, content.status, content.completionDate)
     : null;
 
   return {
@@ -255,25 +255,41 @@ export const updateContent = async (id, data, userId) => {
     }
   }
 
-  if (allowedFields.dueDate !== undefined) {
-    const newDueDate = allowedFields.dueDate ? new Date(allowedFields.dueDate).setHours(0, 0, 0, 0) : null;
-    const today = new Date().setHours(0, 0, 0, 0);
+  if (allowedFields.dueDate !== undefined || allowedFields.completionDate !== undefined) {
+    const finalDueDate = allowedFields.dueDate !== undefined ? allowedFields.dueDate : existingContent.dueDate;
+    const finalCompletionDate = allowedFields.completionDate !== undefined ? allowedFields.completionDate : existingContent.completionDate;
 
-    if (newDueDate === null || newDueDate >= today) {
-      // If the admin corrects the date to the future (or null), 
-      // it means it was never supposed to be overdue. Clear the history.
+    const isSameDay =
+      finalDueDate &&
+      finalCompletionDate &&
+      new Date(finalDueDate).setHours(0, 0, 0, 0) ===
+        new Date(finalCompletionDate).setHours(0, 0, 0, 0);
+
+    if (isSameDay) {
       allowedFields.isOverdue = false;
       await OverdueRecord.deleteMany({ contentId: id });
-    } else {
-      // If it is changed to the past, we only set isOverdue to true if it is still active.
-      // We don't want to make completed items overdue retroactively unless explicitly required.
-      if (["ASSIGNED", "DRAFT"].includes(existingContent.status)) {
-        allowedFields.isOverdue = true;
+    } else if (allowedFields.dueDate !== undefined) {
+      const newDueDate = allowedFields.dueDate ? new Date(allowedFields.dueDate).setHours(0, 0, 0, 0) : null;
+      const today = new Date().setHours(0, 0, 0, 0);
+
+      if (newDueDate === null || newDueDate >= today) {
+        // If the admin corrects the date to the future (or null), 
+        // it means it was never supposed to be overdue. Clear the history.
+        allowedFields.isOverdue = false;
+        await OverdueRecord.deleteMany({ contentId: id });
+      } else {
+        // If it is changed to the past, we only set isOverdue to true if it is still active.
+        // We don't want to make completed items overdue retroactively unless explicitly required.
+        if (["ASSIGNED", "DRAFT"].includes(existingContent.status)) {
+          allowedFields.isOverdue = true;
+        }
       }
     }
 
     // Sync Assignment deadline if dueDate is updated
-    await Assignment.updateMany({ contentId: id }, { deadline: allowedFields.dueDate });
+    if (allowedFields.dueDate !== undefined) {
+      await Assignment.updateMany({ contentId: id }, { deadline: allowedFields.dueDate });
+    }
   }
 
   const content = await Content.findByIdAndUpdate(id, allowedFields, {
@@ -372,7 +388,14 @@ export const updateContentStatus = async (
   const launchDate = new Date("2026-10-01T00:00:00Z");
   const isAfterLaunch = content.dueDate && new Date(content.dueDate) >= launchDate;
 
+  const isRecorded =
+    content.dueDate &&
+    content.completionDate &&
+    new Date(content.dueDate).setHours(0, 0, 0, 0) ===
+      new Date(content.completionDate).setHours(0, 0, 0, 0);
+
   const wasOverdue =
+    !isRecorded &&
     isAfterLaunch &&
     (content.isOverdue ||
       (oldStatus === CONTENT_STATUSES.ASSIGNED &&
