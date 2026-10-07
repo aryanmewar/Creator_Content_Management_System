@@ -24,7 +24,6 @@ import errorHandler, { notFoundHandler } from "./middleware/errorMiddleware.js";
 import authorize from "./middleware/roleMiddleware.js";
 import protect from "./middleware/authMiddleware.js";
 import xssClean from "./middleware/xssMiddleware.js";
-import csrfProtect from "./middleware/csrfMiddleware.js";
 
 const app = express();
 
@@ -75,7 +74,7 @@ app.use(
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-CSRF-Token", "X-XSRF-TOKEN"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
 
@@ -102,7 +101,6 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());
 app.use(xssClean);
-app.use(csrfProtect);
 
 // ─── Health Check ─────────────────────────────────────────────────────────────
 app.get("/", (req, res) => {

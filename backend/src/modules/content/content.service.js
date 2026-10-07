@@ -207,7 +207,7 @@ export const createContent = async (data, userId) => {
 /**
  * Update content fields (does NOT change status — use updateContentStatus for that).
  */
-export const updateContent = async (id, data, user) => {
+export const updateContent = async (id, data, userId) => {
   // Explicitly whitelist only the fields that a manager is allowed to update
   const allowedFields = {};
   const editableFields = [
@@ -236,28 +236,6 @@ export const updateContent = async (id, data, user) => {
     err.statusCode = 404;
     err.code = "NOT_FOUND";
     throw err;
-  }
-
-  // Object-level authorization:
-  if (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN") {
-    if (
-      allowedFields.isOwnerContent !== undefined &&
-      allowedFields.isOwnerContent !== existingContent.isOwnerContent
-    ) {
-      const err = new Error("Only administrators can modify the owner content status.");
-      err.statusCode = 403;
-      err.code = "FORBIDDEN";
-      throw err;
-    }
-    if (
-      existingContent.isOwnerContent &&
-      existingContent.createdBy?.toString() !== user._id.toString()
-    ) {
-      const err = new Error("You are not authorized to modify owner content.");
-      err.statusCode = 403;
-      err.code = "FORBIDDEN";
-      throw err;
-    }
   }
 
   if (allowedFields.title) {
@@ -306,7 +284,7 @@ export const updateContent = async (id, data, user) => {
     .populate("createdBy", "name email");
 
   await logActivity({
-    userId: user._id,
+    userId,
     action: "CONTENT_UPDATED",
     entityType: "Content",
     entityId: content._id,
@@ -322,35 +300,12 @@ export const updateContent = async (id, data, user) => {
 /**
  * Delete content — only allowed for DRAFT or when no publications exist.
  */
-export const deleteContent = async (id, user) => {
+export const deleteContent = async (id, userId) => {
   const content = await Content.findById(id);
   if (!content) {
     const err = new Error("Content not found.");
     err.statusCode = 404;
     err.code = "NOT_FOUND";
-    throw err;
-  }
-
-  // Object-level authorization for deletion
-  if (user.role === "ADMIN" || user.role === "SUPER_ADMIN") {
-    // Authorized
-  } else if (user.role === "CONTENT_MANAGER") {
-    if (content.isOwnerContent) {
-      const err = new Error("You are not authorized to delete owner content.");
-      err.statusCode = 403;
-      err.code = "FORBIDDEN";
-      throw err;
-    }
-    if (content.createdBy?.toString() !== user._id.toString()) {
-      const err = new Error("You are not authorized to delete content created by another user.");
-      err.statusCode = 403;
-      err.code = "FORBIDDEN";
-      throw err;
-    }
-  } else {
-    const err = new Error("You are not authorized to delete this content.");
-    err.statusCode = 403;
-    err.code = "FORBIDDEN";
     throw err;
   }
 
@@ -383,7 +338,7 @@ export const deleteContent = async (id, user) => {
 export const updateContentStatus = async (
   id,
   newStatus,
-  user,
+  userId,
   feedback = null,
   scheduledDate = undefined,
   scheduledTime = undefined,
@@ -396,20 +351,6 @@ export const updateContentStatus = async (
     err.statusCode = 404;
     err.code = "NOT_FOUND";
     throw err;
-  }
-
-  // Object-level authorization for status transitions
-  if (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN") {
-    if (
-      content.isOwnerContent &&
-      ["APPROVED", "REJECTED"].includes(newStatus) &&
-      content.createdBy?.toString() !== user._id.toString()
-    ) {
-      const err = new Error("Only administrators can approve or reject owner content.");
-      err.statusCode = 403;
-      err.code = "FORBIDDEN";
-      throw err;
-    }
   }
 
   // ── Enforce transition rules ──────────────────────────────────────────────
@@ -488,7 +429,7 @@ export const updateContentStatus = async (
   }
 
   await logActivity({
-    userId: user._id,
+    userId,
     action: "STATUS_CHANGED",
     entityType: "Content",
     entityId: content._id,

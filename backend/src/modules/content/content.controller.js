@@ -63,7 +63,7 @@ export const updateContent = async (req, res, next) => {
     const content = await contentService.updateContent(
       req.params.id,
       data,
-      req.user,
+      req.user._id,
     );
     return sendSuccess(res, {
       message: "Content updated successfully.",
@@ -76,7 +76,7 @@ export const updateContent = async (req, res, next) => {
 
 export const deleteContent = async (req, res, next) => {
   try {
-    await contentService.deleteContent(req.params.id, req.user);
+    await contentService.deleteContent(req.params.id, req.user._id);
     return sendSuccess(res, { message: "Content deleted successfully." });
   } catch (error) {
     next(error);
@@ -96,7 +96,7 @@ export const updateContentStatus = async (req, res, next) => {
     const content = await contentService.updateContentStatus(
       req.params.id,
       status,
-      req.user,
+      req.user._id,
       feedback,
       scheduledDate,
       scheduledTime,

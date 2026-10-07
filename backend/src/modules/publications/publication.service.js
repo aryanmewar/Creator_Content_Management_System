@@ -106,8 +106,13 @@ export const createPublication = async (data, userId) => {
 /**
  * Update a publication record (e.g., fix URL).
  */
-export const updatePublication = async (id, data, user) => {
-  const pub = await Publication.findById(id).populate("contentId");
+export const updatePublication = async (id, data, userId) => {
+  const pub = await Publication.findByIdAndUpdate(id, data, {
+    new: true,
+    runValidators: true,
+  })
+    .populate("contentId", "title contentType")
+    .populate("publishedBy", "name email");
 
   if (!pub) {
     const err = new Error("Publication not found.");
@@ -115,28 +120,5 @@ export const updatePublication = async (id, data, user) => {
     err.code = "NOT_FOUND";
     throw err;
   }
-
-  // Object-level authorization:
-  // Admins, Super Admins, the user who logged the publication, or the creator of the content can edit
-  const isAuthorized =
-    user.role === "ADMIN" ||
-    user.role === "SUPER_ADMIN" ||
-    pub.publishedBy?.toString() === user._id.toString() ||
-    pub.contentId?.createdBy?.toString() === user._id.toString();
-
-  if (!isAuthorized) {
-    const err = new Error("You are not authorized to modify this publication record.");
-    err.statusCode = 403;
-    err.code = "FORBIDDEN";
-    throw err;
-  }
-
-  const updatedPub = await Publication.findByIdAndUpdate(id, data, {
-    new: true,
-    runValidators: true,
-  })
-    .populate("contentId", "title contentType")
-    .populate("publishedBy", "name email");
-
-  return updatedPub;
+  return pub;
 };

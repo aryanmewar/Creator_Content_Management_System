@@ -30,24 +30,11 @@ export const getUserNotifications = async (userId) => {
  * Mark a single notification as read.
  */
 export const markAsRead = async (id, userId) => {
-  const notification = await Notification.findById(id);
-  if (!notification) {
-    const err = new Error("Notification not found.");
-    err.statusCode = 404;
-    err.code = "NOT_FOUND";
-    throw err;
-  }
-
-  if (notification.userId.toString() !== userId.toString()) {
-    const err = new Error("You are not authorized to access this notification.");
-    err.statusCode = 403;
-    err.code = "FORBIDDEN";
-    throw err;
-  }
-
-  notification.isRead = true;
-  await notification.save();
-  return notification;
+  return await Notification.findOneAndUpdate(
+    { _id: id, userId },
+    { isRead: true },
+    { new: true },
+  );
 };
 
 /**
@@ -61,23 +48,7 @@ export const markAllAsRead = async (userId) => {
  * Delete a specific notification.
  */
 export const deleteNotification = async (id, userId) => {
-  const notification = await Notification.findById(id);
-  if (!notification) {
-    const err = new Error("Notification not found.");
-    err.statusCode = 404;
-    err.code = "NOT_FOUND";
-    throw err;
-  }
-
-  if (notification.userId.toString() !== userId.toString()) {
-    const err = new Error("You are not authorized to delete this notification.");
-    err.statusCode = 403;
-    err.code = "FORBIDDEN";
-    throw err;
-  }
-
-  await Notification.findByIdAndDelete(id);
-  return true;
+  return await Notification.findOneAndDelete({ _id: id, userId });
 };
 
 /**

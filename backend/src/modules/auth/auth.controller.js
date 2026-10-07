@@ -1,23 +1,9 @@
 import * as authService from "./auth.service.js";
 import { sendSuccess, sendError } from "../../utils/response.js";
-import { generateCsrfToken, setCsrfCookies } from "../../middleware/csrfMiddleware.js";
 
 export const register = async (req, res, next) => {
   try {
     const { name, email, password, role } = req.body;
-
-    if (
-      (role === "ADMIN" || role === "SUPER_ADMIN") &&
-      req.user.role !== "ADMIN" &&
-      req.user.role !== "SUPER_ADMIN"
-    ) {
-      return sendError(res, {
-        message: "You are not authorized to create administrator accounts.",
-        code: "FORBIDDEN",
-        statusCode: 403,
-      });
-    }
-
     const { user, token } = await authService.registerUser({
       name,
       email,
@@ -31,10 +17,6 @@ export const register = async (req, res, next) => {
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
-
-    // Refresh CSRF token for the authenticated session
-    const csrfToken = generateCsrfToken();
-    setCsrfCookies(res, csrfToken);
     return sendSuccess(res, {
       message: "Account created successfully.",
       data: { user, token },
@@ -60,10 +42,6 @@ export const login = async (req, res, next) => {
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge,
     });
-
-    // Refresh CSRF token for the authenticated session
-    const csrfToken = generateCsrfToken();
-    setCsrfCookies(res, csrfToken);
     return sendSuccess(res, {
       message: "Login successful.",
       data: { user, token },
@@ -84,24 +62,11 @@ export const getMe = async (req, res, next) => {
 
 export const logout = async (req, res, next) => {
   try {
-    // Clear the HttpOnly cookie and CSRF cookies server-side
-    const isProd = process.env.NODE_ENV === "production";
+    // Clear the HttpOnly cookie server-side
     res.clearCookie("cms_token", {
       httpOnly: true,
-      secure: isProd,
-      sameSite: isProd ? "none" : "lax",
-    });
-    res.clearCookie("XSRF-TOKEN", {
-      httpOnly: false,
-      secure: isProd,
-      sameSite: isProd ? "none" : "lax",
-      path: "/",
-    });
-    res.clearCookie("_csrf", {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: isProd ? "none" : "lax",
-      path: "/",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     });
     return sendSuccess(res, { message: "Logged out successfully." });
   } catch (error) {
@@ -111,28 +76,13 @@ export const logout = async (req, res, next) => {
 
 export const createContributor = async (req, res, next) => {
   try {
-    const { name, email, password, designation, role } = req.body;
-
-    if (
-      role &&
-      role !== "CONTRIBUTOR" &&
-      req.user.role !== "ADMIN" &&
-      req.user.role !== "SUPER_ADMIN"
-    ) {
-      return sendError(res, {
-        message: "You are not authorized to create accounts with elevated privileges.",
-        code: "FORBIDDEN",
-        statusCode: 403,
-      });
-    }
-
+    const { name, email, password, designation } = req.body;
     const result = await authService.createContributorAccount({
       name,
       email,
       password,
       designation,
       adminId: req.user._id,
-      role,
     });
 
     return sendSuccess(res, {
@@ -195,13 +145,5 @@ export const exportBackup = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-};
-
-export const getCsrfToken = (req, res) => {
-  const token = req.csrfToken ? req.csrfToken() : generateCsrfToken();
-  return sendSuccess(res, {
-    message: "CSRF token retrieved successfully.",
-    data: { csrfToken: token },
-  });
 };
 

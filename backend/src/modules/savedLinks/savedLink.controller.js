@@ -28,32 +28,18 @@ export const createSavedLink = async (req, res, next) => {
 
 export const updateSavedLink = async (req, res, next) => {
   try {
-    const existing = await SavedLink.findById(req.params.id);
-    if (!existing) {
-      return sendError(res, {
-        message: "No saved link found with that ID",
-        code: "NOT_FOUND",
-        statusCode: 404,
-      });
-    }
-
-    if (
-      existing.createdBy.toString() !== req.user._id.toString() &&
-      req.user.role !== "ADMIN" &&
-      req.user.role !== "SUPER_ADMIN"
-    ) {
-      return sendError(res, {
-        message: "You are not authorized to modify this saved link.",
-        code: "FORBIDDEN",
-        statusCode: 403,
-      });
-    }
-
-    const savedLink = await SavedLink.findByIdAndUpdate(
-      req.params.id,
+    const savedLink = await SavedLink.findOneAndUpdate(
+      { _id: req.params.id, createdBy: req.user._id },
       req.body,
       { new: true, runValidators: true },
     );
+
+    if (!savedLink) {
+      return sendError(res, {
+        message: "No saved link found with that ID",
+        statusCode: 404,
+      });
+    }
 
     return sendSuccess(res, { data: savedLink });
   } catch (error) {
@@ -63,28 +49,17 @@ export const updateSavedLink = async (req, res, next) => {
 
 export const deleteSavedLink = async (req, res, next) => {
   try {
-    const existing = await SavedLink.findById(req.params.id);
-    if (!existing) {
+    const savedLink = await SavedLink.findOneAndDelete({
+      _id: req.params.id,
+      createdBy: req.user._id,
+    });
+
+    if (!savedLink) {
       return sendError(res, {
         message: "No saved link found with that ID",
-        code: "NOT_FOUND",
         statusCode: 404,
       });
     }
-
-    if (
-      existing.createdBy.toString() !== req.user._id.toString() &&
-      req.user.role !== "ADMIN" &&
-      req.user.role !== "SUPER_ADMIN"
-    ) {
-      return sendError(res, {
-        message: "You are not authorized to delete this saved link.",
-        code: "FORBIDDEN",
-        statusCode: 403,
-      });
-    }
-
-    await SavedLink.findByIdAndDelete(req.params.id);
 
     return sendSuccess(res, {
       message: "Deleted successfully",

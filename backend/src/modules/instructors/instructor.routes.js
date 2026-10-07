@@ -3,7 +3,6 @@ import * as instructorController from "./instructor.controller.js";
 import protect from "../../middleware/authMiddleware.js";
 import validate from "../../middleware/validateMiddleware.js";
 import { uploadSingle } from "../../middleware/uploadMiddleware.js";
-import { validateObjectId } from "../../middleware/validateObjectId.js";
 import {
   createInstructorSchema,
   updateInstructorSchema,
@@ -22,20 +21,18 @@ router.post(
   validate(createInstructorSchema),
   instructorController.createInstructor,
 );
-router.get("/:id", validateObjectId(), instructorController.getInstructorById);
+router.get("/:id", instructorController.getInstructorById);
 router.put(
   "/:id",
-  validateObjectId(),
   ...uploadSingle("profileImage"),
   validate(updateInstructorSchema),
   instructorController.updateInstructor,
 );
 router.patch(
   "/:id/status",
-  validateObjectId(),
   validate(statusSchema),
   instructorController.updateInstructorStatus,
 );
-router.delete("/:id", validateObjectId(), instructorController.deleteInstructor);
+router.delete("/:id", instructorController.deleteInstructor);
 
 export default router;
