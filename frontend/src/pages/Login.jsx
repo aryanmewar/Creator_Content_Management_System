@@ -38,11 +38,18 @@ const slides = [
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isAuthenticated, user, isLoading: authLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showForgotModal, setShowForgotModal] = useState(false);
+
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      const target = user?.role === "CONTRIBUTOR" ? "/my-dashboard" : "/";
+      navigate(target, { replace: true });
+    }
+  }, [authLoading, isAuthenticated, user, navigate]);
 
   const {
     register,
@@ -74,7 +81,8 @@ const Login = () => {
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      await login(data);
+      const response = await login(data);
+      const userRole = response?.data?.user?.role;
       
       if (data.remember) {
         localStorage.setItem("rememberedEmail", data.email);
@@ -85,7 +93,8 @@ const Login = () => {
       }
       
       toast.success("Welcome back!");
-      navigate("/");
+      const target = userRole === "CONTRIBUTOR" ? "/my-dashboard" : "/";
+      navigate(target, { replace: true });
     } catch (error) {
       console.error("Login Error:", error);
       toast.error(

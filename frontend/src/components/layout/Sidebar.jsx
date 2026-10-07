@@ -50,8 +50,11 @@ const Sidebar = ({
     user?.role === "CONTRIBUTOR" ? contributorNavItems : adminNavItems;
 
   const handleLogout = async () => {
+    if (window.innerWidth < 768) {
+      setIsMobileMenuOpen(false);
+    }
     await logout();
-    navigate("/login");
+    navigate("/login", { replace: true });
   };
 
   const handleNavClick = () => {

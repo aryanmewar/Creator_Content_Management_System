@@ -1,6 +1,7 @@
 import React, { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute.jsx";
+import PublicRoute from "./PublicRoute.jsx";
 import Loader from "../components/common/Loader.jsx";
 
 // ── Lazy-loaded pages (each becomes its own JS chunk) ────────────────────────
@@ -28,7 +29,14 @@ const AppRoutes = () => (
   <Suspense fallback={<PageLoader />}>
     <Routes>
       {/* Public routes */}
-      <Route path="/login" element={<Login />} />
+      <Route
+        path="/login"
+        element={
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        }
+      />
 
       {/* Admin & Content Manager Protected Routes */}
       <Route
