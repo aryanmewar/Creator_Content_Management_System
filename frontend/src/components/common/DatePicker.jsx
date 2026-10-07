@@ -5,7 +5,6 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
-import { createPortal } from "react-dom";
 import {
   format,
   startOfWeek,
@@ -83,7 +82,7 @@ const DatePicker = ({
   }, [isOpen]);
 
   // Current viewed month in calendar
-  const [viewDate, setViewDate] = useState(() => selectedDate || new Date());
+  const [viewDate, setViewDate] = useState(() => selectedDate || getRealDate());
   const [prevSelectedDate, setPrevSelectedDate] = useState(selectedDate);
 
   // Keep viewDate synchronized when selected date changes externally
@@ -94,69 +93,37 @@ const DatePicker = ({
     }
   }
 
-  // Exact fixed coordinates for the portal popup
-  const [coords, setCoords] = useState({ top: 0, left: 0 });
+  // Positioning calculations (dropUp if near screen bottom, alignRight if near screen right)
+  const [placement, setPlacement] = useState({
+    dropUp: false,
+    alignRight: false,
+  });
 
-  const updatePosition = useCallback(() => {
+  const updatePlacement = useCallback(() => {
     if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
-    const popupWidth = 305;
-    const popupHeight = 365;
+    const dropdownHeight = 365;
+    const dropdownWidth = 305;
 
-    // By default, align popup to the left edge of the input (extends to the right)
-    let left = rect.left;
+    const roomBelow = window.innerHeight - rect.bottom;
+    const roomAbove = rect.top;
+    const dropUp = roomBelow < dropdownHeight && roomAbove > dropdownHeight;
+    const alignRight = rect.left + dropdownWidth > window.innerWidth - 16;
 
-    // If opening to the right would overflow the screen edge, shift left
-    if (left + popupWidth > window.innerWidth - 16) {
-      left = window.innerWidth - popupWidth - 16;
-    }
-
-    // Never let it go off-screen to the left (behind sidebar or viewport edge)
-    if (left < 16) {
-      left = 16;
-    }
-
-    // By default open below the input
-    let top = rect.bottom + 6;
-
-    // If not enough room below and room above exists, flip to open above
-    if (
-      top + popupHeight > window.innerHeight - 12 &&
-      rect.top > popupHeight + 12
-    ) {
-      top = rect.top - popupHeight - 6;
-    }
-
-    setCoords({ top, left });
+    setPlacement({ dropUp, alignRight });
   }, []);
 
   useEffect(() => {
     if (!isOpen) return;
-    updatePosition();
+    updatePlacement();
+  }, [isOpen, updatePlacement]);
 
-    const handleUpdate = () => {
-      updatePosition();
-    };
-
-    window.addEventListener("scroll", handleUpdate, true);
-    window.addEventListener("resize", handleUpdate);
-    return () => {
-      window.removeEventListener("scroll", handleUpdate, true);
-      window.removeEventListener("resize", handleUpdate);
-    };
-  }, [isOpen, updatePosition]);
-
-  // Click outside listener to close popup (works cleanly across portal boundary)
+  // Click outside listener to close popup
   useEffect(() => {
     if (!isOpen) return;
 
     const handleClickOutside = (e) => {
-      const inTrigger =
-        containerRef.current && containerRef.current.contains(e.target);
-      const inDropdown =
-        dropdownRef.current && dropdownRef.current.contains(e.target);
-
-      if (!inTrigger && !inDropdown) {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
         setIsOpen(false);
       }
     };
@@ -189,6 +156,7 @@ const DatePicker = ({
           name: name || id,
           value: formatted,
         },
+        value: formatted,
       };
       onChange(syntheticEvent);
     }
@@ -204,6 +172,7 @@ const DatePicker = ({
           name: name || id,
           value: "",
         },
+        value: "",
       };
       onChange(syntheticEvent);
     }
@@ -221,14 +190,21 @@ const DatePicker = ({
 
   const handleTodayClick = (e) => {
     e.stopPropagation();
-    const today = new Date();
+    const today = getRealDate();
     handleSelectDate(today);
   };
 
   const isDateDisabled = (date) => {
-    if (minDate && date < new Date(minDate.setHours(0, 0, 0, 0))) return true;
-    if (maxDate && date > new Date(maxDate.setHours(23, 59, 59, 999)))
-      return true;
+    if (minDate) {
+      const minD = new Date(minDate);
+      minD.setHours(0, 0, 0, 0);
+      if (date < minD) return true;
+    }
+    if (maxDate) {
+      const maxD = new Date(maxDate);
+      maxD.setHours(23, 59, 59, 999);
+      if (date > maxD) return true;
+    }
     return false;
   };
 
@@ -237,7 +213,7 @@ const DatePicker = ({
   return (
     <div
       ref={containerRef}
-      className={`relative inline-block w-full ${className}`}
+      className={`relative inline-block w-full ${isOpen ? "z-50" : "z-0"} ${className}`}
       style={style}
     >
       {/* Trigger Button */}
@@ -292,130 +268,126 @@ const DatePicker = ({
         </div>
       </div>
 
-      {/* Custom Portal Calendar Popup — 100% Solid, Fully Opaque, Z-Index 99999 */}
-      {isOpen &&
-        createPortal(
-          <div
-            ref={dropdownRef}
-            style={{
-              position: "fixed",
-              top: `${coords.top}px`,
-              left: `${coords.left}px`,
-              zIndex: 99999,
-            }}
-            className="bg-white border border-slate-200 shadow-[0_25px_60px_-15px_rgba(15,23,42,0.35),0_0_0_1px_rgba(15,23,42,0.08)] rounded-2xl p-4 w-[305px] max-w-[calc(100vw-32px)] animate-in fade-in zoom-in-95 duration-150 select-none"
-          >
-            {/* Real-Time Live Status Bar */}
-            <div className="mb-3 pb-2.5 border-b border-slate-100 flex items-center justify-between px-1 text-xs text-slate-500">
-              <span className="flex items-center gap-1.5 font-medium text-slate-600">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                Real Time:
+      {/* Calendar Popup Dropdown */}
+      {isOpen && (
+        <div
+          ref={dropdownRef}
+          className={`absolute z-50 bg-white border border-slate-200 shadow-[0_25px_60px_-15px_rgba(15,23,42,0.35),0_0_0_1px_rgba(15,23,42,0.08)] rounded-2xl p-4 w-[305px] max-w-[calc(100vw-32px)] animate-in fade-in zoom-in-95 duration-150 select-none ${
+            placement.dropUp ? "bottom-full mb-2" : "top-full mt-2"
+          } ${
+            placement.alignRight ? "right-0" : "left-0"
+          }`}
+        >
+          {/* Real-Time Live Status Bar */}
+          <div className="mb-3 pb-2.5 border-b border-slate-100 flex items-center justify-between px-1 text-xs text-slate-500">
+            <span className="flex items-center gap-1.5 font-medium text-slate-600">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
-              <span className="font-semibold text-[#2D4396] tabular-nums flex items-center gap-1 bg-indigo-50/80 px-2.5 py-0.5 rounded-full border border-indigo-100/80 text-[11px]">
-                <Clock className="w-3 h-3 text-[#2D4396]" />
-                {format(currentLiveTime, "hh:mm:ss a")}
-              </span>
-            </div>
+              Real Time:
+            </span>
+            <span className="font-semibold text-[#2D4396] tabular-nums flex items-center gap-1 bg-indigo-50/80 px-2.5 py-0.5 rounded-full border border-indigo-100/80 text-[11px]">
+              <Clock className="w-3 h-3 text-[#2D4396]" />
+              {format(currentLiveTime, "hh:mm:ss a")}
+            </span>
+          </div>
 
-            {/* Header Month / Year & Nav */}
-            <div className="flex items-center justify-between mb-3 px-1">
-              <h4 className="text-sm font-bold text-slate-800 tracking-wide">
-                {format(viewDate, "MMMM yyyy")}
-              </h4>
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={handlePrevMonth}
-                  className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
-                  title="Previous month"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={handleNextMonth}
-                  className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
-                  title="Next month"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            {/* Weekday Labels Header */}
-            <div className="grid grid-cols-7 gap-1 mb-1 text-center">
-              {weekDayLabels.map((day) => (
-                <span
-                  key={day}
-                  className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider py-1"
-                >
-                  {day}
-                </span>
-              ))}
-            </div>
-
-            {/* Dates Grid */}
-            <div className="grid grid-cols-7 gap-1 text-center">
-              {calendarDays.map((date) => {
-                const isCurrentMonth = isSameMonth(date, viewDate);
-                const isSelected =
-                  selectedDate && isSameDay(date, selectedDate);
-                const isCurrentDay = isToday(date);
-                const disabledDay = isDateDisabled(date);
-
-                return (
-                  <button
-                    key={date.toISOString()}
-                    type="button"
-                    disabled={disabledDay}
-                    onClick={() => handleSelectDate(date)}
-                    className={`h-8 w-8 mx-auto flex items-center justify-center text-xs font-medium rounded-xl transition-all relative ${
-                      disabledDay
-                        ? "opacity-25 cursor-not-allowed text-slate-400"
-                        : isSelected
-                          ? "bg-[#2D4396] text-white font-bold shadow-md shadow-indigo-600/30 scale-105"
-                          : isCurrentMonth
-                            ? isCurrentDay
-                              ? "text-[#2D4396] font-bold bg-indigo-50/80 hover:bg-[#2D4396] hover:text-white"
-                              : "text-slate-700 hover:bg-indigo-50/70 hover:text-[#2D4396]"
-                            : "text-slate-300 hover:bg-slate-50 hover:text-slate-500"
-                    }`}
-                  >
-                    {format(date, "d")}
-                    {isCurrentDay && !isSelected && (
-                      <span className="absolute bottom-1 w-1 h-1 rounded-full bg-[#2D4396]" />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Footer Actions (Today / Clear) */}
-            <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs px-1">
+          {/* Header Month / Year & Nav */}
+          <div className="flex items-center justify-between mb-3 px-1">
+            <h4 className="text-sm font-bold text-slate-800 tracking-wide">
+              {format(viewDate, "MMMM yyyy")}
+            </h4>
+            <div className="flex items-center gap-1">
               <button
                 type="button"
-                onClick={handleClear}
-                className="text-slate-500 hover:text-rose-600 font-semibold transition-colors py-1 px-2 rounded-lg hover:bg-slate-50"
+                onClick={handlePrevMonth}
+                className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+                title="Previous month"
               >
-                Clear
+                <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 type="button"
-                onClick={handleTodayClick}
-                className="text-[#2D4396] hover:text-indigo-800 font-semibold transition-colors bg-indigo-50/80 hover:bg-indigo-100/80 py-1.5 px-3 rounded-xl flex items-center gap-1"
+                onClick={handleNextMonth}
+                className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+                title="Next month"
               >
-                <span>Today</span>
-                <span className="text-[11px] opacity-75">
-                  ({format(currentLiveTime, "dd MMM")})
-                </span>
+                <ChevronRight className="w-4 h-4" />
               </button>
             </div>
-          </div>,
-          document.body,
-        )}
+          </div>
+
+          {/* Weekday Labels Header */}
+          <div className="grid grid-cols-7 gap-1 mb-1 text-center">
+            {weekDayLabels.map((day) => (
+              <span
+                key={day}
+                className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider py-1"
+              >
+                {day}
+              </span>
+            ))}
+          </div>
+
+          {/* Dates Grid */}
+          <div className="grid grid-cols-7 gap-1 text-center">
+            {calendarDays.map((date) => {
+              const isCurrentMonth = isSameMonth(date, viewDate);
+              const isSelected =
+                selectedDate && isSameDay(date, selectedDate);
+              const isCurrentDay = isToday(date);
+              const disabledDay = isDateDisabled(date);
+
+              return (
+                <button
+                  key={date.toISOString()}
+                  type="button"
+                  disabled={disabledDay}
+                  onClick={() => handleSelectDate(date)}
+                  className={`h-8 w-8 mx-auto flex items-center justify-center text-xs font-medium rounded-xl transition-all relative ${
+                    disabledDay
+                      ? "opacity-25 cursor-not-allowed text-slate-400"
+                      : isSelected
+                        ? "bg-[#2D4396] text-white font-bold shadow-md shadow-indigo-600/30 scale-105"
+                        : isCurrentMonth
+                          ? isCurrentDay
+                            ? "text-[#2D4396] font-bold bg-indigo-50/80 hover:bg-[#2D4396] hover:text-white"
+                            : "text-slate-700 hover:bg-indigo-50/70 hover:text-[#2D4396]"
+                          : "text-slate-300 hover:bg-slate-50 hover:text-slate-500"
+                  }`}
+                >
+                  {format(date, "d")}
+                  {isCurrentDay && !isSelected && (
+                    <span className="absolute bottom-1 w-1 h-1 rounded-full bg-[#2D4396]" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Footer Actions (Today / Clear) */}
+          <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs px-1">
+            <button
+              type="button"
+              onClick={handleClear}
+              className="text-slate-500 hover:text-rose-600 font-semibold transition-colors py-1 px-2 rounded-lg hover:bg-slate-50"
+            >
+              Clear
+            </button>
+            <button
+              type="button"
+              onClick={handleTodayClick}
+              className="text-[#2D4396] hover:text-indigo-800 font-semibold transition-colors bg-indigo-50/80 hover:bg-indigo-100/80 py-1.5 px-3 rounded-xl flex items-center gap-1"
+            >
+              <span>Today</span>
+              <span className="text-[11px] opacity-75">
+                ({format(currentLiveTime, "dd MMM")})
+              </span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

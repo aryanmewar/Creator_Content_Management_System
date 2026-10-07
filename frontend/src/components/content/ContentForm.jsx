@@ -285,8 +285,9 @@ const ContentForm = ({
                       control={control}
                       render={({ field }) => (
                         <DatePicker
+                          name={field.name}
                           value={field.value}
-                          onChange={field.onChange}
+                          onChange={(e) => field.onChange(e?.target?.value ?? e)}
                           error={!!errors.dueDate}
                           placeholder="Select shoot date..."
                         />
@@ -309,8 +310,9 @@ const ContentForm = ({
                     control={control}
                     render={({ field }) => (
                       <DatePicker
+                        name={field.name}
                         value={field.value}
-                        onChange={field.onChange}
+                        onChange={(e) => field.onChange(e?.target?.value ?? e)}
                         error={!!errors.completionDate}
                         placeholder="Select completion date..."
                       />
