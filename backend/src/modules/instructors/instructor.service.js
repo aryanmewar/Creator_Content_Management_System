@@ -151,7 +151,19 @@ export const getInstructorById = async (id) => {
 /**
  * Create a new instructor.
  */
-export const createInstructor = async (data, userId) => {
+export const createInstructor = async (data, user) => {
+  if (
+    data.role &&
+    (data.role === "ADMIN" || data.role === "SUPER_ADMIN") &&
+    user.role !== "ADMIN" &&
+    user.role !== "SUPER_ADMIN"
+  ) {
+    const err = new Error("You are not authorized to create administrator accounts.");
+    err.statusCode = 403;
+    err.code = "FORBIDDEN";
+    throw err;
+  }
+
   const existing = await Instructor.findOne({ email: data.email });
   if (existing) {
     const err = new Error("An instructor with this email already exists.");
@@ -164,7 +176,7 @@ export const createInstructor = async (data, userId) => {
   const finalPassword =
     data.password || Math.random().toString(36).slice(-8) + "A1!";
 
-  const user = await User.create({
+  const newUser = await User.create({
     name: data.name,
     email: data.email,
     passwordHash: finalPassword,
@@ -173,12 +185,12 @@ export const createInstructor = async (data, userId) => {
 
   const instructor = await Instructor.create({
     ...data,
-    userId: user._id,
-    createdBy: userId,
+    userId: newUser._id,
+    createdBy: user._id,
   });
 
   await logActivity({
-    userId,
+    userId: user._id,
     action: "INSTRUCTOR_CREATED",
     entityType: "Instructor",
     entityId: instructor._id,
@@ -191,12 +203,62 @@ export const createInstructor = async (data, userId) => {
 /**
  * Update instructor details.
  */
-export const updateInstructor = async (id, data, userId) => {
+export const updateInstructor = async (id, data, user) => {
   const currentInstructor = await Instructor.findById(id);
   if (!currentInstructor) {
     const err = new Error("Instructor not found.");
     err.statusCode = 404;
     err.code = "NOT_FOUND";
+    throw err;
+  }
+
+  // Find associated target user
+  const targetUser = currentInstructor.userId
+    ? await User.findById(currentInstructor.userId)
+    : await User.findOne({ email: currentInstructor.email });
+
+  if (targetUser) {
+    if (targetUser.role === "SUPER_ADMIN" && user.role !== "SUPER_ADMIN") {
+      const err = new Error("Only super administrators can modify a super administrator account.");
+      err.statusCode = 403;
+      err.code = "FORBIDDEN";
+      throw err;
+    }
+    if (
+      targetUser.role === "ADMIN" &&
+      user.role !== "ADMIN" &&
+      user.role !== "SUPER_ADMIN"
+    ) {
+      const err = new Error("You are not authorized to modify an administrator account.");
+      err.statusCode = 403;
+      err.code = "FORBIDDEN";
+      throw err;
+    }
+  }
+
+  if (
+    data.role &&
+    (data.role === "ADMIN" || data.role === "SUPER_ADMIN") &&
+    user.role !== "ADMIN" &&
+    user.role !== "SUPER_ADMIN"
+  ) {
+    const err = new Error("You are not authorized to assign administrator privileges.");
+    err.statusCode = 403;
+    err.code = "FORBIDDEN";
+    throw err;
+  }
+
+  if (data.role === "SUPER_ADMIN" && user.role !== "SUPER_ADMIN") {
+    const err = new Error("Only super administrators can assign the SUPER_ADMIN role.");
+    err.statusCode = 403;
+    err.code = "FORBIDDEN";
+    throw err;
+  }
+
+  if (data.password && user.role !== "ADMIN" && user.role !== "SUPER_ADMIN") {
+    const err = new Error("You are not authorized to change another user's password.");
+    err.statusCode = 403;
+    err.code = "FORBIDDEN";
     throw err;
   }
 
@@ -226,17 +288,17 @@ export const updateInstructor = async (id, data, userId) => {
     const userQuery = currentInstructor.userId
       ? { _id: currentInstructor.userId }
       : { email: currentInstructor.email };
-    let user = await User.findOne(userQuery);
+    let linkedUser = await User.findOne(userQuery);
 
-    if (user) {
-      if (data.email) user.email = data.email;
-      if (data.password) user.passwordHash = data.password; // hashed in pre('save')
-      if (data.name) user.name = data.name;
-      if (data.role) user.role = data.role;
-      await user.save();
+    if (linkedUser) {
+      if (data.email) linkedUser.email = data.email;
+      if (data.password) linkedUser.passwordHash = data.password; // hashed in pre('save')
+      if (data.name) linkedUser.name = data.name;
+      if (data.role) linkedUser.role = data.role;
+      await linkedUser.save();
     } else if (data.password || data.role) {
       // If no user exists but they provided a password or role, create the user
-      user = await User.create({
+      linkedUser = await User.create({
         name: data.name || currentInstructor.name,
         email: data.email || currentInstructor.email,
         passwordHash:
@@ -244,13 +306,13 @@ export const updateInstructor = async (id, data, userId) => {
         role: data.role || USER_ROLES.CONTRIBUTOR,
       });
       // Link the new user to the instructor
-      instructor.userId = user._id;
+      instructor.userId = linkedUser._id;
       await instructor.save();
     }
   }
 
   await logActivity({
-    userId,
+    userId: user._id,
     action: "INSTRUCTOR_UPDATED",
     entityType: "Instructor",
     entityId: instructor._id,
@@ -264,22 +326,48 @@ export const updateInstructor = async (id, data, userId) => {
  * Toggle instructor active status (soft deactivation).
  * Preserves all historical content/assignment data.
  */
-export const updateInstructorStatus = async (id, isActive, userId) => {
-  const instructor = await Instructor.findByIdAndUpdate(
-    id,
-    { isActive },
-    { new: true },
-  ).populate("createdBy", "name email");
-
-  if (!instructor) {
+export const updateInstructorStatus = async (id, isActive, user) => {
+  const currentInstructor = await Instructor.findById(id);
+  if (!currentInstructor) {
     const err = new Error("Instructor not found.");
     err.statusCode = 404;
     err.code = "NOT_FOUND";
     throw err;
   }
 
+  if (
+    currentInstructor.userId &&
+    currentInstructor.userId.toString() === user._id.toString()
+  ) {
+    const err = new Error("You cannot change the active status of your own account.");
+    err.statusCode = 403;
+    err.code = "FORBIDDEN";
+    throw err;
+  }
+
+  if (currentInstructor.userId) {
+    const targetUser = await User.findById(currentInstructor.userId);
+    if (
+      targetUser &&
+      (targetUser.role === "ADMIN" || targetUser.role === "SUPER_ADMIN") &&
+      user.role !== "ADMIN" &&
+      user.role !== "SUPER_ADMIN"
+    ) {
+      const err = new Error("You are not authorized to change the status of an administrator.");
+      err.statusCode = 403;
+      err.code = "FORBIDDEN";
+      throw err;
+    }
+  }
+
+  const instructor = await Instructor.findByIdAndUpdate(
+    id,
+    { isActive },
+    { new: true },
+  ).populate("createdBy", "name email");
+
   await logActivity({
-    userId,
+    userId: user._id,
     action: isActive ? "INSTRUCTOR_ACTIVATED" : "INSTRUCTOR_DEACTIVATED",
     entityType: "Instructor",
     entityId: instructor._id,
@@ -312,7 +400,7 @@ export const updateProfileImage = async (id, imageData, userId) => {
 /**
  * Delete an instructor and associated user account.
  */
-export const deleteInstructor = async (id, userId) => {
+export const deleteInstructor = async (id, user) => {
   const instructor = await Instructor.findById(id);
 
   if (!instructor) {
@@ -322,8 +410,32 @@ export const deleteInstructor = async (id, userId) => {
     throw err;
   }
 
-  // Delete associated user account if it exists
+  // Deleting instructors is strictly restricted to ADMIN and SUPER_ADMIN
+  if (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN") {
+    const err = new Error("Only administrators can delete instructor accounts.");
+    err.statusCode = 403;
+    err.code = "FORBIDDEN";
+    throw err;
+  }
+
+  if (
+    instructor.userId &&
+    instructor.userId.toString() === user._id.toString()
+  ) {
+    const err = new Error("You cannot delete your own account.");
+    err.statusCode = 403;
+    err.code = "FORBIDDEN";
+    throw err;
+  }
+
   if (instructor.userId) {
+    const targetUser = await User.findById(instructor.userId);
+    if (targetUser && targetUser.role === "SUPER_ADMIN" && user.role !== "SUPER_ADMIN") {
+      const err = new Error("Cannot delete a super administrator account.");
+      err.statusCode = 403;
+      err.code = "FORBIDDEN";
+      throw err;
+    }
     await User.findByIdAndDelete(instructor.userId);
   }
 
@@ -334,7 +446,7 @@ export const deleteInstructor = async (id, userId) => {
   await Instructor.findByIdAndDelete(id);
 
   await logActivity({
-    userId,
+    userId: user._id,
     action: "INSTRUCTOR_DELETED",
     entityType: "Instructor",
     entityId: id,

@@ -43,7 +43,7 @@ export const updateSchedule = async (req, res, next) => {
     const schedule = await scheduleService.rescheduleContent(
       req.params.id,
       req.body,
-      req.user._id,
+      req.user,
     );
     return sendSuccess(res, {
       message: "Content rescheduled successfully.",
@@ -56,7 +56,7 @@ export const updateSchedule = async (req, res, next) => {
 
 export const deleteSchedule = async (req, res, next) => {
   try {
-    await scheduleService.cancelSchedule(req.params.id, req.user._id);
+    await scheduleService.cancelSchedule(req.params.id, req.user);
     return sendSuccess(res, { message: "Schedule cancelled." });
   } catch (error) {
     next(error);

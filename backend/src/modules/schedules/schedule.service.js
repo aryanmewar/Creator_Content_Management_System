@@ -170,13 +170,26 @@ export const createSchedule = async (data, userId) => {
 /**
  * Reschedule — marks old schedule as RESCHEDULED, creates new one.
  */
-export const rescheduleContent = async (id, data, userId) => {
+export const rescheduleContent = async (id, data, user) => {
   const oldSchedule = await Schedule.findById(id).populate("contentId");
   if (!oldSchedule) {
     const err = new Error("Schedule not found.");
     err.statusCode = 404;
     err.code = "NOT_FOUND";
     throw err;
+  }
+
+  if (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN") {
+    const isCreator = oldSchedule.createdBy?.toString() === user._id.toString();
+    const isContentCreator = oldSchedule.contentId?.createdBy?.toString() === user._id.toString();
+    const isOwnerContent = oldSchedule.contentId?.isOwnerContent;
+
+    if (!isCreator && !isContentCreator && isOwnerContent) {
+      const err = new Error("You are not authorized to reschedule this content.");
+      err.statusCode = 403;
+      err.code = "FORBIDDEN";
+      throw err;
+    }
   }
 
   // Mark old as rescheduled
@@ -190,14 +203,14 @@ export const rescheduleContent = async (id, data, userId) => {
     scheduledDate: data.scheduledDate || oldSchedule.scheduledDate,
     scheduledTime: data.scheduledTime || oldSchedule.scheduledTime,
     notes: data.notes || null,
-    createdBy: userId,
+    createdBy: user._id,
     status: "SCHEDULED",
     isActive: true,
     rescheduledFrom: oldSchedule._id,
   });
 
   await logActivity({
-    userId,
+    userId: user._id,
     action: "CONTENT_RESCHEDULED",
     entityType: "Schedule",
     entityId: newSchedule._id,
@@ -214,12 +227,8 @@ export const rescheduleContent = async (id, data, userId) => {
 /**
  * Cancel a schedule.
  */
-export const cancelSchedule = async (id, userId) => {
-  const schedule = await Schedule.findByIdAndUpdate(
-    id,
-    { status: "CANCELLED", isActive: false },
-    { new: true },
-  ).populate("contentId", "title status");
+export const cancelSchedule = async (id, user) => {
+  const schedule = await Schedule.findById(id).populate("contentId", "title status isOwnerContent createdBy");
 
   if (!schedule) {
     const err = new Error("Schedule not found.");
@@ -228,8 +237,25 @@ export const cancelSchedule = async (id, userId) => {
     throw err;
   }
 
+  if (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN") {
+    const isCreator = schedule.createdBy?.toString() === user._id.toString();
+    const isContentCreator = schedule.contentId?.createdBy?.toString() === user._id.toString();
+    const isOwnerContent = schedule.contentId?.isOwnerContent;
+
+    if (!isCreator && !isContentCreator && isOwnerContent) {
+      const err = new Error("You are not authorized to cancel this schedule.");
+      err.statusCode = 403;
+      err.code = "FORBIDDEN";
+      throw err;
+    }
+  }
+
+  schedule.status = "CANCELLED";
+  schedule.isActive = false;
+  await schedule.save();
+
   await logActivity({
-    userId,
+    userId: user._id,
     action: "SCHEDULE_CANCELLED",
     entityType: "Schedule",
     entityId: schedule._id,

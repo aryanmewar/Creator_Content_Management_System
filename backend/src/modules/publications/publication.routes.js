@@ -3,6 +3,7 @@ import * as publicationController from "./publication.controller.js";
 import protect from "../../middleware/authMiddleware.js";
 import { z } from "zod";
 import validate from "../../middleware/validateMiddleware.js";
+import { validateObjectId } from "../../middleware/validateObjectId.js";
 import { PLATFORMS } from "../../utils/statusUtils.js";
 
 const safeUrl = z
@@ -36,9 +37,10 @@ router.post(
   validate(createPublicationSchema),
   publicationController.createPublication,
 );
-router.get("/:id", publicationController.getPublicationById);
+router.get("/:id", validateObjectId(), publicationController.getPublicationById);
 router.put(
   "/:id",
+  validateObjectId(),
   validate(updatePublicationSchema),
   publicationController.updatePublication,
 );

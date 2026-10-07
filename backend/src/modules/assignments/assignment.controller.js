@@ -15,7 +15,10 @@ export const getAssignments = async (req, res, next) => {
 
 export const getAssignmentById = async (req, res, next) => {
   try {
-    const assignment = await assignmentService.getAssignmentById(req.params.id);
+    const assignment = await assignmentService.getAssignmentById(
+      req.params.id,
+      req.user,
+    );
     return sendSuccess(res, { data: assignment });
   } catch (error) {
     next(error);
@@ -26,7 +29,7 @@ export const createAssignment = async (req, res, next) => {
   try {
     const assignment = await assignmentService.createAssignment(
       req.body,
-      req.user._id,
+      req.user,
     );
     return sendSuccess(res, {
       message: "Content assigned successfully.",
@@ -43,7 +46,7 @@ export const updateAssignment = async (req, res, next) => {
     const assignment = await assignmentService.updateAssignment(
       req.params.id,
       req.body,
-      req.user._id,
+      req.user,
     );
     return sendSuccess(res, {
       message: "Assignment updated successfully.",

@@ -43,7 +43,7 @@ export const updatePublication = async (req, res, next) => {
     const pub = await publicationService.updatePublication(
       req.params.id,
       req.body,
-      req.user._id,
+      req.user,
     );
     return sendSuccess(res, { message: "Publication updated.", data: pub });
   } catch (error) {

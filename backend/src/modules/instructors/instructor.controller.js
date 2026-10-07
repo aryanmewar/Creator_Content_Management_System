@@ -41,7 +41,7 @@ export const createInstructor = async (req, res, next) => {
     const data = { ...req.body, ...(imageData && { profileImage: imageData }) };
     const instructor = await instructorService.createInstructor(
       data,
-      req.user._id,
+      req.user,
     );
     return sendSuccess(res, {
       message: "Instructor created successfully.",
@@ -66,7 +66,7 @@ export const updateInstructor = async (req, res, next) => {
     const instructor = await instructorService.updateInstructor(
       req.params.id,
       data,
-      req.user._id,
+      req.user,
     );
     return sendSuccess(res, {
       message: "Instructor updated successfully.",
@@ -83,7 +83,7 @@ export const updateInstructorStatus = async (req, res, next) => {
     const instructor = await instructorService.updateInstructorStatus(
       req.params.id,
       isActive,
-      req.user._id,
+      req.user,
     );
     return sendSuccess(res, {
       message: `Instructor ${isActive ? "activated" : "deactivated"} successfully.`,
@@ -96,7 +96,7 @@ export const updateInstructorStatus = async (req, res, next) => {
 
 export const deleteInstructor = async (req, res, next) => {
   try {
-    await instructorService.deleteInstructor(req.params.id, req.user._id);
+    await instructorService.deleteInstructor(req.params.id, req.user);
     return sendSuccess(res, {
       message: "Contributor removed successfully.",
     });

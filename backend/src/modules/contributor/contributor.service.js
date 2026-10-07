@@ -254,14 +254,21 @@ export const getReport = async (userId) => {
 export const markContentAsChecked = async (userId, contentId) => {
   const instructor = await getInstructorForUser(userId);
 
-  const content = await Content.findOne({
-    _id: contentId,
-    contributors: instructor._id,
-  });
-
+  const content = await Content.findById(contentId);
   if (!content) {
-    const err = new Error("Content not found or not assigned to you.");
+    const err = new Error("Content not found.");
     err.statusCode = 404;
+    err.code = "NOT_FOUND";
+    throw err;
+  }
+
+  const isAssigned = content.contributors?.some(
+    (c) => c.toString() === instructor._id.toString(),
+  );
+  if (!isAssigned) {
+    const err = new Error("You are not authorized to access or modify this content.");
+    err.statusCode = 403;
+    err.code = "FORBIDDEN";
     throw err;
   }
 
@@ -292,14 +299,21 @@ export const markContentAsChecked = async (userId, contentId) => {
 export const markOverdueAsAcknowledged = async (userId, contentId) => {
   const instructor = await getInstructorForUser(userId);
 
-  const content = await Content.findOne({
-    _id: contentId,
-    contributors: instructor._id,
-  });
-
+  const content = await Content.findById(contentId);
   if (!content) {
-    const err = new Error("Content not found or not assigned to you.");
+    const err = new Error("Content not found.");
     err.statusCode = 404;
+    err.code = "NOT_FOUND";
+    throw err;
+  }
+
+  const isAssigned = content.contributors?.some(
+    (c) => c.toString() === instructor._id.toString(),
+  );
+  if (!isAssigned) {
+    const err = new Error("You are not authorized to access or modify this content.");
+    err.statusCode = 403;
+    err.code = "FORBIDDEN";
     throw err;
   }
 

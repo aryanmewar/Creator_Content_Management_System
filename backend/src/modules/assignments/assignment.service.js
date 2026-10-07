@@ -54,10 +54,10 @@ export const getAssignments = async ({
 /**
  * Get single assignment by ID.
  */
-export const getAssignmentById = async (id) => {
+export const getAssignmentById = async (id, user) => {
   const assignment = await Assignment.findById(id)
     .populate("contentId")
-    .populate("instructorId", "name email designation profileImage isActive")
+    .populate("instructorId", "name email designation profileImage isActive userId")
     .populate("assignedBy", "name email");
 
   if (!assignment) {
@@ -65,6 +65,18 @@ export const getAssignmentById = async (id) => {
     err.statusCode = 404;
     err.code = "NOT_FOUND";
     throw err;
+  }
+
+  // If requested by a contributor, verify this assignment belongs to them
+  if (user && user.role === "CONTRIBUTOR") {
+    const isSelf =
+      assignment.instructorId?.userId?.toString() === user._id.toString();
+    if (!isSelf) {
+      const err = new Error("You are not authorized to view this assignment.");
+      err.statusCode = 403;
+      err.code = "FORBIDDEN";
+      throw err;
+    }
   }
 
   return {
@@ -83,7 +95,7 @@ export const getAssignmentById = async (id) => {
  *  - Content must not already be assigned (status !== DRAFT)
  *  - Deadline >= assignedAt
  */
-export const createAssignment = async (data, userId) => {
+export const createAssignment = async (data, user) => {
   const {
     contentId,
     instructorId,
@@ -101,6 +113,17 @@ export const createAssignment = async (data, userId) => {
     err.code = "CONTENT_NOT_FOUND";
     throw err;
   }
+
+  // Object-level authorization:
+  if (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN") {
+    if (content.isOwnerContent && content.createdBy?.toString() !== user._id.toString()) {
+      const err = new Error("You are not authorized to assign owner content created by an administrator.");
+      err.statusCode = 403;
+      err.code = "FORBIDDEN";
+      throw err;
+    }
+  }
+
   if (content.status !== CONTENT_STATUSES.DRAFT) {
     const err = new Error(
       `Content is already in status '${content.status}' and cannot be reassigned.`,
@@ -129,7 +152,7 @@ export const createAssignment = async (data, userId) => {
   const assignment = await Assignment.create({
     contentId,
     instructorId,
-    assignedBy: userId,
+    assignedBy: user._id,
     assignedAt: assignedAt || new Date(),
     deadline,
     priority: priority || "MEDIUM",
@@ -143,7 +166,7 @@ export const createAssignment = async (data, userId) => {
   await content.save();
 
   await logActivity({
-    userId,
+    userId: user._id,
     action: "CONTENT_ASSIGNED",
     entityType: "Assignment",
     entityId: assignment._id,
@@ -171,7 +194,29 @@ export const createAssignment = async (data, userId) => {
 /**
  * Update assignment details (deadline, priority, instructions).
  */
-export const updateAssignment = async (id, data, userId) => {
+export const updateAssignment = async (id, data, user) => {
+  const existing = await Assignment.findById(id).populate("contentId");
+  if (!existing) {
+    const err = new Error("Assignment not found.");
+    err.statusCode = 404;
+    err.code = "NOT_FOUND";
+    throw err;
+  }
+
+  // Object-level authorization:
+  if (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN") {
+    const isAssignedByMe = existing.assignedBy?.toString() === user._id.toString();
+    const isContentCreator = existing.contentId?.createdBy?.toString() === user._id.toString();
+    const isOwnerContent = existing.contentId?.isOwnerContent;
+
+    if (!isAssignedByMe && !isContentCreator && isOwnerContent) {
+      const err = new Error("You are not authorized to modify this assignment.");
+      err.statusCode = 403;
+      err.code = "FORBIDDEN";
+      throw err;
+    }
+  }
+
   // Whitelist only the fields a manager is allowed to update
   const allowedFields = {};
   if (data.deadline !== undefined) allowedFields.deadline = data.deadline;
@@ -187,16 +232,9 @@ export const updateAssignment = async (id, data, userId) => {
     .populate("contentId", "title status")
     .populate("instructorId", "name email");
 
-  if (!assignment) {
-    const err = new Error("Assignment not found.");
-    err.statusCode = 404;
-    err.code = "NOT_FOUND";
-    throw err;
-  }
-
   if (data.deadline) {
     await logActivity({
-      userId,
+      userId: user._id,
       action: "DEADLINE_CHANGED",
       entityType: "Assignment",
       entityId: assignment._id,

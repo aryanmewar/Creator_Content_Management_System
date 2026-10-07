@@ -5,6 +5,19 @@ import { generateCsrfToken, setCsrfCookies } from "../../middleware/csrfMiddlewa
 export const register = async (req, res, next) => {
   try {
     const { name, email, password, role } = req.body;
+
+    if (
+      (role === "ADMIN" || role === "SUPER_ADMIN") &&
+      req.user.role !== "ADMIN" &&
+      req.user.role !== "SUPER_ADMIN"
+    ) {
+      return sendError(res, {
+        message: "You are not authorized to create administrator accounts.",
+        code: "FORBIDDEN",
+        statusCode: 403,
+      });
+    }
+
     const { user, token } = await authService.registerUser({
       name,
       email,
@@ -98,13 +111,28 @@ export const logout = async (req, res, next) => {
 
 export const createContributor = async (req, res, next) => {
   try {
-    const { name, email, password, designation } = req.body;
+    const { name, email, password, designation, role } = req.body;
+
+    if (
+      role &&
+      role !== "CONTRIBUTOR" &&
+      req.user.role !== "ADMIN" &&
+      req.user.role !== "SUPER_ADMIN"
+    ) {
+      return sendError(res, {
+        message: "You are not authorized to create accounts with elevated privileges.",
+        code: "FORBIDDEN",
+        statusCode: 403,
+      });
+    }
+
     const result = await authService.createContributorAccount({
       name,
       email,
       password,
       designation,
       adminId: req.user._id,
+      role,
     });
 
     return sendSuccess(res, {

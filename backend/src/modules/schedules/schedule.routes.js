@@ -2,6 +2,7 @@ import { Router } from "express";
 import * as scheduleController from "./schedule.controller.js";
 import protect from "../../middleware/authMiddleware.js";
 import validate from "../../middleware/validateMiddleware.js";
+import { validateObjectId } from "../../middleware/validateObjectId.js";
 import {
   createScheduleSchema,
   updateScheduleSchema,
@@ -16,12 +17,13 @@ router.post(
   validate(createScheduleSchema),
   scheduleController.createSchedule,
 );
-router.get("/:id", scheduleController.getScheduleById);
+router.get("/:id", validateObjectId(), scheduleController.getScheduleById);
 router.put(
   "/:id",
+  validateObjectId(),
   validate(updateScheduleSchema),
   scheduleController.updateSchedule,
 );
-router.delete("/:id", scheduleController.deleteSchedule);
+router.delete("/:id", validateObjectId(), scheduleController.deleteSchedule);
 
 export default router;

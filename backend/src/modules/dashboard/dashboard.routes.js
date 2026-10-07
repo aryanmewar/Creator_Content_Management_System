@@ -4,11 +4,6 @@ import protect from "../../middleware/authMiddleware.js";
 import OverdueRecord from "../reports/overdueRecord.model.js";
 
 const router = Router();
-router.get("/wipe", async (req, res) => {
-  await OverdueRecord.deleteMany({});
-  res.send("Wiped");
-});
-
 router.use(protect);
 
 router.get("/summary", dashboardController.getSummary);
