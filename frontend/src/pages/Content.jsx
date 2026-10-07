@@ -162,6 +162,31 @@ const Content = () => {
     );
   };
 
+  const getStatusPriority = (status) => {
+    switch (status) {
+      case "ASSIGNED":
+        return 1;
+      case "IN_PROGRESS":
+        return 2;
+      case "SUBMITTED":
+        return 3;
+      case "DRAFT":
+        return 4;
+      case "APPROVED":
+        return 5;
+      case "SCHEDULED":
+        return 6;
+      case "COMPLETED":
+        return 7;
+      case "PUBLISHED":
+        return 8;
+      case "REJECTED":
+        return 9;
+      default:
+        return 10;
+    }
+  };
+
   const ownersContents = contents
     .filter((c) => c.isOwnerContent === true)
     .sort((a, b) => {
@@ -169,6 +194,14 @@ const Content = () => {
       const bOverdue = isContentOverdue(b);
       if (aOverdue && !bOverdue) return -1;
       if (!aOverdue && bOverdue) return 1;
+
+      // Status priority: ASSIGNED & active items first
+      const priorityA = getStatusPriority(a.status);
+      const priorityB = getStatusPriority(b.status);
+      if (priorityA !== priorityB) {
+        return priorityA - priorityB;
+      }
+
       return getSortDate(b) - getSortDate(a);
     });
 
