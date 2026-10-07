@@ -25,4 +25,24 @@ export const authService = {
     const res = await api.post("/auth/contributor", data);
     return res.data;
   },
+
+  updateProfile: async (profileData) => {
+    const res = await api.put("/auth/profile", profileData);
+    return res.data;
+  },
+
+  changePassword: async (passwordData) => {
+    const res = await api.put("/auth/change-password", passwordData);
+    return res.data;
+  },
+
+  getSystemStatus: async () => {
+    const res = await api.get("/auth/system-status");
+    return res.data;
+  },
+
+  exportBackup: async () => {
+    const res = await api.get("/auth/export-backup");
+    return res.data;
+  },
 };

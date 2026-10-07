@@ -26,4 +26,19 @@ router.post(
   authController.createContributor,
 );
 
+router.put("/profile", protect, authController.updateProfile);
+router.put("/change-password", protect, authController.changePassword);
+router.get(
+  "/system-status",
+  protect,
+  authorize("ADMIN", "CONTENT_MANAGER"),
+  authController.getSystemStatus,
+);
+router.get(
+  "/export-backup",
+  protect,
+  authorize("ADMIN", "CONTENT_MANAGER"),
+  authController.exportBackup,
+);
+
 export default router;

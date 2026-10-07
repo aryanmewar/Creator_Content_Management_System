@@ -94,3 +94,56 @@ export const createContributor = async (req, res, next) => {
     next(error);
   }
 };
+
+export const updateProfile = async (req, res, next) => {
+  try {
+    const updated = await authService.updateProfile(req.user._id, req.body);
+    return sendSuccess(res, {
+      message: "Profile updated successfully.",
+      data: updated,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return sendError(res, {
+        message: "Current password and new password are required.",
+        statusCode: 400,
+      });
+    }
+    const result = await authService.changePassword(req.user._id, {
+      currentPassword,
+      newPassword,
+    });
+    return sendSuccess(res, result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getSystemStatus = async (req, res, next) => {
+  try {
+    const status = await authService.getSystemStatus();
+    return sendSuccess(res, { data: status });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const exportBackup = async (req, res, next) => {
+  try {
+    const backup = await authService.exportBackup();
+    return sendSuccess(res, {
+      message: "Backup generated successfully.",
+      data: backup,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+

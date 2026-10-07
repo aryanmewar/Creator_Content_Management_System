@@ -36,6 +36,29 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    bio: {
+      type: String,
+      default: "",
+    },
+    phone: {
+      type: String,
+      default: "",
+    },
+    socialLinks: {
+      instagram: { type: String, default: "" },
+      youtube: { type: String, default: "" },
+      twitter: { type: String, default: "" },
+      website: { type: String, default: "" },
+    },
+    preferences: {
+      emailNotifications: { type: Boolean, default: true },
+      overdueAlerts: { type: Boolean, default: true },
+      dailyDigest: { type: Boolean, default: true },
+      compactMode: { type: Boolean, default: false },
+      dateFormat: { type: String, default: "DD/MM/YYYY" },
+      defaultView: { type: String, default: "kanban" },
+      theme: { type: String, default: "light" },
+    },
     lastLoginAt: {
       type: Date,
       default: null,

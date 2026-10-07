@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import User from "./auth.model.js";
 import Instructor from "../instructors/instructor.model.js";
 import { generateToken } from "../../utils/generateToken.js";
@@ -127,3 +128,145 @@ export const createContributorAccount = async ({
 
   return { user, instructor };
 };
+
+/**
+ * Update current user profile
+ */
+export const updateProfile = async (userId, data) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    const err = new Error("User not found.");
+    err.statusCode = 404;
+    err.code = "USER_NOT_FOUND";
+    throw err;
+  }
+
+  if (data.name !== undefined) user.name = data.name.trim();
+  if (data.phone !== undefined) user.phone = data.phone.trim();
+  if (data.bio !== undefined) user.bio = data.bio.trim();
+  if (data.avatar !== undefined) user.avatar = data.avatar;
+  if (data.socialLinks !== undefined) {
+    user.socialLinks = { ...user.socialLinks?.toObject?.() || {}, ...data.socialLinks };
+  }
+  if (data.preferences !== undefined) {
+    user.preferences = { ...user.preferences?.toObject?.() || {}, ...data.preferences };
+  }
+
+  await user.save();
+
+  // Also update corresponding Instructor record if exists
+  await Instructor.findOneAndUpdate({ userId }, { name: user.name }).catch(() => {});
+
+  return user;
+};
+
+/**
+ * Change password
+ */
+export const changePassword = async (userId, { currentPassword, newPassword }) => {
+  const user = await User.findById(userId).select("+passwordHash");
+  if (!user) {
+    const err = new Error("User not found.");
+    err.statusCode = 404;
+    err.code = "USER_NOT_FOUND";
+    throw err;
+  }
+
+  const isMatch = await user.comparePassword(currentPassword);
+  if (!isMatch) {
+    const err = new Error("Current password is incorrect.");
+    err.statusCode = 400;
+    err.code = "INVALID_PASSWORD";
+    throw err;
+  }
+
+  if (newPassword.length < 6) {
+    const err = new Error("New password must be at least 6 characters.");
+    err.statusCode = 400;
+    err.code = "WEAK_PASSWORD";
+    throw err;
+  }
+
+  user.passwordHash = newPassword;
+  await user.save();
+
+  return { message: "Password updated successfully." };
+};
+
+/**
+ * System status for settings
+ */
+export const getSystemStatus = async () => {
+  const [contentCount, instructorCount, userCount, scheduleCount] = await Promise.all([
+    mongoose.model("Content").countDocuments().catch(() => 0),
+    Instructor.countDocuments().catch(() => 0),
+    User.countDocuments().catch(() => 0),
+    mongoose.model("Schedule").countDocuments().catch(() => 0),
+  ]);
+
+  const uptimeSeconds = Math.floor(process.uptime());
+  const hours = Math.floor(uptimeSeconds / 3600);
+  const minutes = Math.floor((uptimeSeconds % 3600) / 60);
+  const seconds = uptimeSeconds % 60;
+
+  const mem = process.memoryUsage();
+
+  return {
+    server: {
+      uptime: `${hours}h ${minutes}m ${seconds}s`,
+      uptimeSeconds,
+      nodeVersion: process.version,
+      platform: process.platform,
+      env: process.env.NODE_ENV || "development",
+      memoryUsage: `${Math.round(mem.heapUsed / 1024 / 1024)} MB / ${Math.round(mem.rss / 1024 / 1024)} MB`,
+    },
+    database: {
+      status: mongoose.connection.readyState === 1 ? "Connected" : "Disconnected",
+      dbName: mongoose.connection.name || "creatolyt_cms",
+      collections: {
+        content: contentCount,
+        instructors: instructorCount,
+        users: userCount,
+        schedules: scheduleCount,
+      },
+    },
+    security: {
+      jwtExpiry: "7 days (365d for remember me)",
+      hashRounds: "bcrypt 12 rounds",
+      rateLimiter: "Active (500 req/15min)",
+      cors: "Configured & Protected",
+      rbac: "Active (ADMIN, CONTENT_MANAGER, CONTRIBUTOR)",
+    },
+  };
+};
+
+/**
+ * Export backup data
+ */
+export const exportBackup = async () => {
+  const [contents, instructors, users, schedules] = await Promise.all([
+    mongoose.model("Content").find().lean().catch(() => []),
+    Instructor.find().lean().catch(() => []),
+    User.find().select("-passwordHash").lean().catch(() => []),
+    mongoose.model("Schedule").find().lean().catch(() => []),
+  ]);
+
+  return {
+    exportedAt: new Date().toISOString(),
+    version: "1.0.0",
+    appName: "Createlyt CMS",
+    counts: {
+      contents: contents.length,
+      instructors: instructors.length,
+      users: users.length,
+      schedules: schedules.length,
+    },
+    data: {
+      contents,
+      instructors,
+      users,
+      schedules,
+    },
+  };
+};
+

@@ -76,7 +76,11 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const value = { ...state, login, logout };
+  const updateUser = useCallback((updatedUser) => {
+    dispatch({ type: "UPDATE_USER", payload: updatedUser });
+  }, []);
+
+  const value = { ...state, login, logout, updateUser };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
