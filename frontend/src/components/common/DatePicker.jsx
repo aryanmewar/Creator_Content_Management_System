@@ -347,10 +347,14 @@ const DatePicker = ({
           <div
             ref={dropdownRef}
             data-datepicker-portal="true"
-            className="fixed z-[99999] bg-white border border-slate-200/90 shadow-[0_20px_50px_rgba(15,23,42,0.25),0_0_0_1px_rgba(15,23,42,0.06)] rounded-2xl p-4 w-[308px] max-w-[calc(100vw-24px)] animate-in fade-in zoom-in-95 duration-150 select-none backdrop-blur-sm"
+            onPointerDown={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+            className="fixed z-[99999] pointer-events-auto bg-white border border-slate-200/90 shadow-[0_20px_50px_rgba(15,23,42,0.25),0_0_0_1px_rgba(15,23,42,0.06)] rounded-2xl p-4 w-[308px] max-w-[calc(100vw-24px)] animate-in fade-in zoom-in-95 duration-150 select-none backdrop-blur-sm"
             style={{
               top: `${coords.top}px`,
               left: `${coords.left}px`,
+              pointerEvents: "auto",
             }}
           >
             {/* Real-Time Live Status Bar */}
@@ -434,7 +438,7 @@ const DatePicker = ({
                   >
                     {format(date, "d")}
                     {isCurrentDay && !isSelected && (
-                      <span className="absolute bottom-1 w-1 h-1 rounded-full bg-[#2D4396]" />
+                      <span className="pointer-events-none absolute bottom-1 w-1 h-1 rounded-full bg-[#2D4396]" />
                     )}
                   </button>
                 );

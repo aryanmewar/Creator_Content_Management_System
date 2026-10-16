@@ -28,9 +28,14 @@ const DialogContent = React.forwardRef(
       <DialogPrimitive.Content
         ref={ref}
         onPointerDownOutside={(e) => {
+          const originalTarget = e.detail?.originalEvent?.target || e.target;
+          const element =
+            originalTarget instanceof Element
+              ? originalTarget
+              : originalTarget?.parentElement;
           if (
-            e.target?.closest?.("[data-datepicker-portal]") ||
-            e.target?.closest?.("[data-radix-popper-content-wrapper]")
+            element?.closest?.("[data-datepicker-portal]") ||
+            element?.closest?.("[data-radix-popper-content-wrapper]")
           ) {
             e.preventDefault();
             return;
@@ -38,9 +43,14 @@ const DialogContent = React.forwardRef(
           onPointerDownOutside?.(e);
         }}
         onInteractOutside={(e) => {
+          const originalTarget = e.detail?.originalEvent?.target || e.target;
+          const element =
+            originalTarget instanceof Element
+              ? originalTarget
+              : originalTarget?.parentElement;
           if (
-            e.target?.closest?.("[data-datepicker-portal]") ||
-            e.target?.closest?.("[data-radix-popper-content-wrapper]")
+            element?.closest?.("[data-datepicker-portal]") ||
+            element?.closest?.("[data-radix-popper-content-wrapper]")
           ) {
             e.preventDefault();
             return;
